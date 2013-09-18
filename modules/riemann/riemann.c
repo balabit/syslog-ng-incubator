@@ -278,6 +278,18 @@ riemann_dd_field_add_tag(gpointer data, gpointer user_data)
 }
 
 static gboolean
+riemann_dd_field_add_msg_tag(LogMessage *msg,
+                             LogTagId tag_id, const gchar *tag_name,
+                             gpointer user_data)
+{
+  riemann_event_t *event = (riemann_event_t *)user_data;
+
+  riemann_event_tag_add(event, tag_name);
+
+  return TRUE;
+}
+
+static gboolean
 riemann_worker_insert(LogThrDestDriver *s)
 {
   RiemannDestDriver *self = (RiemannDestDriver *)s;
@@ -380,8 +392,12 @@ riemann_worker_insert(LogThrDestDriver *s)
       riemann_dd_field_maybe_add(event, msg, self->fields.state,
                                  RIEMANN_EVENT_FIELD_STATE, self->str);
 
-      g_list_foreach(self->fields.tags, riemann_dd_field_add_tag,
-                     (gpointer)event);
+      if (self->fields.tags)
+        g_list_foreach(self->fields.tags, riemann_dd_field_add_tag,
+                       (gpointer)event);
+      else
+        log_msg_tags_foreach(msg, riemann_dd_field_add_msg_tag,
+                             (gpointer)event);
 
       riemann_client_send_message_oneshot
         (self->client,
