@@ -24,6 +24,8 @@
 %code requires {
 
 #include "riemann-parser.h"
+#include "value-pairs.h"
+#include "vptransform.h"
 
 }
 
@@ -40,7 +42,6 @@
 %parse-param {LogDriver **instance}
 %parse-param {gpointer arg}
 
-
 /* INCLUDE_DECLS */
 
 %token KW_RIEMANN
@@ -50,6 +51,7 @@
 %token KW_DESCRIPTION
 %token KW_METRIC
 %token KW_TTL
+%token KW_ATTRIBUTES
 
 %%
 
@@ -112,6 +114,15 @@ riemann_option
         | KW_TAGS '(' string_list ')'
           {
             riemann_dd_set_field_tags(last_driver, $3);
+          }
+        | KW_ATTRIBUTES
+          {
+            last_value_pairs = value_pairs_new();
+            value_pairs_on_error_set(last_value_pairs, configuration->template_options.on_error);
+          }
+          '(' vp_options ')'
+          {
+            riemann_dd_set_field_attributes(last_driver, last_value_pairs);
           }
         | dest_driver_option
         ;

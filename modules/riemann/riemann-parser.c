@@ -39,6 +39,7 @@ static CfgLexerKeyword riemann_keywords[] = {
   { "description",              KW_DESCRIPTION },
   { "metric",                   KW_METRIC },
   { "ttl",                      KW_TTL },
+  { "attributes",               KW_ATTRIBUTES },
 
   { NULL }
 };

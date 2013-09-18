@@ -55,6 +55,7 @@ typedef struct
     LogTemplate *metric;
     LogTemplate *ttl;
     GList *tags;
+    ValuePairs *attributes;
   } fields;
 
   GString *str;
@@ -145,6 +146,16 @@ riemann_dd_set_field_tags(LogDriver *d, GList *taglist)
 
   string_list_free(self->fields.tags);
   self->fields.tags = taglist;
+}
+
+void
+riemann_dd_set_field_attributes(LogDriver *d, ValuePairs *vp)
+{
+  RiemannDestDriver *self = (RiemannDestDriver *)d;
+
+  if (self->fields.attributes)
+    value_pairs_free(self->fields.attributes);
+  self->fields.attributes = vp;
 }
 
 /*
@@ -290,6 +301,20 @@ riemann_dd_field_add_msg_tag(LogMessage *msg,
 }
 
 static gboolean
+riemann_dd_field_add_attribute_vp(const gchar *name,
+                                  TypeHint type, const gchar *value,
+                                  gpointer user_data)
+{
+  riemann_event_t *event = (riemann_event_t *)user_data;
+  riemann_attribute_t *attrib = riemann_attribute_new();
+
+  riemann_attribute_set(attrib, name, value);
+  riemann_event_attribute_add(event, attrib);
+
+  return FALSE;
+}
+
+static gboolean
 riemann_worker_insert(LogThrDestDriver *s)
 {
   RiemannDestDriver *self = (RiemannDestDriver *)s;
@@ -399,6 +424,10 @@ riemann_worker_insert(LogThrDestDriver *s)
         log_msg_tags_foreach(msg, riemann_dd_field_add_msg_tag,
                              (gpointer)event);
 
+      if (self->fields.attributes)
+        value_pairs_foreach(self->fields.attributes, riemann_dd_field_add_attribute_vp,
+                            msg, 0, event);
+
       riemann_client_send_message_oneshot
         (self->client,
          riemann_message_create_with_events(event, NULL));
@@ -462,6 +491,8 @@ riemann_dd_free(LogPipe *d)
   log_template_unref(self->fields.metric);
   log_template_unref(self->fields.ttl);
   string_list_free(self->fields.tags);
+  if (self->fields.attributes)
+    value_pairs_free(self->fields.attributes);
 
   log_threaded_dest_driver_free(d);
 }

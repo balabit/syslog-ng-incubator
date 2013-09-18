@@ -25,6 +25,7 @@
 #define SNG_RIEMANN_H_INCLUDED
 
 #include "driver.h"
+#include "value-pairs.h"
 
 LogDriver *riemann_dd_new(void);
 
@@ -39,5 +40,6 @@ void riemann_dd_set_field_description(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_metric(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_ttl(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_tags(LogDriver *d, GList *taglist);
+void riemann_dd_set_field_attributes(LogDriver *d, ValuePairs *vp);
 
 #endif
