@@ -27,6 +27,7 @@
 #include <time.h>
 
 #include "logthrdestdrv.h"
+#include "misc.h"
 #include "stats.h"
 #include "plugin.h"
 #include "plugin-types.h"
@@ -53,6 +54,7 @@ typedef struct
     LogTemplate *description;
     LogTemplate *metric;
     LogTemplate *ttl;
+    GList *tags;
   } fields;
 
   GString *str;
@@ -134,6 +136,15 @@ riemann_dd_set_field_ttl(LogDriver *d, LogTemplate *value)
   RiemannDestDriver *self = (RiemannDestDriver *)d;
 
   self->fields.ttl = log_template_ref(value);
+}
+
+void
+riemann_dd_set_field_tags(LogDriver *d, GList *taglist)
+{
+  RiemannDestDriver *self = (RiemannDestDriver *)d;
+
+  string_list_free(self->fields.tags);
+  self->fields.tags = taglist;
 }
 
 /*
@@ -257,6 +268,15 @@ riemann_dd_field_maybe_add(riemann_event_t *event, LogMessage *msg,
   riemann_event_set(event, ftype, target->str, RIEMANN_EVENT_FIELD_NONE);
 }
 
+static void
+riemann_dd_field_add_tag(gpointer data, gpointer user_data)
+{
+  gchar *tag = (gchar *)data;
+  riemann_event_t *event = (riemann_event_t *)user_data;
+
+  riemann_event_tag_add(event, tag);
+}
+
 static gboolean
 riemann_worker_insert(LogThrDestDriver *s)
 {
@@ -360,6 +380,9 @@ riemann_worker_insert(LogThrDestDriver *s)
       riemann_dd_field_maybe_add(event, msg, self->fields.state,
                                  RIEMANN_EVENT_FIELD_STATE, self->str);
 
+      g_list_foreach(self->fields.tags, riemann_dd_field_add_tag,
+                     (gpointer)event);
+
       riemann_client_send_message_oneshot
         (self->client,
          riemann_message_create_with_events(event, NULL));
@@ -422,6 +445,7 @@ riemann_dd_free(LogPipe *d)
   log_template_unref(self->fields.description);
   log_template_unref(self->fields.metric);
   log_template_unref(self->fields.ttl);
+  string_list_free(self->fields.tags);
 
   log_threaded_dest_driver_free(d);
 }

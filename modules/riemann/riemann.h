@@ -38,5 +38,6 @@ void riemann_dd_set_field_state(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_description(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_metric(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_ttl(LogDriver *d, LogTemplate *value);
+void riemann_dd_set_field_tags(LogDriver *d, GList *taglist);
 
 #endif

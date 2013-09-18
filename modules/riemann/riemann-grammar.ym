@@ -109,6 +109,10 @@ riemann_option
 
             riemann_dd_set_on_error(last_driver, on_error);
           }
+        | KW_TAGS '(' string_list ')'
+          {
+            riemann_dd_set_field_tags(last_driver, $3);
+          }
         | dest_driver_option
         ;
 
