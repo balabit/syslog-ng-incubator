@@ -31,7 +31,7 @@ LogDriver *riemann_dd_new(void);
 
 void riemann_dd_set_server(LogDriver *d, const gchar *host);
 void riemann_dd_set_port(LogDriver *d, gint port);
-void riemann_dd_set_on_error(LogDriver *d, gint on_error);
+LogTemplateOptions *riemann_dd_get_template_options(LogDriver *d);
 
 void riemann_dd_set_field_host(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_service(LogDriver *d, LogTemplate *value);

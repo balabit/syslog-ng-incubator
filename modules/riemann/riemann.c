@@ -44,7 +44,6 @@ typedef struct
 
   gchar *server;
   gint port;
-  gint on_error;
 
   struct
   {
@@ -57,6 +56,7 @@ typedef struct
     GList *tags;
     ValuePairs *attributes;
   } fields;
+  LogTemplateOptions template_options;
 
   GString *str;
 
@@ -81,14 +81,6 @@ riemann_dd_set_port(LogDriver *d, gint port)
   RiemannDestDriver *self = (RiemannDestDriver *)d;
 
   self->port = port;
-}
-
-void
-riemann_dd_set_on_error(LogDriver *d, gint on_error)
-{
-  RiemannDestDriver *self = (RiemannDestDriver *)d;
-
-  self->on_error = on_error;
 }
 
 void
@@ -158,6 +150,14 @@ riemann_dd_set_field_attributes(LogDriver *d, ValuePairs *vp)
   self->fields.attributes = vp;
 }
 
+LogTemplateOptions *
+riemann_dd_get_template_options(LogDriver *d)
+{
+  RiemannDestDriver *self = (RiemannDestDriver *)d;
+
+  return &self->template_options;
+}
+
 /*
  * Utilities
  */
@@ -225,6 +225,8 @@ riemann_worker_init(LogPipe *s)
                                             SCS_RIEMANN, riemann_dd_format_stats_instance(self)))
     return FALSE;
 
+  log_template_options_init(&self->template_options, cfg);
+
   if (!self->server)
     self->server = g_strdup("127.0.0.1");
   if (self->port == -1)
@@ -240,9 +242,6 @@ riemann_worker_init(LogPipe *s)
       self->fields.service = log_template_new (cfg, NULL);
       log_template_compile(self->fields.service, "${PROGRAM}", NULL);
     }
-
-  if (self->on_error == 0)
-    self->on_error = cfg->template_options.on_error;
 
   msg_verbose("Initializing Riemann destination",
               evt_tag_str("driver", self->super.super.super.id),
@@ -269,13 +268,14 @@ riemann_worker_deinit(LogPipe *s)
 
 static void
 riemann_dd_field_maybe_add(riemann_event_t *event, LogMessage *msg,
-                           LogTemplate *template, riemann_event_field_t ftype,
-                            GString *target)
+                           LogTemplate *template, const LogTemplateOptions *template_options,
+                           riemann_event_field_t ftype,
+                           GString *target)
 {
   if (!template)
     return;
 
-  log_template_format(template, msg, NULL, LTZ_SEND, 0,NULL, target);
+  log_template_format(template, msg, template_options, LTZ_SEND, 0, NULL, target);
   riemann_event_set(event, ftype, target->str, RIEMANN_EVENT_FIELD_NONE);
 }
 
@@ -335,8 +335,8 @@ riemann_worker_insert(LogThrDestDriver *s)
 
   if (self->fields.metric)
     {
-      log_template_format(self->fields.metric, msg, NULL, LTZ_SEND,
-                          0, NULL, self->str);
+      log_template_format(self->fields.metric, msg, &self->template_options,
+                          LTZ_SEND, 0, NULL, self->str);
 
       switch (self->fields.metric->type_hint)
         {
@@ -349,7 +349,7 @@ riemann_worker_insert(LogThrDestDriver *s)
               riemann_event_set(event, RIEMANN_EVENT_FIELD_METRIC_S64, i,
                                 RIEMANN_EVENT_FIELD_NONE);
             else
-              need_drop = type_cast_drop_helper(self->on_error,
+              need_drop = type_cast_drop_helper(self->template_options.on_error,
                                                 self->str->str, "int");
             break;
           }
@@ -371,12 +371,12 @@ riemann_worker_insert(LogThrDestDriver *s)
               riemann_event_set(event, RIEMANN_EVENT_FIELD_METRIC_D, (double) f,
                                 RIEMANN_EVENT_FIELD_NONE);
             else
-              need_drop = type_cast_drop_helper(self->on_error,
+              need_drop = type_cast_drop_helper(self->template_options.on_error,
                                                 self->str->str, "float");
             break;
           }
         default:
-          need_drop = type_cast_drop_helper(self->on_error,
+          need_drop = type_cast_drop_helper(self->template_options.on_error,
                                             self->str->str, "<unknown>");
           break;
         }
@@ -388,7 +388,8 @@ riemann_worker_insert(LogThrDestDriver *s)
       gchar *endptr;
       gboolean r = TRUE;
 
-      log_template_format(self->fields.ttl, msg, NULL, LTZ_SEND, 0, NULL, self->str);
+      log_template_format(self->fields.ttl, msg, &self->template_options,
+                          LTZ_SEND, 0, NULL, self->str);
 
       errno = 0;
       f = strtof(self->str->str, &endptr);
@@ -402,19 +403,23 @@ riemann_worker_insert(LogThrDestDriver *s)
         riemann_event_set(event, RIEMANN_EVENT_FIELD_TTL, f,
                           RIEMANN_EVENT_FIELD_NONE);
       else
-        need_drop = type_cast_drop_helper(self->on_error,
+        need_drop = type_cast_drop_helper(self->template_options.on_error,
                                           self->str->str, "float");
     }
 
   if (!need_drop)
     {
       riemann_dd_field_maybe_add(event, msg, self->fields.host,
+                                 &self->template_options,
                                  RIEMANN_EVENT_FIELD_HOST, self->str);
       riemann_dd_field_maybe_add(event, msg, self->fields.service,
+                                 &self->template_options,
                                  RIEMANN_EVENT_FIELD_SERVICE, self->str);
       riemann_dd_field_maybe_add(event, msg, self->fields.description,
+                                 &self->template_options,
                                  RIEMANN_EVENT_FIELD_DESCRIPTION, self->str);
       riemann_dd_field_maybe_add(event, msg, self->fields.state,
+                                 &self->template_options,
                                  RIEMANN_EVENT_FIELD_STATE, self->str);
 
       if (self->fields.tags)
@@ -426,7 +431,7 @@ riemann_worker_insert(LogThrDestDriver *s)
 
       if (self->fields.attributes)
         value_pairs_foreach(self->fields.attributes, riemann_dd_field_add_attribute_vp,
-                            msg, 0, event);
+                            msg, 0, &self->template_options, event);
 
       riemann_client_send_message_oneshot
         (self->client,
@@ -481,6 +486,8 @@ riemann_dd_free(LogPipe *d)
 
   g_free(self->server);
 
+  log_template_options_destroy(&self->template_options);
+
   riemann_client_free(self->client);
   g_string_free(self->str, TRUE);
 
@@ -514,8 +521,9 @@ riemann_dd_new(void)
   self->super.worker.insert = riemann_worker_insert;
 
   self->port = -1;
-
   self->str = g_string_sized_new (1024);
+
+  log_template_options_defaults(&self->template_options);
 
   return (LogDriver *)self;
 }

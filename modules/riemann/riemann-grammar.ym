@@ -102,15 +102,6 @@ riemann_option
           {
             riemann_dd_set_field_metric(last_driver, $3);
           }
-        | KW_ON_ERROR '(' string ')'
-          {
-            gint on_error;
-
-            CHECK_ERROR(log_template_on_error_parse($3, &on_error), @3, "Invalid on-error() setting");
-            free($3);
-
-            riemann_dd_set_on_error(last_driver, on_error);
-          }
         | KW_TAGS '(' string_list ')'
           {
             riemann_dd_set_field_tags(last_driver, $3);
@@ -118,13 +109,13 @@ riemann_option
         | KW_ATTRIBUTES
           {
             last_value_pairs = value_pairs_new();
-            value_pairs_on_error_set(last_value_pairs, configuration->template_options.on_error);
           }
           '(' vp_options ')'
           {
             riemann_dd_set_field_attributes(last_driver, last_value_pairs);
           }
         | dest_driver_option
+        | { last_template_options = riemann_dd_get_template_options(last_driver); } template_option
         ;
 
 /* INCLUDE_RULES */
