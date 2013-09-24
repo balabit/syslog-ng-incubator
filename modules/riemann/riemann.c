@@ -163,8 +163,9 @@ riemann_dd_get_template_options(LogDriver *d)
  */
 
 static gchar *
-riemann_dd_format_stats_instance(RiemannDestDriver *self)
+riemann_dd_format_stats_instance(LogThrDestDriver *s)
 {
+  RiemannDestDriver *self = (RiemannDestDriver *)s;
   static gchar persist_name[1024];
 
   g_snprintf(persist_name, sizeof(persist_name),
@@ -173,8 +174,9 @@ riemann_dd_format_stats_instance(RiemannDestDriver *self)
 }
 
 static gchar *
-riemann_dd_format_persist_name(RiemannDestDriver *self)
+riemann_dd_format_persist_name(LogThrDestDriver *s)
 {
+  RiemannDestDriver *self = (RiemannDestDriver *)s;
   static gchar persist_name[1024];
 
   g_snprintf(persist_name, sizeof(persist_name),
@@ -220,9 +222,7 @@ riemann_worker_init(LogPipe *s)
   RiemannDestDriver *self = (RiemannDestDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
 
-  if (!log_threaded_dest_driver_init_method(&self->super,
-                                            riemann_dd_format_persist_name(self),
-                                            SCS_RIEMANN, riemann_dd_format_stats_instance(self)))
+  if (!log_threaded_dest_driver_init_method(s))
     return FALSE;
 
   log_template_options_init(&self->template_options, cfg);
@@ -252,18 +252,6 @@ riemann_worker_init(LogPipe *s)
   log_threaded_dest_driver_start(&self->super);
 
   return TRUE;
-}
-
-static gboolean
-riemann_worker_deinit(LogPipe *s)
-{
-  RiemannDestDriver *self = (RiemannDestDriver *)s;
-
-  riemann_dd_disconnect(&self->super);
-
-  return log_threaded_dest_driver_deinit_method(&self->super,
-                                                SCS_RIEMANN,
-                                                riemann_dd_format_stats_instance(self));
 }
 
 static void
@@ -466,20 +454,6 @@ riemann_worker_insert(LogThrDestDriver *s)
  */
 
 static void
-riemann_worker_thread_init(LogThrDestDriver *d)
-{
-  RiemannDestDriver *self = (RiemannDestDriver *)d;
-
-  riemann_dd_connect(self, FALSE);
-}
-
-static void
-riemann_worker_thread_deinit (LogThrDestDriver *d)
-{
-  riemann_dd_disconnect(d);
-}
-
-static void
 riemann_dd_free(LogPipe *d)
 {
   RiemannDestDriver *self = (RiemannDestDriver *)d;
@@ -512,13 +486,14 @@ riemann_dd_new(void)
   log_threaded_dest_driver_init_instance(&self->super);
 
   self->super.super.super.super.init = riemann_worker_init;
-  self->super.super.super.super.deinit = riemann_worker_deinit;
   self->super.super.super.super.free_fn = riemann_dd_free;
 
-  self->super.worker.init = riemann_worker_thread_init;
-  self->super.worker.deinit = riemann_worker_thread_deinit;
   self->super.worker.disconnect = riemann_dd_disconnect;
   self->super.worker.insert = riemann_worker_insert;
+
+  self->super.format.stats_instance = riemann_dd_format_stats_instance;
+  self->super.format.persist_name = riemann_dd_format_persist_name;
+  self->super.stats_source = SCS_RIEMANN;
 
   self->port = -1;
   self->str = g_string_sized_new (1024);
