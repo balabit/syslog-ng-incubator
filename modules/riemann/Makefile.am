@@ -14,7 +14,8 @@ modules_riemann_libriemann_la_SOURCES		 = \
 	modules/riemann/riemann.c		   \
 	modules/riemann/riemann.h		   \
 	modules/riemann/riemann-parser.c	   \
-	modules/riemann/riemann-parser.h
+	modules/riemann/riemann-parser.h	   \
+	modules/riemann/riemann-plugin.c
 
 modules_riemann_libriemann_la_LIBADD		 = \
 	$(RIEMANN_CLIENT_LIBS) $(EVENTLOG_LIBS)    \

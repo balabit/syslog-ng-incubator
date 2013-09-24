@@ -29,10 +29,7 @@
 #include "logthrdestdrv.h"
 #include "misc.h"
 #include "stats.h"
-#include "plugin.h"
-#include "plugin-types.h"
 #include "riemann.h"
-#include "riemann-parser.h"
 
 #ifndef SCS_RIEMANN
 #define SCS_RIEMANN 0
@@ -502,29 +499,3 @@ riemann_dd_new(void)
 
   return (LogDriver *)self;
 }
-
-extern CfgParser riemann_dd_parser;
-
-static Plugin riemann_plugin =
-{
-  .type = LL_CONTEXT_DESTINATION,
-  .name = "riemann",
-  .parser = &riemann_parser,
-};
-
-gboolean
-riemann_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
-{
-  plugin_register(cfg, &riemann_plugin, 1);
-  return TRUE;
-}
-
-const ModuleInfo module_info =
-{
-  .canonical_name = "riemann",
-  .version = VERSION,
-  .description = "The riemann module provides Riemann destination support for syslog-ng.",
-  .core_revision = VERSION_CURRENT_VER_ONLY,
-  .plugins = &riemann_plugin,
-  .plugins_len = 1,
-};
