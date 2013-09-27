@@ -10,12 +10,7 @@ also an example of a third party syslog-ng module.
 
  [sng]: https://github.com/balabit/syslog-ng-3.5
 
-**NOTE**: Currently, this module requires some patches not yet
-integrated into syslog-ng proper, and one needs to use the
-[merge-queue/3.5][sng:mq] branch. The Incubator is expected to work
-with stock syslog-ng 3.5.0beta2 and onwards, once that is released.
-
- [sng:mq]: https://github.com/algernon/syslog-ng/tree/merge-queue/3.5
+**NOTE**: The Incubator requires syslog-ng 3.5.0beta2 or newer!
 
 Contents
 --------
