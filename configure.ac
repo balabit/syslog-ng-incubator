@@ -32,6 +32,7 @@ SYSLOG_NG_MIN_VERSION="3.5"
 EVENTLOG_MIN_VERSION="0.2.10"
 LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
+MYSQL_MIN_VERSION="5.5"
 
 dnl ***************************************************************************
 dnl Initial setup
@@ -109,6 +110,19 @@ dnl ***************************************************************************
 PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,enable_riemann="no")
 
 dnl ***************************************************************************
+dnl mysql-client headers/libraries
+dnl ***************************************************************************
+AC_CHECK_PROG(enable_mysql, mysql_config, yes, no)
+if test "x$enable_mysql" = "xyes"; then
+   AC_MSG_CHECKING(for libmysqlclient_r)
+   MYSQL_CFLAGS=`mysql_config --cflags`
+   MYSQL_LIBS=`mysql_config --libs_r`
+   AC_SUBST(MYSQL_CFLAGS)
+   AC_SUBST(MYSQL_LIBS)
+   AC_MSG_RESULT(yes)
+fi
+
+dnl ***************************************************************************
 dnl misc features to be enabled
 dnl ***************************************************************************
 
@@ -117,6 +131,7 @@ AC_SUBST(moduledir)
 
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
+AM_CONDITIONAL(ENABLE_MYSQL, [test "$enable_mysql" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
