@@ -27,7 +27,7 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
-extern CfgParser riemann_dd_parser;
+extern CfgParser riemann_parser;
 
 static Plugin riemann_plugin =
 {
