@@ -39,11 +39,6 @@ AC_ARG_WITH(module-dir,
    [  --with-module-dir=path   Use path as the list of directories looked up when searching for modules],
    moduledir=$with_module_dir,moduledir="auto")
 
-AC_ARG_ENABLE(logmongource,
-             [  --enable-logmongource   Enable the logmongource tool (default: auto)]
-             ,,enable_logmongource="auto")
-
-
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -92,8 +87,8 @@ dnl ***************************************************************************
 dnl syslog-ng headers/libraries
 dnl ***************************************************************************
 
-PKG_CHECK_MODULES(SYSLOG_NG, syslog-ng >= $SYSLOG_NG_MIN_VERSION,,)
-PKG_CHECK_MODULES(EVENTLOG, eventlog >= $EVENTLOG_MIN_VERSION,,)
+PKG_CHECK_MODULES(SYSLOG_NG, syslog-ng >= $SYSLOG_NG_MIN_VERSION)
+PKG_CHECK_MODULES(EVENTLOG, eventlog >= $EVENTLOG_MIN_VERSION)
 
 syslog_ng_tools=[`pkg-config syslog-ng --variable toolsdir`]
 if test "x$moduledir" = "xauto"; then
@@ -103,9 +98,7 @@ fi
 dnl ***************************************************************************
 dnl libmongo-client headers/libraries
 dnl ***************************************************************************
-if test "x$enable_logmongource" != "xno" || test "x$enable_mongodb" != "xno"; then
-       PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,enable_logmongource="no"; enable_mongodb="no")
-fi
+PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,enable_logmongource="no")
 
 dnl ***************************************************************************
 dnl riemann-client headers/libraries
