@@ -41,5 +41,3 @@ EXTRA_DIST				+= \
 	modules/mysql/mysql-example.conf
 
 .PHONY: modules/mysql mod-mysql
-
-include $(syslog_ng_tools)/lex-rules.am
