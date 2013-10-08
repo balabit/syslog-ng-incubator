@@ -39,5 +39,3 @@ EXTRA_DIST					+= \
 	modules/riemann/riemann-example.conf
 
 .PHONY: modules/riemann mod-riemann
-
-include $(syslog_ng_tools)/lex-rules.am
