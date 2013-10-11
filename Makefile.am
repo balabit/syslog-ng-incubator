@@ -1,5 +1,7 @@
 ACLOCAL_AMFLAGS		= -I m4
 
+check_PROGRAMS		=
+TESTS			= ${check_PROGRAMS}
 bin_PROGRAMS		=
 module_LTLIBRARIES	=
 
