@@ -1,0 +1,80 @@
+/*
+ * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
+ */
+
+%code requires {
+
+#include "trigger-source-parser.h"
+
+}
+
+%code {
+
+#include "cfg-grammar.h"
+#include "cfg-parser.h"
+#include "plugin.h"
+}
+
+%name-prefix "trigger_"
+%lex-param {CfgLexer *lexer}
+%parse-param {CfgLexer *lexer}
+%parse-param {LogDriver **instance}
+%parse-param {gpointer arg}
+
+/* INCLUDE_DECLS */
+
+%token KW_TRIGGER
+%token KW_TRIGGER_FREQ
+
+%%
+
+start
+        : LL_CONTEXT_SOURCE KW_TRIGGER
+          {
+            last_driver = *instance = trigger_sd_new ();
+          }
+          '(' trigger_source_params ')'         { YYACCEPT; }
+        ;
+
+trigger_source_params
+        : {
+            last_source_options = trigger_sd_get_source_options (last_driver);
+          }
+          trigger_source_options
+        ;
+
+trigger_source_options
+        : trigger_source_option trigger_source_options
+        |
+        ;
+
+trigger_source_option
+        : source_option
+        | KW_TRIGGER_FREQ '(' LL_NUMBER ')'
+          {
+            trigger_sd_set_trigger_freq (last_driver, $3);
+          }
+        ;
+
+/* INCLUDE_RULES */
+
+%%
