@@ -21,6 +21,12 @@ Contents
 
    [sng:riemann]: https://github.com/algernon/syslog-ng-incubator/tree/master/modules/riemann/
 
+ * [Trigger source][sng:trigger]: A very simple example source that
+   periodically generates a message. Useful mostly for debugging
+   purposes.
+
+   [sng:trigger]: https://github.com/algernon/syslog-ng-incubator/tree/master/modules/trigger-source/
+
  * [logmongource][sng:mongource]: A log visualisation tool that
    extracts messages from a MongoDB collection, and visualises them
    with [Gource](https://code.google.com/p/gource/)
