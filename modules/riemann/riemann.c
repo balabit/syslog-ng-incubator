@@ -58,6 +58,7 @@ typedef struct
   GString *str;
 
   riemann_client_t *client;
+  gint32 seq_num;
 } RiemannDestDriver;
 
 /*
@@ -255,12 +256,14 @@ static void
 riemann_dd_field_maybe_add(riemann_event_t *event, LogMessage *msg,
                            LogTemplate *template, const LogTemplateOptions *template_options,
                            riemann_event_field_t ftype,
+                           gint32 seq_num,
                            GString *target)
 {
   if (!template)
     return;
 
-  log_template_format(template, msg, template_options, LTZ_SEND, 0, NULL, target);
+  log_template_format(template, msg, template_options, LTZ_SEND,
+                      seq_num, NULL, target);
   riemann_event_set(event, ftype, target->str, RIEMANN_EVENT_FIELD_NONE);
 }
 
@@ -321,7 +324,7 @@ riemann_worker_insert(LogThrDestDriver *s)
   if (self->fields.metric)
     {
       log_template_format(self->fields.metric, msg, &self->template_options,
-                          LTZ_SEND, 0, NULL, self->str);
+                          LTZ_SEND, self->seq_num, NULL, self->str);
 
       switch (self->fields.metric->type_hint)
         {
@@ -374,7 +377,7 @@ riemann_worker_insert(LogThrDestDriver *s)
       gboolean r = TRUE;
 
       log_template_format(self->fields.ttl, msg, &self->template_options,
-                          LTZ_SEND, 0, NULL, self->str);
+                          LTZ_SEND, self->seq_num, NULL, self->str);
 
       errno = 0;
       f = strtof(self->str->str, &endptr);
@@ -396,16 +399,20 @@ riemann_worker_insert(LogThrDestDriver *s)
     {
       riemann_dd_field_maybe_add(event, msg, self->fields.host,
                                  &self->template_options,
-                                 RIEMANN_EVENT_FIELD_HOST, self->str);
+                                 RIEMANN_EVENT_FIELD_HOST,
+                                 self->seq_num, self->str);
       riemann_dd_field_maybe_add(event, msg, self->fields.service,
                                  &self->template_options,
-                                 RIEMANN_EVENT_FIELD_SERVICE, self->str);
+                                 RIEMANN_EVENT_FIELD_SERVICE,
+                                 self->seq_num, self->str);
       riemann_dd_field_maybe_add(event, msg, self->fields.description,
                                  &self->template_options,
-                                 RIEMANN_EVENT_FIELD_DESCRIPTION, self->str);
+                                 RIEMANN_EVENT_FIELD_DESCRIPTION,
+                                 self->seq_num, self->str);
       riemann_dd_field_maybe_add(event, msg, self->fields.state,
                                  &self->template_options,
-                                 RIEMANN_EVENT_FIELD_STATE, self->str);
+                                 RIEMANN_EVENT_FIELD_STATE,
+                                 self->seq_num, self->str);
 
       if (self->fields.tags)
         g_list_foreach(self->fields.tags, riemann_dd_field_add_tag,
@@ -416,7 +423,7 @@ riemann_worker_insert(LogThrDestDriver *s)
 
       if (self->fields.attributes)
         value_pairs_foreach(self->fields.attributes, riemann_dd_field_add_attribute_vp,
-                            msg, 0, &self->template_options, event);
+                            msg, self->seq_num, &self->template_options, event);
 
       riemann_client_send_message_oneshot
         (self->client,
@@ -428,6 +435,7 @@ riemann_worker_insert(LogThrDestDriver *s)
   if (success)
     {
       stats_counter_inc(self->super.stored_messages);
+      step_sequence_number(&self->seq_num);
       log_msg_ack(msg, &path_options);
       log_msg_unref(msg);
     }
@@ -436,6 +444,7 @@ riemann_worker_insert(LogThrDestDriver *s)
       if (need_drop)
         {
           stats_counter_inc(self->super.dropped_messages);
+          step_sequence_number(&self->seq_num);
           log_msg_ack(msg, &path_options);
           log_msg_unref(msg);
         }
@@ -494,6 +503,8 @@ riemann_dd_new(void)
 
   self->port = -1;
   self->str = g_string_sized_new (1024);
+
+  init_sequence_number(&self->seq_num);
 
   log_template_options_defaults(&self->template_options);
 
