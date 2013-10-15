@@ -237,7 +237,7 @@ riemann_worker_init(LogPipe *s)
     }
   if (!self->fields.service)
     {
-      self->fields.service = log_template_new (cfg, NULL);
+      self->fields.service = log_template_new(cfg, NULL);
       log_template_compile(self->fields.service, "${PROGRAM}", NULL);
     }
 
@@ -502,7 +502,7 @@ riemann_dd_new(void)
   self->super.stats_source = SCS_RIEMANN;
 
   self->port = -1;
-  self->str = g_string_sized_new (1024);
+  self->str = g_string_sized_new(1024);
 
   init_sequence_number(&self->seq_num);
 
