@@ -41,5 +41,6 @@ void riemann_dd_set_field_metric(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_ttl(LogDriver *d, LogTemplate *value);
 void riemann_dd_set_field_tags(LogDriver *d, GList *taglist);
 void riemann_dd_set_field_attributes(LogDriver *d, ValuePairs *vp);
+gboolean riemann_dd_set_connection_type(LogDriver *d, const gchar *type);
 
 #endif

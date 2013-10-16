@@ -41,6 +41,7 @@ typedef struct
 
   gchar *server;
   gint port;
+  riemann_client_type_t type;
 
   struct
   {
@@ -148,6 +149,21 @@ riemann_dd_set_field_attributes(LogDriver *d, ValuePairs *vp)
   self->fields.attributes = vp;
 }
 
+gboolean
+riemann_dd_set_connection_type(LogDriver *d, const gchar *type)
+{
+  RiemannDestDriver *self = (RiemannDestDriver *)d;
+
+  if (strcmp(type, "tcp") == 0)
+    self->type = RIEMANN_CLIENT_TCP;
+  else if (strcmp(type, "udp") == 0)
+    self->type = RIEMANN_CLIENT_UDP;
+  else
+    return FALSE;
+
+  return TRUE;
+}
+
 LogTemplateOptions *
 riemann_dd_get_template_options(LogDriver *d)
 {
@@ -197,8 +213,7 @@ riemann_dd_connect(RiemannDestDriver *self, gboolean reconnect)
   if (reconnect && self->client)
     return TRUE;
 
-  self->client = riemann_client_create(RIEMANN_CLIENT_TCP,
-                                       self->server, self->port);
+  self->client = riemann_client_create(self->type, self->server, self->port);
   if (!self->client)
     {
       msg_error("Error connecting to Riemann",
@@ -503,6 +518,7 @@ riemann_dd_new(void)
 
   self->port = -1;
   self->str = g_string_sized_new(1024);
+  self->type = RIEMANN_CLIENT_TCP;
 
   init_sequence_number(&self->seq_num);
 
