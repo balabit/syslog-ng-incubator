@@ -10,7 +10,7 @@ also an example of a third party syslog-ng module.
 
  [sng]: https://github.com/balabit/syslog-ng-3.5
 
-**NOTE**: The Incubator requires syslog-ng 3.5 master!
+**NOTE**: The Incubator requires syslog-ng 3.5.0rc1 or newer!
 
 Contents
 --------
