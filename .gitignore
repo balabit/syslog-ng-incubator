@@ -28,3 +28,12 @@
 /ylwrap
 
 /b/
+
+/debian/autoreconf.*
+/debian/build-tree/
+/debian/files
+/debian/*.debhelper.log
+/debian/*.substvars
+/debian/syslog-ng-mod-riemann/
+/debian/syslog-ng-mod-trigger/
+/debian/tmp/

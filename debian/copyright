@@ -1,0 +1,36 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: syslog-ng-incubator
+Upstream-Contact: Gergely Nagy <algernon@balabit.hu>
+Source: git://github.com/algernon/syslog-ng-incubator.git
+Copyright: Copyright (C) Gergely Nagy <algernon@balabit.hu>
+ Copyright (C) BalaBit IT Security Ltd.
+
+Files: *
+Copyright: Copyright (C) Gergely Nagy <algernon@balabit.hu>
+ Copyright (C) BalaBit IT Security Ltd.
+License: GPL-2+ with OpenSSL exception
+
+Files: debian/*
+Copyright: Copyright (C) 2013 Gergely Nagy <algernon@madhouse-project.org>
+License: GPL-2+ with OpenSSL exception
+
+License: GPL-2+ with OpenSSL exception
+ This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License version 2 as published
+ by the Free Software Foundation, or (at your option) any later version.
+ .
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ .
+ As an additional exemption you are allowed to compile & link against the
+ OpenSSL libraries as published by the OpenSSL project. See the file
+ COPYING for details.
+ .
+ On Debian systems, the complete text of the GNU General Public
+ License can be found in the file `/usr/share/common-licenses/GPL-2'.
