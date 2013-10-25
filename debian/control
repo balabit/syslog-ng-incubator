@@ -1,0 +1,61 @@
+Source: syslog-ng-incubator
+Section: admin
+Priority: extra
+Maintainer: syslog-ng maintainers <syslog-ng-maintainers@lists.alioth.debian.org>
+Uploaders: Gergely Nagy <algernon@madhouse-project.org>,
+           Laszlo Boszormenyi (GCS) <gcs@debian.hu>,
+           SZALAY Attila <sasa@debian.org>
+Build-Depends: debhelper (>= 9~),
+               dh-autoreconf,
+               libivykis-dev (>= 0.30~),
+               syslog-ng-dev (>= 3.5.0~rc1~),
+               automake (>= 1:1.11.1),
+               pkg-config, flex, bison,
+               libmongo-client-dev (>= 0.1.6~),
+               libriemann-client-dev
+Build-Conflicts: autoconf2.13
+Standards-Version: 3.9.4
+Vcs-Git: git://github.com/algernon/syslog-ng-incubator.git
+Vcs-Browser: http://github.com/algernon/syslog-ng-incubator
+
+Package: syslog-ng-mod-trigger
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Next generation system logging daemon (trigger plugin)
+ syslog-ng is an enhanced syslog daemon, supporting, amongst others:
+  * Powerful configurability, while still being readable
+  * Filtering on any part of the syslog message
+  * Support for both legacy BSD and the new syslog protocol
+  * Wide range of source and destination drivers, including TCP
+    (plain, or over SSL/TLS), UDP, SQL, MongoDB
+  * Also supports fine-grained output format control
+  * Multi-threaded operation
+ .
+ The wide range of plugins make syslog-ng able to perform well in
+ every situation, ranging from enterprise-class centralised
+ deployments, through personal computers to ad-hoc connected networks.
+ .
+ This package provides the trigger() source, which is most useful as a
+ debugging aid.
+
+Package: syslog-ng-mod-riemann
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Next generation system logging daemon (Riemann plugin)
+ syslog-ng is an enhanced syslog daemon, supporting, amongst others:
+  * Powerful configurability, while still being readable
+  * Filtering on any part of the syslog message
+  * Support for both legacy BSD and the new syslog protocol
+  * Wide range of source and destination drivers, including TCP
+    (plain, or over SSL/TLS), UDP, SQL, MongoDB
+  * Also supports fine-grained output format control
+  * Multi-threaded operation
+ .
+ The wide range of plugins make syslog-ng able to perform well in
+ every situation, ranging from enterprise-class centralised
+ deployments, through personal computers to ad-hoc connected networks.
+ .
+ This package provides the Riemann destination, allowing one to push
+ events to a Riemann server from within syslog-ng.

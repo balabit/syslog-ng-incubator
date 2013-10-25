@@ -1,0 +1,46 @@
+#! /usr/bin/make -f
+## debian/rules file for syslog-ng Incubator
+## (C) 2013 Gergely Nagy <algernon@madhouse-project.org>
+##
+## Released under the GPLv2+, see /usr/share/common-licenses/GPL-2 on
+## Debian systems.
+
+export DH_OPTIONS += -O-Bdebian/build-tree -O-D${SRCDIR}
+
+CFLAGS		?= $(shell dpkg-buildflags --get CFLAGS)
+LDFLAGS		?= $(shell dpkg-buildflags --get LDFLAGS)
+
+##
+#* Overrides for dh_auto*
+##
+
+override_dh_auto_configure:
+	install -d debian/build-tree
+	dh_auto_configure -- LDFLAGS="${LDFLAGS} -Wl,-rpath=/usr/lib/syslog-ng"
+
+##
+#* Overrides for other debhelper commands
+#
+# Below are overrides for individual debhelper commands.
+##
+
+# Install the NEWS file as upstream changelog.
+override_dh_installchangelogs:
+	dh_installchangelogs NEWS
+
+# dh_makeshlibs wants to be clever and treat plugins as shared libs.
+# Slap it in the face, and tell it not to.
+override_dh_makeshlibs:
+	dh_makeshlibs -n -Xusr/lib/syslog-ng/*
+
+# Compress the .debs with xz, except, we use gzip on Ubuntu, for the
+# sake of Lucid.
+override_dh_builddeb:
+ifeq (Ubuntu,$(shell lsb_release -is))
+	dh_builddeb -- -Zgzip
+else
+	dh_builddeb -- -Zxz
+endif
+
+%:
+	dh $@ --with autoreconf
