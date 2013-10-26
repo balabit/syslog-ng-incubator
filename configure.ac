@@ -30,6 +30,7 @@ dnl dependencies
 GLIB_MIN_VERSION="2.14"
 SYSLOG_NG_MIN_VERSION="3.5"
 EVENTLOG_MIN_VERSION="0.2.10"
+IVYKIS_MIN_VERSION="0.30.0"
 LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
 
@@ -92,6 +93,7 @@ dnl ***************************************************************************
 
 PKG_CHECK_MODULES(SYSLOG_NG, syslog-ng >= $SYSLOG_NG_MIN_VERSION)
 PKG_CHECK_MODULES(EVENTLOG, eventlog >= $EVENTLOG_MIN_VERSION)
+PKG_CHECK_MODULES(IVYKIS, ivykis >= $IVYKIS_MIN_VERSION,,true)
 
 syslog_ng_tools=[`pkg-config syslog-ng --variable toolsdir`]
 if test "x$moduledir" = "xauto"; then

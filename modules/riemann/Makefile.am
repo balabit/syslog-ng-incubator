@@ -6,6 +6,7 @@ modules_riemann_libriemann_la_CFLAGS		 = \
 	$(RIEMANN_CLIENT_CFLAGS)		   \
 	$(SYSLOG_NG_CFLAGS)			   \
 	$(EVENTLOG_CFLAGS)			   \
+	$(IVYKIS_CFLAGS)			   \
 	-I$(top_srcdir)/modules/riemann		   \
 	-I$(top_builddir)/modules/riemann
 
@@ -19,7 +20,7 @@ modules_riemann_libriemann_la_SOURCES		 = \
 
 modules_riemann_libriemann_la_LIBADD		 = \
 	$(RIEMANN_CLIENT_LIBS) $(EVENTLOG_LIBS)    \
-	$(SYSLOG_NG_LIBS)
+	$(SYSLOG_NG_LIBS) $(IVYKIS_LIBS)
 
 modules_riemann_libriemann_la_LDFLAGS		 = \
 	-avoid-version -module -no-undefined
