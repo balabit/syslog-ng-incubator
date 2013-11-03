@@ -122,12 +122,26 @@ riemann_option
           {
             last_value_pairs = value_pairs_new();
           }
-          '(' vp_options ')'
+          '(' attribute_options ')'
           {
             riemann_dd_set_field_attributes(last_driver, last_value_pairs);
           }
         | dest_driver_option
         | { last_template_options = riemann_dd_get_template_options(last_driver); } template_option
+        ;
+
+attribute_options
+        : attribute_option attribute_options
+        |
+        ;
+
+attribute_option
+        : LL_IDENTIFIER '(' template_content ')'
+          {
+            value_pairs_add_pair(last_value_pairs, $1, $3);
+            free($1);
+          }
+        | vp_option
         ;
 
 /* INCLUDE_RULES */
