@@ -19,26 +19,26 @@ Contents
    destination that allows syslog-ng to send events to the
    [Riemann](http://riemann.io/) network monitoring system.
 
-   [sng:riemann]: https://github.com/algernon/syslog-ng-incubator/tree/master/modules/riemann/
+   [sng:riemann]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/riemann/
 
  * [Trigger source][sng:trigger]: A very simple example source that
    periodically generates a message. Useful mostly for debugging
    purposes.
 
-   [sng:trigger]: https://github.com/algernon/syslog-ng-incubator/tree/master/modules/trigger-source/
+   [sng:trigger]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/trigger-source/
 
  * [logmongource][sng:mongource]: A log visualisation tool that
    extracts messages from a MongoDB collection, and visualises them
    with [Gource](https://code.google.com/p/gource/)
 
-   [sng:mongource]: https://github.com/algernon/syslog-ng-incubator/tree/master/tools/visualize/
+   [sng:mongource]: https://github.com/balabit/syslog-ng-incubator/tree/master/tools/visualize/
 
 Installation
 ------------
 
 Installing the modules and tools follows the usual autotools way:
 
-    $ git clone git://github.com/algernon/syslog-ng-incubator.git
+    $ git clone git://github.com/balabit/syslog-ng-incubator.git
     $ cd syslog-ng-incubator
     $ autoreconf -i
     $ ./configure && make && make install
