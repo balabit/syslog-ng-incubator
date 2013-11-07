@@ -362,8 +362,7 @@ riemann_worker_insert(LogThrDestDriver *s)
 
             errno = 0;
             f = strtof(self->str->str, &endptr);
-            if ((errno == ERANGE && (f == HUGE_VAL || f == -HUGE_VAL))
-                || (errno == 0 && f == 0))
+            if (errno == ERANGE && (f == HUGE_VAL || f == -HUGE_VAL))
               r = FALSE;
             if (endptr == self->str->str)
               r = FALSE;
