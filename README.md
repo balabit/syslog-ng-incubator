@@ -27,6 +27,12 @@ Contents
 
    [sng:trigger]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/trigger-source/
 
+ * [Extra template functions][sng:bf+]: Extra template functions, such
+   as `$(//)` which is floating-point division, as opposed to the
+   built-in `$(/)` (integer division).
+
+   [sng:bf+]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/basicfuncs-plus/
+
  * [logmongource][sng:mongource]: A log visualisation tool that
    extracts messages from a MongoDB collection, and visualises them
    with [Gource](https://code.google.com/p/gource/)
