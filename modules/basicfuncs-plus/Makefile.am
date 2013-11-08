@@ -14,6 +14,7 @@ modules_basicfuncs_plus_libbasicfuncs_plus_la_LDFLAGS	 = \
 	-avoid-version -module -no-undefined
 
 EXTRA_DIST						+= \
+	modules/basicfuncs-plus/cond-funcs.c		   \
 	modules/basicfuncs-plus/number-funcs.c		   \
 	modules/basicfuncs-plus/state-funcs.c
 

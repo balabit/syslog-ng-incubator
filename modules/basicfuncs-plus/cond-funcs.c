@@ -25,35 +25,19 @@
 #include "cfg.h"
 #include "plugin-types.h"
 
-#include "number-funcs.c"
-#include "state-funcs.c"
-#include "cond-funcs.c"
-
-/*
- * Plugin glue
- */
-
-static Plugin basicfuncs_plus_plugins[] =
+static void
+tf_or (LogMessage *msg, gint argc, GString *argv[], GString *result)
 {
-  TEMPLATE_FUNCTION_PLUGIN(tf_num_divx, "//"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_state, "state"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_or, "or"),
-};
+  gint i;
 
-gboolean
-basicfuncs_plus_module_init(GlobalConfig *cfg, CfgArgs *args)
-{
-  plugin_register(cfg, basicfuncs_plus_plugins,
-                  G_N_ELEMENTS(basicfuncs_plus_plugins));
-  return TRUE;
+  for (i = 0; i < argc; i++)
+    {
+      if (argv[i]->len == 0)
+        continue;
+
+      g_string_append_len (result, argv[i]->str, argv[i]->len);
+      break;
+    }
 }
 
-const ModuleInfo module_info =
-{
-  .canonical_name = "basicfuncs-plus",
-  .version = VERSION,
-  .description = "The basicfuncs-plus module provides some additional template functions for syslog-ng.",
-  .core_revision = VERSION_CURRENT_VER_ONLY,
-  .plugins = basicfuncs_plus_plugins,
-  .plugins_len = G_N_ELEMENTS(basicfuncs_plus_plugins),
-};
+TEMPLATE_FUNCTION_SIMPLE(tf_or);
