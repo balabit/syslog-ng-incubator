@@ -26,6 +26,7 @@
 #include "plugin-types.h"
 
 #include "number-funcs.c"
+#include "state-funcs.c"
 
 /*
  * Plugin glue
@@ -34,6 +35,7 @@
 static Plugin basicfuncs_plus_plugins[] =
 {
   TEMPLATE_FUNCTION_PLUGIN(tf_num_divx, "//"),
+  TEMPLATE_FUNCTION_PLUGIN(tf_state, "state"),
 };
 
 gboolean
