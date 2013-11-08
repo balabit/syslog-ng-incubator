@@ -21,60 +21,11 @@
  *
  */
 
-#include <math.h>
-#include <errno.h>
-#include <stdlib.h>
-
 #include "plugin.h"
 #include "cfg.h"
-#include "parse-number.h"
 #include "plugin-types.h"
 
-static gboolean
-tf_num_parse(gint argc, GString *argv[],
-             const gchar *func_name, glong *n, glong *m)
-{
-  if (argc != 2)
-    {
-      msg_debug("Template function requires two arguments.",
-                evt_tag_str("function", func_name), NULL);
-      return FALSE;
-    }
-
-  if (!parse_number_with_suffix(argv[0]->str, n))
-    {
-      msg_debug("Parsing failed, template function's first argument is not a number",
-                evt_tag_str("function", func_name),
-                evt_tag_str("arg1", argv[0]->str), NULL);
-      return FALSE;
-    }
-
-  if (!parse_number_with_suffix(argv[1]->str, m))
-    {
-      msg_debug("Parsing failed, template function's first argument is not a number",
-                evt_tag_str("function", func_name),
-                evt_tag_str("arg1", argv[1]->str), NULL);
-      return FALSE;
-    }
-
-  return TRUE;
-}
-
-static void
-tf_num_divx(LogMessage *msg, gint argc, GString *argv[], GString *result)
-{
-  glong n, m;
-
-  if (!tf_num_parse(argc, argv, "//", &n, &m) || !m)
-    {
-      g_string_append_len(result, "NaN", 3);
-      return;
-    }
-
-  g_string_append_printf (result, "%f", (double) ((double)n / (double)m));
-}
-
-TEMPLATE_FUNCTION_SIMPLE(tf_num_divx);
+#include "number-funcs.c"
 
 /*
  * Plugin glue
