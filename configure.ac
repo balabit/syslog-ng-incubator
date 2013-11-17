@@ -76,7 +76,7 @@ dnl ***************************************************************************
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h])
-AC_CHECK_FUNCS([floor memset strdup])
+AC_CHECK_FUNCS([floor memset strdup strtoll])
 
 dnl ***************************************************************************
 dnl Header checks
