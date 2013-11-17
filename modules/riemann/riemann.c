@@ -29,6 +29,7 @@
 #include "logthrdestdrv.h"
 #include "misc.h"
 #include "stats.h"
+#include "scratch-buffers.h"
 #include "riemann.h"
 
 #ifndef SCS_RIEMANN
@@ -55,8 +56,6 @@ typedef struct
     ValuePairs *attributes;
   } fields;
   LogTemplateOptions template_options;
-
-  GString *str;
 
   riemann_client_t *client;
   gint32 seq_num;
@@ -323,6 +322,7 @@ riemann_worker_insert(LogThrDestDriver *s)
   gboolean success, need_drop = FALSE;
   LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
+  SBGString *str;
 
   riemann_dd_connect(self, TRUE);
 
@@ -334,10 +334,12 @@ riemann_worker_insert(LogThrDestDriver *s)
 
   event = riemann_event_new();
 
+  str = sb_gstring_acquire();
+
   if (self->fields.metric)
     {
       log_template_format(self->fields.metric, msg, &self->template_options,
-                          LTZ_SEND, self->seq_num, NULL, self->str);
+                          LTZ_SEND, self->seq_num, NULL, sb_gstring_string(str));
 
       switch (self->fields.metric->type_hint)
         {
@@ -346,12 +348,12 @@ riemann_worker_insert(LogThrDestDriver *s)
           {
             glong i;
 
-            if (type_cast_to_int64(self->str->str, &i, NULL))
+            if (type_cast_to_int64(sb_gstring_string(str)->str, &i, NULL))
               riemann_event_set(event, RIEMANN_EVENT_FIELD_METRIC_S64, i,
                                 RIEMANN_EVENT_FIELD_NONE);
             else
               need_drop = type_cast_drop_helper(self->template_options.on_error,
-                                                self->str->str, "int");
+                                                sb_gstring_string(str)->str, "int");
             break;
           }
         case TYPE_HINT_STRING:
@@ -361,10 +363,10 @@ riemann_worker_insert(LogThrDestDriver *s)
             gboolean r;
 
             errno = 0;
-            f = strtof(self->str->str, &endptr);
+            f = strtof(sb_gstring_string(str)->str, &endptr);
             if (errno == ERANGE && (f == HUGE_VAL || f == -HUGE_VAL))
               r = FALSE;
-            if (endptr == self->str->str)
+            if (endptr == sb_gstring_string(str)->str)
               r = FALSE;
 
             if (r)
@@ -372,12 +374,12 @@ riemann_worker_insert(LogThrDestDriver *s)
                                 RIEMANN_EVENT_FIELD_NONE);
             else
               need_drop = type_cast_drop_helper(self->template_options.on_error,
-                                                self->str->str, "float");
+                                                sb_gstring_string(str)->str, "float");
             break;
           }
         default:
           need_drop = type_cast_drop_helper(self->template_options.on_error,
-                                            self->str->str, "<unknown>");
+                                            sb_gstring_string(str)->str, "<unknown>");
           break;
         }
     }
@@ -389,14 +391,14 @@ riemann_worker_insert(LogThrDestDriver *s)
       gboolean r = TRUE;
 
       log_template_format(self->fields.ttl, msg, &self->template_options,
-                          LTZ_SEND, self->seq_num, NULL, self->str);
+                          LTZ_SEND, self->seq_num, NULL, sb_gstring_string(str));
 
       errno = 0;
-      f = strtof(self->str->str, &endptr);
+      f = strtof(sb_gstring_string(str)->str, &endptr);
       if ((errno == ERANGE && (f == HUGE_VAL || f == -HUGE_VAL))
           || (errno == 0 && f == 0))
         r = FALSE;
-      if (endptr == self->str->str)
+      if (endptr == sb_gstring_string(str)->str)
         r = FALSE;
 
       if (r)
@@ -404,7 +406,7 @@ riemann_worker_insert(LogThrDestDriver *s)
                           RIEMANN_EVENT_FIELD_NONE);
       else
         need_drop = type_cast_drop_helper(self->template_options.on_error,
-                                          self->str->str, "float");
+                                          sb_gstring_string(str)->str, "float");
     }
 
   if (!need_drop)
@@ -412,19 +414,19 @@ riemann_worker_insert(LogThrDestDriver *s)
       riemann_dd_field_maybe_add(event, msg, self->fields.host,
                                  &self->template_options,
                                  RIEMANN_EVENT_FIELD_HOST,
-                                 self->seq_num, self->str);
+                                 self->seq_num, sb_gstring_string(str));
       riemann_dd_field_maybe_add(event, msg, self->fields.service,
                                  &self->template_options,
                                  RIEMANN_EVENT_FIELD_SERVICE,
-                                 self->seq_num, self->str);
+                                 self->seq_num, sb_gstring_string(str));
       riemann_dd_field_maybe_add(event, msg, self->fields.description,
                                  &self->template_options,
                                  RIEMANN_EVENT_FIELD_DESCRIPTION,
-                                 self->seq_num, self->str);
+                                 self->seq_num, sb_gstring_string(str));
       riemann_dd_field_maybe_add(event, msg, self->fields.state,
                                  &self->template_options,
                                  RIEMANN_EVENT_FIELD_STATE,
-                                 self->seq_num, self->str);
+                                 self->seq_num, sb_gstring_string(str));
 
       if (self->fields.tags)
         g_list_foreach(self->fields.tags, riemann_dd_field_add_tag,
@@ -441,6 +443,8 @@ riemann_worker_insert(LogThrDestDriver *s)
         (self->client,
          riemann_message_create_with_events(event, NULL));
     }
+
+  sb_gstring_release(str);
 
   msg_set_context(NULL);
 
@@ -481,7 +485,6 @@ riemann_dd_free(LogPipe *d)
   log_template_options_destroy(&self->template_options);
 
   riemann_client_free(self->client);
-  g_string_free(self->str, TRUE);
 
   log_template_unref(self->fields.host);
   log_template_unref(self->fields.service);
@@ -514,7 +517,6 @@ riemann_dd_new(void)
   self->super.stats_source = SCS_RIEMANN;
 
   self->port = -1;
-  self->str = g_string_sized_new(1024);
   self->type = RIEMANN_CLIENT_TCP;
 
   init_sequence_number(&self->seq_num);
