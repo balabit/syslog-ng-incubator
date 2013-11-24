@@ -1,5 +1,5 @@
 syslog-ng-incubator (0.1.0-1) unstable; urgency=low
 
-  * Initial release.
+  * Initial release (closes: #728591).
 
  -- Gergely Nagy <algernon@madhouse-project.org>  Fri, 25 Oct 2013 15:21:55 +0200
