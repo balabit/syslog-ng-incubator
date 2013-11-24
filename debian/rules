@@ -44,3 +44,6 @@ endif
 
 %:
 	dh $@ --with autoreconf
+
+.PHONY: override_dh_auto_configure override_dh_makeshlibs \
+	override_dh_installchangelogs override_dh_builddeb
