@@ -3,7 +3,7 @@ Section: admin
 Priority: extra
 Maintainer: syslog-ng maintainers <syslog-ng-maintainers@lists.alioth.debian.org>
 Uploaders: Gergely Nagy <algernon@madhouse-project.org>,
-           Laszlo Boszormenyi (GCS) <gcs@debian.hu>,
+           Laszlo Boszormenyi (GCS) <gcs@debian.org>,
            SZALAY Attila <sasa@debian.org>
 Build-Depends: debhelper (>= 9~),
                dh-autoreconf,
