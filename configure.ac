@@ -41,6 +41,9 @@ AC_ARG_WITH(module-dir,
    [  --with-module-dir=path   Use path as the list of directories looked up when searching for modules],
    moduledir=$with_module_dir,moduledir="auto")
 
+AC_ARG_WITH(ivykis,
+   [  --without-ivykis         Build without explicitly linking to ivykis])
+
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -93,7 +96,10 @@ dnl ***************************************************************************
 
 PKG_CHECK_MODULES(SYSLOG_NG, syslog-ng >= $SYSLOG_NG_MIN_VERSION)
 PKG_CHECK_MODULES(EVENTLOG, eventlog >= $EVENTLOG_MIN_VERSION)
-PKG_CHECK_MODULES(IVYKIS, ivykis >= $IVYKIS_MIN_VERSION,,true)
+
+if test "x$with_ivykis" != "xno"; then
+   PKG_CHECK_MODULES(IVYKIS, ivykis >= $IVYKIS_MIN_VERSION,,true)
+fi
 
 syslog_ng_tools=[`pkg-config syslog-ng --variable toolsdir`]
 if test "x$moduledir" = "xauto"; then
