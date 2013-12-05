@@ -25,6 +25,7 @@
 
 #include "driver.h"
 #include "logsource.h"
+#include "mainloop.h"
 
 typedef struct _TriggerSourceDriver
 {
