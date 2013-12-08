@@ -48,6 +48,15 @@ _format_feed_footer(RssDestDriver * self, GString * result)
   return g_string_append (result, "</feed>\n");
 };
 
+static GString*
+_append_text_escaped(GString* result, GString* message)
+{
+   gchar* escaped_text = g_markup_escape_text(message->str, message->len);
+   result = g_string_append (result, escaped_text);
+   g_free(escaped_text);
+   return result;
+}
+
 GString *
 _format_backlog (RssDestDriver * self, GString * result)
 {
@@ -56,17 +65,18 @@ _format_backlog (RssDestDriver * self, GString * result)
   char id_str[10];
   int offset = self->id;
   result = _format_feed_header(self, result);
+
   while (feed_item)
     {
       message = g_string_new ("");
       log_template_format (self->entry_title, feed_item->data, NULL, LTZ_LOCAL, 0,
 			   NULL, message);
       result = g_string_append (result, "<entry>\n <title>");
-      result = g_string_append (result, message->str);
+      result = _append_text_escaped (result, message);
       result = g_string_append (result, "</title>\n <description>");
       log_template_format (self->entry_description, feed_item->data, NULL, LTZ_LOCAL, 0,
 			   NULL, message);
-      result = g_string_append (result, message->str);
+      result = _append_text_escaped (result, message);
       result = g_string_append (result, "</description>\n <id>");
       snprintf (id_str, 10, "%d", offset);
       result = g_string_append (result, id_str);
