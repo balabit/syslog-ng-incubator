@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.68])
 
 AC_INIT([syslog-ng-incubator], [0.1.0], [algernon@madhouse-project.org])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
