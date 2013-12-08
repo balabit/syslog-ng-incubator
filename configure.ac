@@ -6,7 +6,7 @@ AC_PREREQ([2.68])
 AC_INIT([syslog-ng-incubator], [0.1.0], [algernon@madhouse-project.org])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 
@@ -72,6 +72,7 @@ else
 fi
 
 YFLAGS="-d"
+CFLAGS="-Werror"
 
 dnl ***************************************************************************
 dnl Miscellanneous headers
