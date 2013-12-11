@@ -27,24 +27,28 @@
 #include "logsource.h"
 #include "mainloop.h"
 
+typedef struct
+{
+  gint trigger_freq;
+  gchar *message;
+} TriggerOptions;
+
 typedef struct _TriggerSourceDriver
 {
   LogSrcDriver super;
   LogSource *source;
   LogSourceOptions source_options;
 
-  gint trigger_freq;
-  gchar *message;
+  TriggerOptions options;
 } TriggerSourceDriver;
 
 typedef struct
 {
   LogSource super;
-  gint trigger_freq;
-  gchar *message;
   struct iv_timer trigger_timer;
-
   gboolean watches_running;
+
+  TriggerOptions *options;
 } TriggerSource;
 
 #ifndef SCS_TRIGGER
@@ -69,7 +73,7 @@ trigger_source_triggered (gpointer s)
   if (!log_source_free_to_send (&self->super))
     goto end;
 
-  msg = log_msg_new_internal (LOG_INFO, self->message);
+  msg = log_msg_new_internal (LOG_INFO, self->options->message);
   path_options.ack_needed = FALSE;
 
   log_pipe_queue (&self->super.super, msg, &path_options);
@@ -121,7 +125,7 @@ trigger_source_update_watches (TriggerSource *self)
   iv_validate_now ();
   trigger_source_stop_watches (self);
   self->trigger_timer.expires = iv_now;
-  self->trigger_timer.expires.tv_sec += self->trigger_freq;
+  self->trigger_timer.expires.tv_sec += self->options->trigger_freq;
   trigger_source_start_watches (self);
 }
 
@@ -135,7 +139,7 @@ trigger_source_init (LogPipe *s)
 
   iv_validate_now ();
   self->trigger_timer.expires = iv_now;
-  self->trigger_timer.expires.tv_sec += self->trigger_freq;
+  self->trigger_timer.expires.tv_sec += self->options->trigger_freq;
 
   trigger_source_start_watches (self);
 
@@ -162,8 +166,7 @@ trigger_source_new (TriggerSourceDriver *owner, LogSourceOptions *options)
   log_source_set_options (&self->super, options, 0, SCS_TRIGGER,
                           owner->super.super.id, NULL, FALSE);
 
-  self->trigger_freq = owner->trigger_freq;
-  self->message = owner->message;
+  self->options = &owner->options;
 
   trigger_source_init_watches (self);
 
@@ -186,11 +189,11 @@ trigger_sd_init (LogPipe *s)
   if (!log_src_driver_init_method (s))
     return FALSE;
 
-  if (self->trigger_freq <= 0)
-    self->trigger_freq = 10;
+  if (self->options.trigger_freq <= 0)
+    self->options.trigger_freq = 10;
 
-  if (!self->message)
-    self->message = g_strdup ("Trigger source is trigger happy.");
+  if (!self->options.message)
+    self->options.message = g_strdup ("Trigger source is trigger happy.");
 
   log_source_options_init (&self->source_options, cfg, self->super.super.group);
   self->source = trigger_source_new (self, &self->source_options);
@@ -213,7 +216,7 @@ trigger_sd_deinit (LogPipe *s)
       self->source = NULL;
     }
 
-  g_free (self->message);
+  g_free (self->options.message);
 
   return log_src_driver_deinit_method (s);
 }
@@ -231,7 +234,7 @@ trigger_sd_set_trigger_freq (LogDriver *s, gint freq)
 {
   TriggerSourceDriver *self = (TriggerSourceDriver *)s;
 
-  self->trigger_freq = freq;
+  self->options.trigger_freq = freq;
 }
 
 void
@@ -239,8 +242,8 @@ trigger_sd_set_trigger_message (LogDriver *s, const gchar *message)
 {
   TriggerSourceDriver *self = (TriggerSourceDriver *)s;
 
-  g_free (self->message);
-  self->message = g_strdup (message);
+  g_free (self->options.message);
+  self->options.message = g_strdup (message);
 }
 
 LogDriver *
