@@ -31,5 +31,6 @@ LogDriver *trigger_sd_new (void);
 
 void trigger_sd_set_trigger_freq (LogDriver *s, gint freq);
 LogSourceOptions *trigger_sd_get_source_options (LogDriver *s);
+void trigger_sd_set_trigger_message (LogDriver *s, const gchar *message);
 
 #endif

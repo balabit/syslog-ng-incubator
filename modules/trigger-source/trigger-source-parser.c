@@ -31,6 +31,7 @@ int trigger_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 static CfgLexerKeyword trigger_keywords[] = {
   { "trigger",                 KW_TRIGGER },
   { "trigger_freq",            KW_TRIGGER_FREQ },
+  { "trigger_message",         KW_TRIGGER_MESSAGE },
   { NULL }
 };
 

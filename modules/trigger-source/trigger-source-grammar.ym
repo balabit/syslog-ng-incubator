@@ -44,6 +44,7 @@
 
 %token KW_TRIGGER
 %token KW_TRIGGER_FREQ
+%token KW_TRIGGER_MESSAGE
 
 %%
 
@@ -72,6 +73,11 @@ trigger_source_option
         | KW_TRIGGER_FREQ '(' LL_NUMBER ')'
           {
             trigger_sd_set_trigger_freq (last_driver, $3);
+          }
+        | KW_TRIGGER_MESSAGE '(' string ')'
+          {
+            trigger_sd_set_trigger_message (last_driver, $3);
+            free ($3);
           }
         ;
 

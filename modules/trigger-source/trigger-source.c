@@ -34,12 +34,14 @@ typedef struct _TriggerSourceDriver
   LogSourceOptions source_options;
 
   gint trigger_freq;
+  gchar *message;
 } TriggerSourceDriver;
 
 typedef struct
 {
   LogSource super;
   gint trigger_freq;
+  gchar *message;
   struct iv_timer trigger_timer;
 
   gboolean watches_running;
@@ -67,7 +69,7 @@ trigger_source_triggered (gpointer s)
   if (!log_source_free_to_send (&self->super))
     goto end;
 
-  msg = log_msg_new_internal (LOG_INFO, "Trigger source is trigger happy.");
+  msg = log_msg_new_internal (LOG_INFO, self->message);
   path_options.ack_needed = FALSE;
 
   log_pipe_queue (&self->super.super, msg, &path_options);
@@ -161,6 +163,7 @@ trigger_source_new (TriggerSourceDriver *owner, LogSourceOptions *options)
                           owner->super.super.id, NULL, FALSE);
 
   self->trigger_freq = owner->trigger_freq;
+  self->message = owner->message;
 
   trigger_source_init_watches (self);
 
@@ -186,6 +189,9 @@ trigger_sd_init (LogPipe *s)
   if (self->trigger_freq <= 0)
     self->trigger_freq = 10;
 
+  if (!self->message)
+    self->message = g_strdup ("Trigger source is trigger happy.");
+
   log_source_options_init (&self->source_options, cfg, self->super.super.group);
   self->source = trigger_source_new (self, &self->source_options);
 
@@ -207,6 +213,8 @@ trigger_sd_deinit (LogPipe *s)
       self->source = NULL;
     }
 
+  g_free (self->message);
+
   return log_src_driver_deinit_method (s);
 }
 
@@ -224,6 +232,15 @@ trigger_sd_set_trigger_freq (LogDriver *s, gint freq)
   TriggerSourceDriver *self = (TriggerSourceDriver *)s;
 
   self->trigger_freq = freq;
+}
+
+void
+trigger_sd_set_trigger_message (LogDriver *s, const gchar *message)
+{
+  TriggerSourceDriver *self = (TriggerSourceDriver *)s;
+
+  g_free (self->message);
+  self->message = g_strdup (message);
 }
 
 LogDriver *
