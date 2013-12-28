@@ -33,6 +33,11 @@ Contents
 
    [sng:bf+]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/basicfuncs-plus/
 
+ * [RSS destination][sng:rss]: A very simple destination module that
+   allows one to offer log messages as an RSS feed.
+
+   [sng:rss]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/rss/
+
  * [logmongource][sng:mongource]: A log visualisation tool that
    extracts messages from a MongoDB collection, and visualises them
    with [Gource](https://code.google.com/p/gource/)
