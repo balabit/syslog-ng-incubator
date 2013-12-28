@@ -15,8 +15,8 @@ Build-Depends: debhelper (>= 9~),
                libriemann-client-dev
 Build-Conflicts: autoconf2.13
 Standards-Version: 3.9.5
-Vcs-Git: git://github.com/algernon/syslog-ng-incubator.git
-Vcs-Browser: http://github.com/algernon/syslog-ng-incubator
+Vcs-Git: git://anonscm.debian.org/syslog-ng/syslog-ng-incubator.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=syslog-ng/syslog-ng-incubator.git
 
 Package: syslog-ng-mod-trigger
 Architecture: any
