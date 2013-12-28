@@ -36,4 +36,6 @@
 /debian/*.substvars
 /debian/syslog-ng-mod-riemann/
 /debian/syslog-ng-mod-trigger/
+/debian/syslog-ng-mod-rss/
+/debian/syslog-ng-mod-basicfuncs-plus/
 /debian/tmp/
