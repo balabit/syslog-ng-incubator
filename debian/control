@@ -22,19 +22,21 @@ Package: syslog-ng-mod-trigger
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Next generation system logging daemon (trigger plugin)
- syslog-ng is an enhanced syslog daemon, supporting, amongst others:
-  * Powerful configurability, while still being readable
-  * Filtering on any part of the syslog message
-  * Support for both legacy BSD and the new syslog protocol
-  * Wide range of source and destination drivers, including TCP
-    (plain, or over SSL/TLS), UDP, SQL, MongoDB
-  * Also supports fine-grained output format control
-  * Multi-threaded operation
+Description: Enhanced system logging daemon (trigger source)
+ syslog-ng is an enhanced log daemon, supporting a wide range of input
+ and output methods: syslog, unstructured text, message queues,
+ databases (SQL and NoSQL alike) and more.
  .
- The wide range of plugins make syslog-ng able to perform well in
- every situation, ranging from enterprise-class centralised
- deployments, through personal computers to ad-hoc connected networks.
+ Key features:
+ .
+  * receive and send RFC3164 and RFC5424 style syslog messages
+  * work with any kind of unstructured data
+  * receive and send JSON formatted messages
+  * classify and structure logs with builtin parsers (csv-parser(),
+    db-parser(), etc.)
+  * normalize, crunch and process logs as they flow through the system
+  * hand on messages for further processing using message queues (like
+    AMQP), files or databases (like PostgreSQL or MongoDB).
  .
  This package provides the trigger() source, which is most useful as a
  debugging aid.
@@ -43,19 +45,21 @@ Package: syslog-ng-mod-riemann
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Next generation system logging daemon (Riemann plugin)
- syslog-ng is an enhanced syslog daemon, supporting, amongst others:
-  * Powerful configurability, while still being readable
-  * Filtering on any part of the syslog message
-  * Support for both legacy BSD and the new syslog protocol
-  * Wide range of source and destination drivers, including TCP
-    (plain, or over SSL/TLS), UDP, SQL, MongoDB
-  * Also supports fine-grained output format control
-  * Multi-threaded operation
+Description: Enhanced system logging daemon (Riemann destination)
+ syslog-ng is an enhanced log daemon, supporting a wide range of input
+ and output methods: syslog, unstructured text, message queues,
+ databases (SQL and NoSQL alike) and more.
  .
- The wide range of plugins make syslog-ng able to perform well in
- every situation, ranging from enterprise-class centralised
- deployments, through personal computers to ad-hoc connected networks.
+ Key features:
+ .
+  * receive and send RFC3164 and RFC5424 style syslog messages
+  * work with any kind of unstructured data
+  * receive and send JSON formatted messages
+  * classify and structure logs with builtin parsers (csv-parser(),
+    db-parser(), etc.)
+  * normalize, crunch and process logs as they flow through the system
+  * hand on messages for further processing using message queues (like
+    AMQP), files or databases (like PostgreSQL or MongoDB).
  .
  This package provides the Riemann destination, allowing one to push
  events to a Riemann server from within syslog-ng.
@@ -64,19 +68,21 @@ Package: syslog-ng-mod-rss
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Next generation system logging daemon (RSS plugin)
- syslog-ng is an enhanced syslog daemon, supporting, amongst others:
-  * Powerful configurability, while still being readable
-  * Filtering on any part of the syslog message
-  * Support for both legacy BSD and the new syslog protocol
-  * Wide range of source and destination drivers, including TCP
-    (plain, or over SSL/TLS), UDP, SQL, MongoDB
-  * Also supports fine-grained output format control
-  * Multi-threaded operation
+Description: Enhanced system logging daemon (RSS destination)
+ syslog-ng is an enhanced log daemon, supporting a wide range of input
+ and output methods: syslog, unstructured text, message queues,
+ databases (SQL and NoSQL alike) and more.
  .
- The wide range of plugins make syslog-ng able to perform well in
- every situation, ranging from enterprise-class centralised
- deployments, through personal computers to ad-hoc connected networks.
+ Key features:
+ .
+  * receive and send RFC3164 and RFC5424 style syslog messages
+  * work with any kind of unstructured data
+  * receive and send JSON formatted messages
+  * classify and structure logs with builtin parsers (csv-parser(),
+    db-parser(), etc.)
+  * normalize, crunch and process logs as they flow through the system
+  * hand on messages for further processing using message queues (like
+    AMQP), files or databases (like PostgreSQL or MongoDB).
  .
  This package provides the RSS destination, allowing one to publish
  log messages as an RSS feed.
@@ -85,19 +91,21 @@ Package: syslog-ng-mod-basicfuncs-plus
 Architecture: any
 Multi-Arch: foreign
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Next generation system logging daemon (Extra template functions)
- syslog-ng is an enhanced syslog daemon, supporting, amongst others:
-  * Powerful configurability, while still being readable
-  * Filtering on any part of the syslog message
-  * Support for both legacy BSD and the new syslog protocol
-  * Wide range of source and destination drivers, including TCP
-    (plain, or over SSL/TLS), UDP, SQL, MongoDB
-  * Also supports fine-grained output format control
-  * Multi-threaded operation
+Description: Enhanced system logging daemon (extra template functions)
+ syslog-ng is an enhanced log daemon, supporting a wide range of input
+ and output methods: syslog, unstructured text, message queues,
+ databases (SQL and NoSQL alike) and more.
  .
- The wide range of plugins make syslog-ng able to perform well in
- every situation, ranging from enterprise-class centralised
- deployments, through personal computers to ad-hoc connected networks.
+ Key features:
+ .
+  * receive and send RFC3164 and RFC5424 style syslog messages
+  * work with any kind of unstructured data
+  * receive and send JSON formatted messages
+  * classify and structure logs with builtin parsers (csv-parser(),
+    db-parser(), etc.)
+  * normalize, crunch and process logs as they flow through the system
+  * hand on messages for further processing using message queues (like
+    AMQP), files or databases (like PostgreSQL or MongoDB).
  .
  This package provides additional template functions such as $(//),
  which is a floating point division function, $(or) which does what
