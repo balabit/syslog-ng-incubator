@@ -64,8 +64,8 @@ latter two are optional) installed too.
 License
 -------
 
-Copyright (C) 2011-2013 BalaBit IT Security Ltd. and Gergely Nagy
-<algernon@balabit.hu>, released under the terms of the
-[GNU General Public License][gpl], version 2 (or later).
+Copyright (C) 2011-2013 BalaBit IT Security Ltd., Gergely Nagy
+<algernon@balabit.hu> and other contributors, released under the terms
+of the [GNU General Public License][gpl], version 2 (or later).
 
  [gpl]: http://www.gnu.org/licenses/gpl-2.0.html
