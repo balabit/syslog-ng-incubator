@@ -1,5 +1,5 @@
 ACLOCAL_AMFLAGS		= -I m4
-AM_YFLAGS		= -Wno-other
+AM_YFLAGS		= -Wno-other -d
 
 check_PROGRAMS		=
 TESTS			= ${check_PROGRAMS}
