@@ -10,6 +10,11 @@ Copyright: Copyright (C) Gergely Nagy <algernon@balabit.hu>
  Copyright (C) BalaBit IT Security Ltd.
 License: GPL-2+ with OpenSSL exception
 
+Files: modules/rss/*
+Copyright: Copyright (C) Viktor Tusa
+ Copyright (C) BalaBit IT Ltd
+License: GPL-2+ with OpenSSL exception
+
 Files: debian/*
 Copyright: Copyright (C) 2013 Gergely Nagy <algernon@madhouse-project.org>
 License: GPL-2+ with OpenSSL exception
