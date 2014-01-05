@@ -1,0 +1,93 @@
+/*
+ * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
+ */
+
+%code requires {
+
+#include "lua-parser.h"
+#include "value-pairs.h"
+#include "vptransform.h"
+
+}
+
+%code {
+
+#include "cfg-grammar.h"
+#include "cfg-parser.h"
+#include "plugin.h"
+}
+
+%name-prefix "lua_driver_"
+%lex-param {CfgLexer *lexer}
+%parse-param {CfgLexer *lexer}
+%parse-param {LogDriver **instance}
+%parse-param {gpointer arg}
+
+/* INCLUDE_DECLS */
+
+%token KW_LUA
+%token KW_SCRIPT
+%token KW_INIT
+%token KW_QUEUE
+
+%%
+
+start
+        : LL_CONTEXT_DESTINATION KW_LUA
+          {
+            last_driver = *instance = lua_dd_new();
+          }
+          '(' lua_options ')'         { YYACCEPT; }
+        ;
+
+lua_options
+        : lua_option lua_options
+        |
+        ;
+
+lua_option
+        : KW_SCRIPT '(' string ')'
+          {
+            lua_dd_set_filename(last_driver, $3);
+            free($3);
+          }
+        | KW_TEMPLATE '(' template_content ')'
+          {
+            lua_dd_set_template(last_driver, $3);
+          }
+        | KW_INIT '(' string ')'
+          {
+            lua_dd_set_init_func(last_driver, $3);
+            free($3);
+          }
+        | KW_QUEUE '(' string ')'
+          {
+            lua_dd_set_queue_func(last_driver, $3);
+            free($3);
+          }
+        | dest_driver_option
+        | { last_template_options = lua_dd_get_template_options(last_driver); } template_option
+        ;
+
+/* INCLUDE_RULES */
+
+%%
