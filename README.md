@@ -8,7 +8,7 @@ serves both as a staging ground for experimental modules, and as a
 repository of plugins that are not aimed at upstream inclusion. It's
 also an example of a third party syslog-ng module.
 
- [sng]: https://github.com/balabit/syslog-ng-3.5
+ [sng]: https://github.com/balabit/syslog-ng
 
 **NOTE**: The Incubator requires syslog-ng 3.5.0rc1 or newer!
 
