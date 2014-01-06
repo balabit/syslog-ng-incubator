@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013, 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -26,8 +26,11 @@
 #include "plugin-types.h"
 
 #include "number-funcs.c"
-#include "state-funcs.c"
 #include "cond-funcs.c"
+
+#if GLIB_CHECK_VERSION(2,32,0)
+#include "state-funcs.c"
+#endif
 
 /*
  * Plugin glue
@@ -36,8 +39,10 @@
 static Plugin basicfuncs_plus_plugins[] =
 {
   TEMPLATE_FUNCTION_PLUGIN(tf_num_divx, "//"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_state, "state"),
   TEMPLATE_FUNCTION_PLUGIN(tf_or, "or"),
+#if GLIB_CHECK_VERSION(2,32,0)
+  TEMPLATE_FUNCTION_PLUGIN(tf_state, "state"),
+#endif
 };
 
 gboolean
