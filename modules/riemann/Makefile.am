@@ -11,12 +11,16 @@ modules_riemann_libriemann_la_CFLAGS		 = \
 	-I$(top_builddir)/modules/riemann
 
 modules_riemann_libriemann_la_SOURCES		 = \
-	modules/riemann/riemann-grammar.y	   \
 	modules/riemann/riemann.c		   \
 	modules/riemann/riemann.h		   \
 	modules/riemann/riemann-parser.c	   \
 	modules/riemann/riemann-parser.h	   \
 	modules/riemann/riemann-plugin.c
+
+nodist_riemann_libriemann_la_SOURCES		 = \
+	modules/riemann/riemann-grammar.y	   \
+	modules/riemann/riemann-grammar.c	   \
+	modules/riemann/riemann-grammar.h
 
 modules_riemann_libriemann_la_LIBADD		 = \
 	$(RIEMANN_CLIENT_LIBS) $(EVENTLOG_LIBS)    \
@@ -24,11 +28,6 @@ modules_riemann_libriemann_la_LIBADD		 = \
 
 modules_riemann_libriemann_la_LDFLAGS		 = \
 	-avoid-version -module -no-undefined
-
-BUILT_SOURCES					+= \
-	modules/riemann/riemann-grammar.y	   \
-	modules/riemann/riemann-grammar.c	   \
-	modules/riemann/riemann-grammar.h
 
 modules/riemann mod-riemann: modules/riemann/libriemann.la
 else

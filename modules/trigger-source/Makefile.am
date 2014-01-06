@@ -8,12 +8,16 @@ modules_trigger_source_libtrigger_source_la_CFLAGS	 = \
 	-I$(top_builddir)/modules/trigger-source
 
 modules_trigger_source_libtrigger_source_la_SOURCES	 = \
-	modules/trigger-source/trigger-source-grammar.y	   \
 	modules/trigger-source/trigger-source.c		   \
 	modules/trigger-source/trigger-source.h		   \
 	modules/trigger-source/trigger-source-parser.c	   \
 	modules/trigger-source/trigger-source-parser.h	   \
 	modules/trigger-source/trigger-source-plugin.c
+
+nodist_modules_trigger_source_libtrigger_source_la_SOURCES=\
+	modules/trigger-source/trigger-source-grammar.y	   \
+	modules/trigger-source/trigger-source-grammar.c	   \
+	modules/trigger-source/trigger-source-grammar.h
 
 modules_trigger_source_libtrigger_source_la_LIBADD	 = \
 	$(EVENTLOG_LIBS)				   \
@@ -24,11 +28,6 @@ modules_trigger_source_libtrigger_source_la_LDFLAGS	 = \
 	-avoid-version -module -no-undefined
 
 modules/trigger-source mod-trigger: modules/trigger-source/libtrigger-source.la
-
-BUILT_SOURCES						+= \
-	modules/trigger-source/trigger-source-grammar.y	   \
-	modules/trigger-source/trigger-source-grammar.c	   \
-	modules/trigger-source/trigger-source-grammar.h
 
 EXTRA_DIST						+= \
 	modules/trigger-source/trigger-source-grammar.ym	   \

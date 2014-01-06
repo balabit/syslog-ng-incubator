@@ -55,8 +55,8 @@ Installing the modules and tools follows the usual autotools way:
     $ ./configure && make && make install
 
 Of course, one will need all the dependencies ([syslog-ng][sng],
-[riemann-c-client][lrc], and [libmongo-client][lmc]; of which the
-latter two are optional) installed too.
+bison, flex, [riemann-c-client][lrc], and [libmongo-client][lmc]; of
+which the latter two are optional) installed too.
 
  [lrc]: https://github.com/algernon/riemann-c-client
  [lmc]: https://github.com/algernon/libmongo-client
@@ -64,7 +64,7 @@ latter two are optional) installed too.
 License
 -------
 
-Copyright (C) 2011-2013 BalaBit IT Security Ltd., Gergely Nagy
+Copyright (C) 2011-2014 BalaBit IT Security Ltd., Gergely Nagy
 <algernon@balabit.hu> and other contributors, released under the terms
 of the [GNU General Public License][gpl], version 2 (or later).
 
