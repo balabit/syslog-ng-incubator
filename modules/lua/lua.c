@@ -28,14 +28,15 @@
 #include "scratch-buffers.h"
 
 static gboolean
-lua_dd_load_file(lua_State* state, gchar* filename)
+lua_dd_load_file(LuaDestDriver* self)
 {
-    if (luaL_loadfile(state, filename) ||  
-        lua_pcall(state, 0,0,0) )
-    {   
-         msg_error("Error parsing configuration", 
-                   evt_tag_str("error",lua_tostring(state,-1)), 
-                   evt_tag_str("filename",filename), 
+    if (luaL_loadfile(self->state, self->filename) ||
+        lua_pcall(self->state, 0,0,0) )
+    {
+         msg_error("Error parsing lau script file for lua destination",
+                   evt_tag_str("error",lua_tostring(self->state,-1)),
+                   evt_tag_str("filename",self->filename),
+                   evt_tag_str("driver_id",self->super.super.id),
                    NULL);
          return FALSE;
     }
@@ -51,11 +52,12 @@ void lua_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_option
    lua_getglobal(self->state, self->queue_func_name);
    lua_pushlstring(self->state, sb_gstring_string(str)->str, sb_gstring_string(str)->len);
 
-   if (lua_pcall(self->state, 1, 0, 0)) 
-      msg_error("Error happened during calling Lua destination function!", 
-                 evt_tag_str("error", lua_tostring(self->state, -1) ), 
+   if (lua_pcall(self->state, 1, 0, 0))
+      msg_error("Error happened during calling Lua destination function!",
+                 evt_tag_str("error", lua_tostring(self->state, -1) ),
                  evt_tag_str("queue_func", self->queue_func_name),
                  evt_tag_str("filename", self->filename),
+                 evt_tag_str("driver_id",self->super.super.id),
                  NULL);
 
    log_dest_driver_queue_method(s, msg, path_options, user_data);
@@ -71,29 +73,28 @@ lua_dd_call_init_func(LuaDestDriver* self)
 
   if (lua_isnil(self->state, -1))
   {
-    msg_error("Lua destination initializing function cannot be found!", 
-              evt_tag_str("init_func", self->init_func_name), 
-              evt_tag_str("filename", self->filename), 
+    msg_warning("Lua destination initializing function cannot be found, continueing anyway!",
+              evt_tag_str("init_func", self->init_func_name),
+              evt_tag_str("filename", self->filename),
+              evt_tag_str("driver_id",self->super.super.id),
               NULL);
+    return TRUE;
   }
-  else
-  {
-    int ret = lua_pcall(self->state, 0, 0, 0);
 
-    if (ret)
+  if (lua_pcall(self->state, 0, 0, 0))
     {
-      msg_error("Error happened during calling Lua destination initializing function!", 
+      msg_error("Error happened during calling Lua destination initializing function!",
                 evt_tag_str("error", lua_tostring(self->state, -1) ),
                 evt_tag_str("init_func", self->init_func_name),
                 evt_tag_str("filename", self->filename),
+                evt_tag_str("driver_id",self->super.super.id),
                 NULL);
       return FALSE;
     }
-  }
   return TRUE;
 }
 
-static gboolean 
+static gboolean
 lua_dd_check_existence_of_queue_func(LuaDestDriver* self)
 {
   gboolean result = TRUE;
@@ -104,6 +105,7 @@ lua_dd_check_existence_of_queue_func(LuaDestDriver* self)
     msg_error("Lua destination queue function cannot be found!",
               evt_tag_str("queue_func", self->queue_func_name),
               evt_tag_str("filename", self->filename),
+              evt_tag_str("driver_id",self->super.super.id),
               NULL);
     result = FALSE;
   }
@@ -117,7 +119,7 @@ lua_dd_init(LogPipe *s)
 {
   LuaDestDriver *self = (LuaDestDriver *) s;
 
-  if (!lua_dd_load_file(self->state, self->filename))
+  if (!lua_dd_load_file(self))
   {
      lua_close(self->state);
      return FALSE;
@@ -127,20 +129,20 @@ lua_dd_init(LogPipe *s)
 
   if (!self->template)
   {
-     msg_warning("No template set in lua destination, falling back to template \"$MESSAGE\"", NULL);
+     msg_info("No template set in lua destination, falling back to template \"$MESSAGE\"", NULL);
      self->template = log_template_new(cfg, "default_lua_template");
      log_template_compile(self->template, "$MESSAGE", NULL);
   }
 
   if (!self->init_func_name)
   {
-     msg_warning("No init function name set, defaulting to \"lua_init_func\"",NULL);
+     msg_info("No init function name set, defaulting to \"lua_init_func\"",NULL);
      self->init_func_name = g_strdup("lua_init_func");
   }
 
   if (!self->queue_func_name)
   {
-     msg_warning("No queue function name set, defaulting to \"lua_queue_func\"",NULL);
+     msg_info("No queue function name set, defaulting to \"lua_queue_func\"",NULL);
      self->queue_func_name = g_strdup("lua_queue_func");
   }
 
@@ -154,9 +156,7 @@ lua_dd_init(LogPipe *s)
      return FALSE;
   }
 
-  if (!log_dest_driver_init_method(s))
-    return FALSE;
-  return TRUE;
+  return log_dest_driver_init_method(s);
 };
 
 static gboolean
@@ -232,5 +232,3 @@ lua_dd_new()
    self->super.super.super.queue = lua_dd_queue;
    return &self->super.super;
 }
-
-
