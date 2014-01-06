@@ -31,8 +31,8 @@ int lua_driver_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 static CfgLexerKeyword lua_keywords[] = {
   { "lua",                      KW_LUA },
   { "script",                   KW_SCRIPT },
-  { "init",                     KW_INIT },
-  { "queue",                    KW_QUEUE },
+  { "init-func",                     KW_INIT },
+  { "queue-func",                    KW_QUEUE },
 
   { NULL }
 };
