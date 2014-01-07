@@ -21,6 +21,12 @@ Contents
 
    [sng:riemann]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/riemann/
 
+ * [Lua destination][sng:lua]: This destination is really just a
+   wrapper, that allows one to write destination drivers in Lua, with
+   some limitations.
+
+   [sng:lua]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/lua/
+
  * [Trigger source][sng:trigger]: A very simple example source that
    periodically generates a message. Useful mostly for debugging
    purposes.
@@ -55,11 +61,12 @@ Installing the modules and tools follows the usual autotools way:
     $ ./configure && make && make install
 
 Of course, one will need all the dependencies ([syslog-ng][sng],
-bison, flex, [riemann-c-client][lrc], and [libmongo-client][lmc]; of
-which the latter two are optional) installed too.
+bison, flex, [riemann-c-client][lrc], [libmongo-client][lmc],
+[lua][lua]; of which the latter three are optional) installed too.
 
  [lrc]: https://github.com/algernon/riemann-c-client
  [lmc]: https://github.com/algernon/libmongo-client
+ [lua]: http://www.lua.org/
 
 License
 -------
