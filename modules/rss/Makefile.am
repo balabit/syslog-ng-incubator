@@ -12,18 +12,19 @@ module_rss_librss_la_LIBS		= \
 	$(EVENTLOG_LIBS)
 
 modules_rss_librss_la_SOURCES		= \
+	modules/rss/rss-grammar.y	  \
 	modules/rss/rss.c		  \
 	modules/rss/rss.h		  \
 	modules/rss/rss-parser.c	  \
 	modules/rss/rss-parser.h
 
-nodist_modules_rss_librss_la_SOURCES	= \
+modules_rss_librss_la_LDFLAGS		= \
+	-avoid-version -module -no-undefined
+
+BUILT_SOURCES			       += \
 	modules/rss/rss-grammar.y	  \
 	modules/rss/rss-grammar.c	  \
 	modules/rss/rss-grammar.h
-
-modules_rss_librss_la_LDFLAGS		= \
-	-avoid-version -module -no-undefined
 
 modules/rss mod-rss: modules/rss/librss.la
 
