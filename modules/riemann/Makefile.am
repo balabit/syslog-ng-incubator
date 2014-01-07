@@ -17,7 +17,7 @@ modules_riemann_libriemann_la_SOURCES		 = \
 	modules/riemann/riemann-parser.h	   \
 	modules/riemann/riemann-plugin.c
 
-nodist_riemann_libriemann_la_SOURCES		 = \
+nodist_modules_riemann_libriemann_la_SOURCES	 = \
 	modules/riemann/riemann-grammar.y	   \
 	modules/riemann/riemann-grammar.c	   \
 	modules/riemann/riemann-grammar.h
