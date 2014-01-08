@@ -36,7 +36,6 @@ modules/lua mod-lua:
 endif
 
 EXTRA_DIST					+= \
-	modules/lua/lua-grammar.ym	   \
-	modules/lua/lua-example.conf
+	modules/lua/lua-grammar.ym
 
 .PHONY: modules/lua mod-lua
