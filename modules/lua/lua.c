@@ -240,7 +240,7 @@ lua_dd_new()
 {
   LuaDestDriver *self = g_new0(LuaDestDriver, 1);
 
-  self->state = lua_open();
+  self->state = luaL_newstate();
   luaL_openlibs(self->state);
 
   log_dest_driver_init_instance(&self->super);
