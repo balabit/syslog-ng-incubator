@@ -21,7 +21,7 @@
  *
  */
 
-#include "lua.h"
+#include "lua-dest.h"
 #include "lua-parser.h"
 
 #include "plugin.h"

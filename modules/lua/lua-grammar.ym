@@ -24,8 +24,7 @@
 %code requires {
 
 #include "lua-parser.h"
-#include "value-pairs.h"
-#include "vptransform.h"
+#include "lua-dest.h"
 
 }
 

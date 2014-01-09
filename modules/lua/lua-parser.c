@@ -21,7 +21,7 @@
  *
  */
 
-#include "lua.h"
+#include "lua-parser.h"
 #include "cfg-parser.h"
 #include "lua-grammar.h"
 

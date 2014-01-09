@@ -21,7 +21,7 @@
  *
  */
 
-#include "lua.h"
+#include "lua-dest.h"
 #include "messages.h"
 #include <lauxlib.h>
 #include <lualib.h>
