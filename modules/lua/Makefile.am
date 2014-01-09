@@ -12,8 +12,8 @@ modules_lua_liblua_la_CFLAGS		 = \
 
 modules_lua_liblua_la_SOURCES		 = \
 	modules/lua/lua-grammar.y	   \
-	modules/lua/lua.c		   \
-	modules/lua/lua.h		   \
+	modules/lua/lua-dest.c		   \
+	modules/lua/lua-dest.h		   \
 	modules/lua/lua-parser.c	   \
 	modules/lua/lua-parser.h	   \
 	modules/lua/lua-plugin.c

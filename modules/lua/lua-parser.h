@@ -26,7 +26,7 @@
 
 #include "cfg-parser.h"
 #include "cfg-lexer.h"
-#include "lua.h"
+#include "lua-dest.h"
 
 extern CfgParser lua_parser;
 
