@@ -104,7 +104,10 @@ PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,enable_rie
 dnl ***************************************************************************
 dnl lua headers/libraries
 dnl ***************************************************************************
-PKG_CHECK_MODULES(LUA, lua5.1 >= $LUA_MIN_VERSION,,enable_lua="no")
+PKG_CHECK_EXISTS(lua, lua_mod="lua",
+  PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
+   PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1")))
+PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,,enable_lua="no")
 
 dnl ***************************************************************************
 dnl misc features to be enabled
