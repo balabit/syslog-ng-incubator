@@ -15,6 +15,10 @@ DISTFILES		= \
 	$(filter-out %-grammar.y,$(DIST_SOURCES))			 \
 	$(TEXINFOS) $(EXTRA_DIST)
 
+DISTCLEANFILES		= \
+	$(filter %-grammar.y %-grammar.c %-grammar.h,$(DIST_COMMON)) \
+	$(filter %-grammar.y,$(DIST_SOURCES))
+
 .y.c:
 
 include modules/Makefile.am
