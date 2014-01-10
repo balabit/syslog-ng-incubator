@@ -33,7 +33,7 @@ lua_dd_load_file(LuaDestDriver* self)
   if (luaL_loadfile(self->state, self->filename) ||
       lua_pcall(self->state, 0,0,0) )
     {
-      msg_error("Error parsing lau script file for lua destination",
+      msg_error("Error parsing lua script file for lua destination",
                 evt_tag_str("error", lua_tostring(self->state, -1)),
                 evt_tag_str("filename", self->filename),
                 evt_tag_str("driver_id", self->super.super.id),
