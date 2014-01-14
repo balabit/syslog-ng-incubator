@@ -46,7 +46,7 @@ Contents
 
  * [logmongource][sng:mongource]: A log visualisation tool that
    extracts messages from a MongoDB collection, and visualises them
-   with [Gource](https://code.google.com/p/gource/)
+   with [Gource](https://code.google.com/p/gource/).
 
    [sng:mongource]: https://github.com/balabit/syslog-ng-incubator/tree/master/tools/visualize/
 
