@@ -16,6 +16,10 @@ modules_lua_liblua_la_SOURCES		 = \
 	modules/lua/lua-dest.h		   \
 	modules/lua/lua-parser.c	   \
 	modules/lua/lua-parser.h	   \
+	modules/lua/lua-msg.h	   	\
+	modules/lua/lua-msg.c	   	\
+	modules/lua/lua-utils.h	   	\
+	modules/lua/lua-utils.c	   	\
 	modules/lua/lua-plugin.c
 
 modules_lua_liblua_la_LIBADD		 = \

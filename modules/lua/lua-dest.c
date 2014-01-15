@@ -27,6 +27,9 @@
 #include <lualib.h>
 #include "scratch-buffers.h"
 
+#define LUA_DEST_MODE_RAW 1
+#define LUA_DEST_MODE_FORMATTED 2
+
 static gboolean
 lua_dd_load_file(LuaDestDriver* self)
 {
@@ -50,10 +53,18 @@ lua_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options,
   LuaDestDriver *self = (LuaDestDriver *) s;
   SBGString *str = sb_gstring_acquire();
 
-  log_template_format(self->template, msg, NULL, 0, 0, NULL, sb_gstring_string(str));
-
   lua_getglobal(self->state, self->queue_func_name);
-  lua_pushlstring(self->state, sb_gstring_string(str)->str, sb_gstring_string(str)->len);
+
+  if (self->mode == LUA_DEST_MODE_FORMATTED)
+    {
+      log_template_format(self->template, msg, NULL, 0, 0, NULL, sb_gstring_string(str));
+      lua_pushlstring(self->state, sb_gstring_string(str)->str, sb_gstring_string(str)->len);
+    }
+
+  if (self->mode == LUA_DEST_MODE_RAW)
+    {
+      lua_message_create_from_logmsg(self->state, msg);
+    }
 
   if (lua_pcall(self->state, 1, 0, 0))
     msg_error("Error happened during calling Lua destination function!",
@@ -129,6 +140,8 @@ lua_dd_init(LogPipe *s)
       return FALSE;
     }
 
+  lua_register_message(self->state);
+
   cfg = log_pipe_get_config(s);
 
   if (!self->template)
@@ -146,7 +159,7 @@ lua_dd_init(LogPipe *s)
                evt_tag_str("driver_id", self->super.super.id),
                NULL);
       self->init_func_name = g_strdup("lua_init_func");
-  }
+    }
 
   if (!self->queue_func_name)
     {
@@ -155,6 +168,9 @@ lua_dd_init(LogPipe *s)
                NULL);
       self->queue_func_name = g_strdup("lua_queue_func");
     }
+
+  if (!self->mode)
+    self->mode = LUA_DEST_MODE_FORMATTED;
 
   if (!lua_dd_call_init_func(self))
     {
@@ -234,6 +250,18 @@ lua_dd_set_queue_func(LogDriver* d, gchar* queue_func_name)
   g_free(self->queue_func_name);
   self->queue_func_name = g_strdup(queue_func_name);
 }
+
+void
+lua_dd_set_mode(LogDriver* d, gchar* mode)
+{
+  LuaDestDriver *self = (LuaDestDriver *) d;
+
+  if (!strcmp("raw", mode))
+    self->mode = LUA_DEST_MODE_RAW;
+
+  if (!strcmp("formatted", mode))
+    self->mode = LUA_DEST_MODE_FORMATTED;
+};
 
 LogDriver*
 lua_dd_new()
