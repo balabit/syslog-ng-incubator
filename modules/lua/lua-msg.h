@@ -21,31 +21,14 @@
  *
  */
 
-#include "lua-parser.h"
-#include "cfg-parser.h"
-#include "lua-grammar.h"
+#include "logmsg.h"
+#include <lua.h>
 
-extern int lua_debug;
-int lua_driver_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
+#ifndef _LUA_MSG_H
+#define _LUA_MSG_H
 
-static CfgLexerKeyword lua_keywords[] = {
-  { "lua",                      KW_LUA },
-  { "script",                   KW_SCRIPT },
-  { "init_func",                KW_INIT_FUNC },
-  { "queue_func",               KW_QUEUE_FUNC },
-  { "mode",               	KW_LUA_DEST_MODE },
-  { NULL }
-};
+int lua_register_message(lua_State *state);
+LogMessage * lua_message_to_logmsg(lua_State *state, int index);
+int lua_message_create_from_logmsg(lua_State *state, LogMessage *self);
 
-CfgParser lua_parser =
-{
-#if ENABLE_DEBUG
-  .debug_flag = &lua_debug,
 #endif
-  .name = "lua",
-  .keywords = lua_keywords,
-  .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) lua_driver_parse,
-  .cleanup = (void (*)(gpointer)) log_pipe_unref,
-};
-
-CFG_PARSER_IMPLEMENT_LEXER_BINDING(lua_driver_, LogDriver **)

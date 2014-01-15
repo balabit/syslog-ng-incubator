@@ -38,13 +38,16 @@ typedef struct _LuaDestDriver
   gchar* queue_func_name;
   LogTemplate* template;
   LogTemplateOptions template_options;
+  gint mode;
 } LuaDestDriver;
 
 LogDriver* lua_dd_new();
 void lua_dd_set_init_func(LogDriver* d, gchar* init_func_name);
 void lua_dd_set_queue_func(LogDriver* d, gchar* queue_func_name);
-void  lua_dd_set_filename(LogDriver* d, gchar* filename);
+void lua_dd_set_filename(LogDriver* d, gchar* filename);
 void lua_dd_set_template(LogDriver* d, LogTemplate* template);
+void lua_dd_set_mode(LogDriver* d, gchar* mode);
+
 LogTemplateOptions* lua_dd_get_template_options(LogDriver *d);
 
 #endif
