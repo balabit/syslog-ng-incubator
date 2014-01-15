@@ -201,7 +201,7 @@ lua_dd_set_template(LogDriver* d, LogTemplate* template)
   self->template = log_template_ref(template);
 }
 
-void 
+void
 lua_dd_set_filename(LogDriver* d, gchar* filename)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
