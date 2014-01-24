@@ -27,10 +27,12 @@
 static void *
 lua_get_pointer_from_userdata(void *udata)
 {
+  void *data;
+
   if (!udata)
     return NULL;
 
-  void* data = *((void**)udata);
+  data = *((void **)udata);
 
   return data;
 }
@@ -38,7 +40,7 @@ lua_get_pointer_from_userdata(void *udata)
 static void *
 lua_check_user_data (lua_State *state, int userdata_index, const char *type)
 {
-  void* data = lua_touserdata(state, userdata_index);
+  void *data = lua_touserdata(state, userdata_index);
 
   if (!data)
     return NULL;
@@ -70,7 +72,7 @@ lua_create_userdata_from_pointer(lua_State *state, void *data, const char *type)
 {
   void *userdata = lua_newuserdata(state, sizeof(data));
 
-  *((void**)userdata) = data;
+  *((void **)userdata) = data;
 
   luaL_getmetatable(state, type);
   lua_setmetatable(state, -2);

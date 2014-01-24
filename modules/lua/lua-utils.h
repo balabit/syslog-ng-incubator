@@ -26,7 +26,7 @@
 #ifndef _LUA_UTILS_H
 #define  _LUA_UTILS_H
 
-void * lua_check_and_convert_userdata(lua_State *state, int index, const char *type);
+void *lua_check_and_convert_userdata(lua_State *state, int index, const char *type);
 int lua_create_userdata_from_pointer(lua_State *state, void *data, const char *type);
 
 #endif

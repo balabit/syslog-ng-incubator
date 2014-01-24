@@ -31,7 +31,7 @@
 #define LUA_DEST_MODE_FORMATTED 2
 
 static gboolean
-lua_dd_load_file(LuaDestDriver* self)
+lua_dd_load_file(LuaDestDriver *self)
 {
   if (luaL_loadfile(self->state, self->filename) ||
       lua_pcall(self->state, 0,0,0) )
@@ -79,7 +79,7 @@ lua_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options,
 };
 
 static gboolean
-lua_dd_call_init_func(LuaDestDriver* self)
+lua_dd_call_init_func(LuaDestDriver *self)
 {
   msg_debug("Calling lua destination init function", NULL);
 
@@ -109,7 +109,7 @@ lua_dd_call_init_func(LuaDestDriver* self)
 }
 
 static gboolean
-lua_dd_check_existence_of_queue_func(LuaDestDriver* self)
+lua_dd_check_existence_of_queue_func(LuaDestDriver *self)
 {
   gboolean result = TRUE;
 
@@ -132,7 +132,7 @@ static gboolean
 lua_dd_init(LogPipe *s)
 {
   LuaDestDriver *self = (LuaDestDriver *) s;
-  GlobalConfig* cfg;
+  GlobalConfig *cfg;
 
   if (!lua_dd_load_file(self))
     {
@@ -210,7 +210,7 @@ lua_dd_free(LogPipe *s)
 }
 
 void
-lua_dd_set_template(LogDriver* d, LogTemplate* template)
+lua_dd_set_template(LogDriver *d, LogTemplate *template)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
 
@@ -218,7 +218,7 @@ lua_dd_set_template(LogDriver* d, LogTemplate* template)
 }
 
 void
-lua_dd_set_filename(LogDriver* d, gchar* filename)
+lua_dd_set_filename(LogDriver *d, gchar *filename)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
 
@@ -234,7 +234,7 @@ lua_dd_get_template_options(LogDriver *d)
 }
 
 void
-lua_dd_set_init_func(LogDriver* d, gchar* init_func_name)
+lua_dd_set_init_func(LogDriver *d, gchar *init_func_name)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
 
@@ -243,7 +243,7 @@ lua_dd_set_init_func(LogDriver* d, gchar* init_func_name)
 }
 
 void
-lua_dd_set_queue_func(LogDriver* d, gchar* queue_func_name)
+lua_dd_set_queue_func(LogDriver *d, gchar *queue_func_name)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
 
@@ -252,7 +252,7 @@ lua_dd_set_queue_func(LogDriver* d, gchar* queue_func_name)
 }
 
 void
-lua_dd_set_mode(LogDriver* d, gchar* mode)
+lua_dd_set_mode(LogDriver *d, gchar *mode)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
 
@@ -263,7 +263,7 @@ lua_dd_set_mode(LogDriver* d, gchar* mode)
     self->mode = LUA_DEST_MODE_FORMATTED;
 };
 
-LogDriver*
+LogDriver *
 lua_dd_new()
 {
   LuaDestDriver *self = g_new0(LuaDestDriver, 1);

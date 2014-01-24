@@ -84,8 +84,8 @@ lua_option
             lua_dd_set_queue_func(last_driver, $3);
             free($3);
           }
-	| KW_LUA_DEST_MODE '(' string ')'
-	  {
+        | KW_LUA_DEST_MODE '(' string ')'
+          {
             lua_dd_set_mode(last_driver, $3);
             free($3);
           }

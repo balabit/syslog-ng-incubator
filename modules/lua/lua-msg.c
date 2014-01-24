@@ -42,7 +42,7 @@ lua_message_create_from_logmsg(lua_State *state, LogMessage *self)
 static int
 lua_message_new(lua_State *state)
 {
-  LogMessage* self = log_msg_new_empty();
+  LogMessage *self = log_msg_new_empty();
 
   self->pri = 0;
   self->flags |= LF_LOCAL;
@@ -54,14 +54,17 @@ static int
 lua_message_metatable__new_index(lua_State *state)
 {
   gsize value_len = 0;
-  LogMessage* m = lua_check_and_convert_userdata(state, 1, LUA_MESSAGE_TYPE);
+  LogMessage *m = lua_check_and_convert_userdata(state, 1, LUA_MESSAGE_TYPE);
 
-  const char* key = lua_tostring(state, 2);
-  const char* value = lua_tolstring(state, 3, &value_len);
+  const char *key = lua_tostring(state, 2);
+  const char *value = lua_tolstring(state, 3, &value_len);
 
   NVHandle nv_handle = log_msg_get_value_handle(key);
 
-  msg_trace("Setting value to lua message", evt_tag_str("key",key), evt_tag_str("value",value), NULL);
+  msg_trace("Setting value to lua message",
+            evt_tag_str("key",key),
+            evt_tag_str("value",value),
+            NULL);
   log_msg_set_value(m, nv_handle, value, value_len);
   return 0;
 }
@@ -70,13 +73,16 @@ static int
 lua_message_metatable__index(lua_State *state)
 {
   gssize value_len;
-  LogMessage* m = lua_check_and_convert_userdata(state, 1, LUA_MESSAGE_TYPE);
-  const char* key = lua_tostring(state, 2);
+  LogMessage *m = lua_check_and_convert_userdata(state, 1, LUA_MESSAGE_TYPE);
+  const char *key = lua_tostring(state, 2);
 
   NVHandle handle = log_msg_get_value_handle(key);
-  const char* value = log_msg_get_value(m, handle, &value_len);
+  const char *value = log_msg_get_value(m, handle, &value_len);
 
-  msg_trace("Getting value from lua message", evt_tag_str("key",key), evt_tag_str("value",value), NULL);
+  msg_trace("Getting value from lua message",
+            evt_tag_str("key",key),
+            evt_tag_str("value",value),
+            NULL);
   lua_pushlstring(state, value, value_len);
 
   return 1;
@@ -85,7 +91,7 @@ lua_message_metatable__index(lua_State *state)
 static int
 lua_message_metatable__gc(lua_State *state)
 {
-  LogMessage* m = lua_check_and_convert_userdata(state, 1, LUA_MESSAGE_TYPE);
+  LogMessage *m = lua_check_and_convert_userdata(state, 1, LUA_MESSAGE_TYPE);
 
   log_msg_unref(m);
 
