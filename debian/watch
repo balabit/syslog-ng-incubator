@@ -1,0 +1,3 @@
+version=3
+
+https://github.com/balabit/syslog-ng-incubator/releases .*/syslog-ng-incubator-([\d\.]+)\.tar\.gz
