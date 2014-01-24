@@ -2,32 +2,32 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: syslog-ng-incubator
 Upstream-Contact: Gergely Nagy <algernon@balabit.hu>
 Source: git://github.com/algernon/syslog-ng-incubator.git
-Copyright: Copyright (C) Gergely Nagy <algernon@balabit.hu>
- Copyright (C) BalaBit IT Security Ltd.
+Copyright: Copyright (C) 2011-2014 Gergely Nagy <algernon@balabit.hu>
+ Copyright (C) 2011-2014 BalaBit IT Security Ltd.
 
 Files: *
-Copyright: Copyright (C) Gergely Nagy <algernon@balabit.hu>
- Copyright (C) BalaBit IT Security Ltd.
+Copyright: Copyright (C) 2011-2014 Gergely Nagy <algernon@balabit.hu>
+ Copyright (C) 2011-2014 BalaBit IT Security Ltd.
 License: GPL-2+ with OpenSSL exception
 
 Files: modules/rss/*
-Copyright: Copyright (C) Viktor Tusa
- Copyright (C) BalaBit IT Ltd
+Copyright: Copyright (C) 2013 Viktor Tusa
+ Copyright (C) 2013 BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception
 
 Files: modules/lua/*
-Copyright: Copyright (C) Viktor Tusa
- Copyright (C) BalaBit IT Ltd
+Copyright: Copyright (C) 2013-2014 Viktor Tusa
+ Copyright (C) 2013-2014 BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception
 
 Files: modules/lua/elasticsearch.lua
-Copyright: Copyright (C) Viktor Tusa
- Copyright (C) Gergely Nagy
- Copyright (C) BalaBit IT Ltd
+Copyright: Copyright (C) 2014 Viktor Tusa
+ Copyright (C) 2014 Gergely Nagy
+ Copyright (C) 2014 BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception
 
 Files: debian/*
-Copyright: Copyright (C) Gergely Nagy <algernon@madhouse-project.org>
+Copyright: Copyright (C) 2011-2014 Gergely Nagy <algernon@madhouse-project.org>
 License: GPL-2+ with OpenSSL exception
 
 License: GPL-2+ with OpenSSL exception
