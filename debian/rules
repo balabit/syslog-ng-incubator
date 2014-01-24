@@ -33,14 +33,5 @@ override_dh_installchangelogs:
 override_dh_makeshlibs:
 	dh_makeshlibs -n -Xusr/lib/syslog-ng/*
 
-# Compress the .debs with xz, except, we use gzip on Ubuntu, for the
-# sake of Lucid.
-override_dh_builddeb:
-ifeq (Ubuntu,$(shell lsb_release -is))
-	dh_builddeb -- -Zgzip
-else
-	dh_builddeb -- -Zxz
-endif
-
 %:
 	dh $@ --with autoreconf
