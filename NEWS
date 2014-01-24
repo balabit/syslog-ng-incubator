@@ -1,5 +1,21 @@
 #+STARTUP: indent showall                       -*- org -*-
 
+* 0.1.1 - <2014-01-24 Fri>
+
+** Bugfix: Grammar files are not shipped in the tarball anymore
+When generating a tarball with "make dist", the built grammar files
+are not shipped anymore. They're built against a specific syslog-ng
+version, and as such, are not portable to another version of it. The
+grammars need to be rebuilt, and shipping them prevents that.
+
+** Bugfix: Don't depend on recent glib
+When glib is too old, the $(state) template function gets disabled
+now, instead of the build failing.
+
+** Feature: Lua destination
+This new feature allows one to write destination driver scripts in
+Lua. Example scripts are provided in modules/lua/.
+
 * 0.1.0 - <2013-12-28 Sat>
 
 Initial public release.
