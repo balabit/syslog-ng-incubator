@@ -1,3 +1,10 @@
+syslog-ng-incubator (0.1.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * New module: syslog-ng-mod-lua.
+
+ -- Gergely Nagy <algernon@madhouse-project.org>  Fri, 24 Jan 2014 16:33:23 +0100
+
 syslog-ng-incubator (0.1.0-1) unstable; urgency=low
 
   * Initial release (closes: #728591).

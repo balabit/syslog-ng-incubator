@@ -15,8 +15,19 @@ Copyright: Copyright (C) Viktor Tusa
  Copyright (C) BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception
 
+Files: modules/lua/*
+Copyright: Copyright (C) Viktor Tusa
+ Copyright (C) BalaBit IT Ltd
+License: GPL-2+ with OpenSSL exception
+
+Files: modules/lua/elasticsearch.lua
+Copyright: Copyright (C) Viktor Tusa
+ Copyright (C) Gergely Nagy
+ Copyright (C) BalaBit IT Ltd
+License: GPL-2+ with OpenSSL exception
+
 Files: debian/*
-Copyright: Copyright (C) 2013 Gergely Nagy <algernon@madhouse-project.org>
+Copyright: Copyright (C) Gergely Nagy <algernon@madhouse-project.org>
 License: GPL-2+ with OpenSSL exception
 
 License: GPL-2+ with OpenSSL exception

@@ -12,7 +12,8 @@ Build-Depends: debhelper (>= 9~),
                automake (>= 1:1.11.1),
                pkg-config, flex, bison,
                libmongo-client-dev (>= 0.1.6~),
-               libriemann-client-dev
+               libriemann-client-dev,
+               liblua5.2-dev
 Build-Conflicts: autoconf2.13
 Standards-Version: 3.9.5
 Vcs-Git: git://anonscm.debian.org/syslog-ng/syslog-ng-incubator.git
@@ -110,3 +111,26 @@ Description: Enhanced system logging daemon (extra template functions)
  This package provides additional template functions such as $(//),
  which is a floating point division function, $(or) which does what
  the name implies and a $(state) function.
+
+Package: syslog-ng-mod-lua
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Enhanced system logging daemon (Lua destination)
+ syslog-ng is an enhanced log daemon, supporting a wide range of input
+ and output methods: syslog, unstructured text, message queues,
+ databases (SQL and NoSQL alike) and more.
+ .
+ Key features:
+ .
+  * receive and send RFC3164 and RFC5424 style syslog messages
+  * work with any kind of unstructured data
+  * receive and send JSON formatted messages
+  * classify and structure logs with builtin parsers (csv-parser(),
+    db-parser(), etc.)
+  * normalize, crunch and process logs as they flow through the system
+  * hand on messages for further processing using message queues (like
+    AMQP), files or databases (like PostgreSQL or MongoDB).
+ .
+ This package provides the Lua destination, allowing one to write
+ destination drivers without having to touch C, in Lua.
