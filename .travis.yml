@@ -1,5 +1,6 @@
 language: c
 install:
+  - sudo apt-get install -qq curl
   - wget http://packages.madhouse-project.org/debian/add-release.sh
   - chmod +x add-release.sh
   - sudo ./add-release.sh syslog-ng-3.5
