@@ -22,6 +22,7 @@
  */
 
 #include "lua-dest.h"
+#include "lua-msg.h"
 #include "messages.h"
 #include <lauxlib.h>
 #include <lualib.h>
