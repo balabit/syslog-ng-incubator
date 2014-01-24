@@ -42,6 +42,8 @@ endif
 EXTRA_DIST					+= \
 	modules/lua/lua-grammar.ym		   \
 	modules/lua/lua-example.conf		   \
-	modules/lua/lua-example.lua
+	modules/lua/lua-example.lua		   \
+	modules/lua/elasticsearch.conf		   \
+	modules/lua/elasticsearch.lua
 
 .PHONY: modules/lua mod-lua
