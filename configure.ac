@@ -3,7 +3,7 @@ dnl
 
 AC_PREREQ([2.68])
 
-AC_INIT([syslog-ng-incubator], [0.1.0], [algernon@madhouse-project.org])
+AC_INIT([syslog-ng-incubator], [0.1.1], [algernon@madhouse-project.org])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])
@@ -33,6 +33,7 @@ EVENTLOG_MIN_VERSION="0.2.10"
 IVYKIS_MIN_VERSION="0.30.0"
 LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
+LUA_MIN_VERSION="5.1.4"
 
 dnl ***************************************************************************
 dnl Initial setup
@@ -101,6 +102,14 @@ dnl ***************************************************************************
 PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,enable_riemann="no")
 
 dnl ***************************************************************************
+dnl lua headers/libraries
+dnl ***************************************************************************
+PKG_CHECK_EXISTS(lua, lua_mod="lua",
+  PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
+   PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1")))
+PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,,enable_lua="no")
+
+dnl ***************************************************************************
 dnl misc features to be enabled
 dnl ***************************************************************************
 
@@ -109,6 +118,7 @@ AC_SUBST(moduledir)
 
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
+AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

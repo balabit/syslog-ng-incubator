@@ -346,7 +346,7 @@ riemann_worker_insert(LogThrDestDriver *s)
         case TYPE_HINT_INT32:
         case TYPE_HINT_INT64:
           {
-            glong i;
+            gint64 i;
 
             if (type_cast_to_int64(sb_gstring_string(str)->str, &i, NULL))
               riemann_event_set(event, RIEMANN_EVENT_FIELD_METRIC_S64, i,

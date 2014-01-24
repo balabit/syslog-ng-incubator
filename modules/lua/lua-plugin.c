@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,44 +21,34 @@
  *
  */
 
+#include "lua-dest.h"
+#include "lua-parser.h"
+
 #include "plugin.h"
-#include "cfg.h"
 #include "plugin-types.h"
 
-#include "number-funcs.c"
-#include "cond-funcs.c"
+extern CfgParser lua_parser;
 
-#if GLIB_CHECK_VERSION(2,32,0)
-#include "state-funcs.c"
-#endif
-
-/*
- * Plugin glue
- */
-
-static Plugin basicfuncs_plus_plugins[] =
+static Plugin lua_plugin =
 {
-  TEMPLATE_FUNCTION_PLUGIN(tf_num_divx, "//"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_or, "or"),
-#if GLIB_CHECK_VERSION(2,32,0)
-  TEMPLATE_FUNCTION_PLUGIN(tf_state, "state"),
-#endif
+  .type = LL_CONTEXT_DESTINATION,
+  .name = "lua",
+  .parser = &lua_parser,
 };
 
 gboolean
-basicfuncs_plus_module_init(GlobalConfig *cfg, CfgArgs *args)
+lua_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 {
-  plugin_register(cfg, basicfuncs_plus_plugins,
-                  G_N_ELEMENTS(basicfuncs_plus_plugins));
+  plugin_register(cfg, &lua_plugin, 1);
   return TRUE;
 }
 
 const ModuleInfo module_info =
 {
-  .canonical_name = "basicfuncs-plus",
+  .canonical_name = "lua",
   .version = VERSION,
-  .description = "The basicfuncs-plus module provides some additional template functions for syslog-ng.",
+  .description = "The lua module provides lua scripted destination support for syslog-ng.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
-  .plugins = basicfuncs_plus_plugins,
-  .plugins_len = G_N_ELEMENTS(basicfuncs_plus_plugins),
+  .plugins = &lua_plugin,
+  .plugins_len = 1,
 };

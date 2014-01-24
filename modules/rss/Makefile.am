@@ -7,6 +7,10 @@ modules_rss_librss_la_CFLAGS		= \
 	-I$(top_srcdir)/modules/rss	  \
 	-I$(top_builddir)/modules/rss
 
+module_rss_librss_la_LIBS		= \
+	$(SYSLOG_NG_LIBS)		  \
+	$(EVENTLOG_LIBS)
+
 modules_rss_librss_la_SOURCES		= \
 	modules/rss/rss-grammar.y	  \
 	modules/rss/rss.c		  \

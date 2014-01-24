@@ -8,7 +8,16 @@ module_LTLIBRARIES	=
 
 BUILT_SOURCES		=
 EXTRA_DIST		= \
-	COPYING GPL.txt README.md NEWS ${BUILT_SOURCES}
+	COPYING GPL.txt README.md NEWS
+
+DISTFILES		= \
+	$(filter-out %-grammar.y %-grammar.c %-grammar.h,$(DIST_COMMON)) \
+	$(filter-out %-grammar.y,$(DIST_SOURCES))			 \
+	$(TEXINFOS) $(EXTRA_DIST)
+
+DISTCLEANFILES		= \
+	$(filter %-grammar.y %-grammar.c %-grammar.h,$(DIST_COMMON)) \
+	$(filter %-grammar.y,$(DIST_SOURCES))
 
 .y.c:
 

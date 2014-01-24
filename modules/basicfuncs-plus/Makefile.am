@@ -9,7 +9,7 @@ modules_basicfuncs_plus_libbasicfuncs_plus_la_CPPFLAGS	 = \
 	$(EVENTLOG_CFLAGS)				   \
 	-I$(top_srcdir)/modules/basicfuncs-plus
 modules_basicfuncs_plus_libbasicfuncs_plus_la_LIBADD	 = \
-	$(SYSLOG_NG_LIBS)
+	$(SYSLOG_NG_LIBS) $(EVENTLOG_LIBS)
 modules_basicfuncs_plus_libbasicfuncs_plus_la_LDFLAGS	 = \
 	-avoid-version -module -no-undefined
 
