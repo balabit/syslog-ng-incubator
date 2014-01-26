@@ -129,17 +129,17 @@ AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 
-echo
-echo "Modules:"
-echo " logmongource:        $enable_logmongource"
-echo " riemann:             $enable_riemann"
-echo " lua:                 $enable_lua"
-echo
-
-if test "x$enable_lua" == "xyes"; then
-  echo "Lua library:      $lua_mod"
-  echo
-fi
-
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
+
+echo
+echo "syslog-ng Incubator $VERSION configured"
+echo "syslog-ng Incubator $VERSION configured" | sed -e "s/./-/g"
+echo " Modules:"
+echo "  basicfuncs-plus      yes"
+echo "  logmongource:        ${enable_logmongource:-yes}"
+echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
+echo "  riemann:             ${enable_riemann:-yes}"
+echo "  rss                  yes"
+echo "  trigger-source       yes"
+echo
