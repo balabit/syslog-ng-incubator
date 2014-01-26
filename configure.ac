@@ -45,6 +45,10 @@ AC_ARG_WITH(module-dir,
 AC_ARG_WITH(ivykis,
    [  --without-ivykis         Build without explicitly linking to ivykis])
 
+AC_ARG_ENABLE(luajit,
+   [  --enable-luajit          Use luajit instead of standard liblua for Lua support],
+   enable_luajit="yes",)
+
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -104,10 +108,15 @@ PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,enable_rie
 dnl ***************************************************************************
 dnl lua headers/libraries
 dnl ***************************************************************************
-PKG_CHECK_EXISTS(lua, lua_mod="lua",
+if test "x$enable_luajit" == "xyes"; then
+ PKG_CHECK_EXISTS(luajit, [lua_mod="luajit"; LUA_MIN_VERSION="2.0"])
+fi
+if test "x$lua_mod" != "xluajit"; then
+ PKG_CHECK_EXISTS(lua, lua_mod="lua",
   PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
    PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1")))
-PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,,enable_lua="no")
+fi
+PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,enable_lua="yes",enable_lua="no")
 
 dnl ***************************************************************************
 dnl misc features to be enabled
@@ -119,6 +128,18 @@ AC_SUBST(moduledir)
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
+
+echo
+echo "Modules:"
+echo " logmongource:        $enable_logmongource"
+echo " riemann:             $enable_riemann"
+echo " lua:                 $enable_lua"
+echo
+
+if test "x$enable_lua" == "xyes"; then
+  echo "Lua library:      $lua_mod"
+  echo
+fi
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
