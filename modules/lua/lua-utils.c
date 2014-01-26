@@ -78,3 +78,18 @@ lua_create_userdata_from_pointer(lua_State *state, void *data, const char *type)
   lua_setmetatable(state, -2);
   return 1;
 }
+
+gboolean
+lua_check_existence_of_global_variable(lua_State *state, const char *variable_name)
+{
+  gboolean result = TRUE;
+
+  lua_getglobal(state, variable_name);
+  if (lua_isnil(state, -1))
+    {
+      result = FALSE;
+    }
+  lua_pop(state, 1);
+
+  return result;
+};
