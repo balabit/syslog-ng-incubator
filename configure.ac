@@ -120,5 +120,12 @@ AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 
+echo
+echo "Modules:"
+echo " logmongource:        $enable_logmongource"
+echo " riemann:             $enable_riemann"
+echo " lua:                 $enable_lua"
+echo
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
