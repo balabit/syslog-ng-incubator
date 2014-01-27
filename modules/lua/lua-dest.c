@@ -112,21 +112,17 @@ lua_dd_call_init_func(LuaDestDriver *self)
 static gboolean
 lua_dd_check_existence_of_queue_func(LuaDestDriver *self)
 {
-  gboolean result = TRUE;
-
-  lua_getglobal(self->state, self->queue_func_name);
-  if (lua_isnil(self->state, -1))
+  if (!lua_check_existence_of_global_variable(self->state, self->queue_func_name))
     {
       msg_error("Lua destination queue function cannot be found!",
                 evt_tag_str("queue_func", self->queue_func_name),
                 evt_tag_str("filename", self->filename),
                 evt_tag_str("driver_id", self->super.super.id),
                 NULL);
-      result = FALSE;
+      return FALSE;
     }
-  lua_pop(self->state, 1);
 
-  return result;
+  return TRUE;
 }
 
 static gboolean

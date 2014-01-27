@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2014 Viktor Tusa <tusa@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,14 +22,34 @@
  *
  */
 
-#include <lua.h>
-#include <syslog-ng.h>
+#include "monitor-source.h"
+#include "monitor-source-parser.h"
 
-#ifndef _LUA_UTILS_H
-#define  _LUA_UTILS_H
+#include "plugin.h"
+#include "plugin-types.h"
 
-void *lua_check_and_convert_userdata(lua_State *state, int index, const char *type);
-int lua_create_userdata_from_pointer(lua_State *state, void *data, const char *type);
-gboolean lua_check_existence_of_global_variable(lua_State *state, const char *variable_name);
+extern CfgParser monitor_parser;
 
-#endif
+static Plugin monitor_plugin =
+{
+  .type = LL_CONTEXT_SOURCE,
+  .name = "monitor",
+  .parser = &monitor_parser,
+};
+
+gboolean
+monitor_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
+{
+  plugin_register(cfg, &monitor_plugin, 1);
+  return TRUE;
+}
+
+const ModuleInfo module_info =
+{
+  .canonical_name = "monitor",
+  .version = VERSION,
+  .description = "The monitor module provides stuff.",
+  .core_revision = VERSION_CURRENT_VER_ONLY,
+  .plugins = &monitor_plugin,
+  .plugins_len = 1,
+};
