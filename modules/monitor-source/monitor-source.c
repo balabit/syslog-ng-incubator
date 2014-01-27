@@ -86,7 +86,7 @@ monitor_source_load_file(MonitorSource *self)
 static void
 monitor_process_string_result(lua_State *state, LogMessage *msg, const char *key)
 {
-  gchar *value;
+  const gchar *value;
   size_t value_length;
   NVHandle handle;
 
