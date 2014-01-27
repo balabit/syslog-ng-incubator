@@ -78,7 +78,8 @@ License
 -------
 
 Copyright (C) 2011-2014 BalaBit IT Security Ltd., Gergely Nagy
-<algernon@balabit.hu> and other contributors, released under the terms
-of the [GNU General Public License][gpl], version 2 (or later).
+<algernon@balabit.hu>, Viktor Tusa <tusa@balabit.hu>, and other
+contributors; released under the terms of the
+[GNU General Public License][gpl], version 2 (or later).
 
  [gpl]: http://www.gnu.org/licenses/gpl-2.0.html
