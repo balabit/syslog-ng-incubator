@@ -1,3 +1,5 @@
+if ENABLE_LUA
+
 module_LTLIBRARIES					+= modules/monitor-source/libmonitor-source.la
 
 modules_monitor_source_libmonitor_source_la_CFLAGS	 = \
@@ -27,6 +29,9 @@ modules_monitor_source_libmonitor_source_la_LDFLAGS	 = \
 	-avoid-version -module -no-undefined
 
 modules/monitor-source mod-monitor: modules/monitor-source/libmonitor-source.la
+else
+modules/monitor-source mod-monitor:
+endif
 
 BUILT_SOURCES						+= \
 	modules/monitor-source/monitor-source-grammar.y	   \
