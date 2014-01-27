@@ -33,6 +33,12 @@ Contents
 
    [sng:trigger]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/trigger-source/
 
+ * [Monitor source][sng:monitor]: A module similar to the trigger
+   source, except it dispatches to a Lua function to generate the
+   message.
+
+   [sng:monitor]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/monitor-source/
+
  * [Extra template functions][sng:bf+]: Extra template functions, such
    as `$(//)` which is floating-point division, as opposed to the
    built-in `$(/)` (integer division).
