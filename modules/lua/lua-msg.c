@@ -30,8 +30,6 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#define LUA_MESSAGE_TYPE "SyslogNG.Message"
-
 int
 lua_message_create_from_logmsg(lua_State *state, LogMessage *self)
 {
