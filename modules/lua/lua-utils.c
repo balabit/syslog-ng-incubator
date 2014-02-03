@@ -93,3 +93,14 @@ lua_check_existence_of_global_variable(lua_State *state, const char *variable_na
 
   return result;
 };
+
+GlobalConfig *
+lua_get_config_from_current_state(lua_State *state)
+{
+    GlobalConfig *result;
+
+    lua_getglobal(state, "__conf");
+    result = lua_topointer(state, -1);
+    lua_pop(state, 1);
+    return result;
+}

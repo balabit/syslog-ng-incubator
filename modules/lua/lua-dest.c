@@ -125,6 +125,13 @@ lua_dd_check_existence_of_queue_func(LuaDestDriver *self)
   return TRUE;
 }
 
+static void
+lua_dd_set_config_variable(lua_State *state, GlobalConfig *conf)
+{
+  lua_pushlightuserdata(state, conf);
+  lua_setglobal(state, "__conf");
+};
+
 static gboolean
 lua_dd_init(LogPipe *s)
 {
@@ -140,6 +147,8 @@ lua_dd_init(LogPipe *s)
   lua_register_message(self->state);
 
   cfg = log_pipe_get_config(s);
+
+  lua_dd_set_config_variable(self->state, cfg);
 
   if (!self->template)
     {
