@@ -31,4 +31,6 @@ int lua_register_message(lua_State *state);
 LogMessage *lua_message_to_logmsg(lua_State *state, int index);
 int lua_message_create_from_logmsg(lua_State *state, LogMessage *self);
 
+#define LUA_MESSAGE_TYPE "SyslogNG.Message"
+
 #endif
