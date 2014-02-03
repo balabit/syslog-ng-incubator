@@ -23,6 +23,7 @@
 
 #include "lua-dest.h"
 #include "lua-msg.h"
+#include "lua-template.h"
 #include "messages.h"
 #include <lauxlib.h>
 #include <lualib.h>
@@ -145,6 +146,7 @@ lua_dd_init(LogPipe *s)
     }
 
   lua_register_message(self->state);
+  lua_register_template_class(self->state);
 
   cfg = log_pipe_get_config(s);
 

@@ -22,7 +22,9 @@ modules_lua_libluautil_la_SOURCES = \
   modules/lua/lua-msg.h	   	\
 	modules/lua/lua-msg.c	   	\
 	modules/lua/lua-utils.h	   	\
-	modules/lua/lua-utils.c
+	modules/lua/lua-utils.c     \
+	modules/lua/lua-template.h	   	\
+	modules/lua/lua-template.c
 
 modules_lua_libluautil_la_LIBADD		 = \
 	$(LUA_LIBS) $(EVENTLOG_LIBS)    \
