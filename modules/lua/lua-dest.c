@@ -81,16 +81,17 @@ lua_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options,
 };
 
 static gboolean
-lua_dd_call_init_func(LuaDestDriver *self)
+lua_dd_check_and_call_function(LuaDestDriver *self, const char *function_name, const char *function_type)
 {
-  msg_debug("Calling lua destination init function", NULL);
+  msg_debug("Calling lua destination function", evt_tag_str("function_type", function_type), NULL);
 
-  lua_getglobal(self->state, self->init_func_name);
+  lua_getglobal(self->state, function_name);
 
   if (lua_isnil(self->state, -1))
     {
-      msg_warning("Lua destination initializing function cannot be found, continueing anyway!",
-                  evt_tag_str("init_func", self->init_func_name),
+      msg_warning("Lua destination function cannot be found, continueing anyway!",
+                  evt_tag_str("function_type", function_type),
+                  evt_tag_str("function_name", function_name),
                   evt_tag_str("filename", self->filename),
                   evt_tag_str("driver_id", self->super.super.id),
                   NULL);
@@ -101,13 +102,26 @@ lua_dd_call_init_func(LuaDestDriver *self)
     {
       msg_error("Error happened during calling Lua destination initializing function!",
                 evt_tag_str("error", lua_tostring(self->state, -1)),
-                evt_tag_str("init_func", self->init_func_name),
+                evt_tag_str("function_type", function_type),
+                evt_tag_str("function_name", function_name),
                 evt_tag_str("filename", self->filename),
                 evt_tag_str("driver_id", self->super.super.id),
                 NULL);
       return FALSE;
     }
   return TRUE;
+};
+
+static gboolean
+lua_dd_call_init_func(LuaDestDriver *self)
+{
+  return lua_dd_check_and_call_function(self, self->init_func_name, "initialization");
+}
+
+static gboolean
+lua_dd_call_deinit_func(LuaDestDriver *self)
+{
+  return lua_dd_check_and_call_function(self, self->deinit_func_name, "deinitialization");
 }
 
 static gboolean
@@ -177,6 +191,14 @@ lua_dd_init(LogPipe *s)
       self->queue_func_name = g_strdup("lua_queue_func");
     }
 
+  if (!self->deinit_func_name)
+    {
+      msg_info("No deinit function name set, defaulting to \"lua_deinit_func\"",
+               evt_tag_str("driver_id", self->super.super.id),
+               NULL);
+      self->deinit_func_name = g_strdup("lua_deinit_func");
+    }
+
   if (!self->mode)
     self->mode = LUA_DEST_MODE_FORMATTED;
 
@@ -198,10 +220,13 @@ lua_dd_deinit(LogPipe *s)
 {
   LuaDestDriver *self = (LuaDestDriver *) s;
 
+  lua_dd_call_deinit_func(self);
+
   if (!log_dest_driver_deinit_method(s))
     return FALSE;
 
   lua_close(self->state);
+
   return TRUE;
 }
 
@@ -257,6 +282,15 @@ lua_dd_set_queue_func(LogDriver *d, gchar *queue_func_name)
 
   g_free(self->queue_func_name);
   self->queue_func_name = g_strdup(queue_func_name);
+}
+
+void
+lua_dd_set_deinit_func(LogDriver *d, gchar *deinit_func_name)
+{
+  LuaDestDriver *self = (LuaDestDriver *) d;
+
+  g_free(self->deinit_func_name);
+  self->deinit_func_name = g_strdup(deinit_func_name);
 }
 
 void

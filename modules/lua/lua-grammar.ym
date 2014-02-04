@@ -47,6 +47,7 @@
 %token KW_SCRIPT
 %token KW_INIT_FUNC
 %token KW_QUEUE_FUNC
+%token KW_DEINIT_FUNC
 %token KW_LUA_DEST_MODE
 
 %%
@@ -82,6 +83,11 @@ lua_option
         | KW_QUEUE_FUNC '(' string ')'
           {
             lua_dd_set_queue_func(last_driver, $3);
+            free($3);
+          }
+        | KW_DEINIT_FUNC '(' string ')'
+          {
+            lua_dd_set_deinit_func(last_driver, $3);
             free($3);
           }
         | KW_LUA_DEST_MODE '(' string ')'

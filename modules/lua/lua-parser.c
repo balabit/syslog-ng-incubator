@@ -33,6 +33,7 @@ static CfgLexerKeyword lua_keywords[] = {
   { "script",                   KW_SCRIPT },
   { "init_func",                KW_INIT_FUNC },
   { "queue_func",               KW_QUEUE_FUNC },
+  { "deinit_func",              KW_DEINIT_FUNC },
   { "mode",                     KW_LUA_DEST_MODE },
   { NULL }
 };
