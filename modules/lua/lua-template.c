@@ -21,6 +21,8 @@
  *
  */
 
+#define LUA_COMPAT_MODULE
+
 #include "lua-template.h"
 #include "lua-utils.h"
 #include <syslog-ng.h>

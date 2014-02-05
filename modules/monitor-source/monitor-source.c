@@ -24,7 +24,7 @@
 
 #include "monitor-source.h"
 #include "../lua/lua-utils.h"
-#include <lua.h>
+#include <lualib.h>
 #include <lauxlib.h>
 
 #include "driver.h"
