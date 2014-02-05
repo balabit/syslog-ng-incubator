@@ -16,6 +16,9 @@ script:
 compiler:
   - gcc
   - clang
+branches:
+  - except:
+      - "master"
 notifications:
   irc:
     channels:
