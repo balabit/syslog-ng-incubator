@@ -31,6 +31,8 @@
 
 #define LUA_TEMPLATE_TYPE "SyslogNG.Template"
 
+#define LUA_COMPAT_MODULE
+
 int
 lua_template_new(lua_State *state)
 {
