@@ -24,6 +24,7 @@
 #include "lua-dest.h"
 #include "lua-msg.h"
 #include "lua-template.h"
+#include "lua-utils.h"
 #include "messages.h"
 #include <lauxlib.h>
 #include <lualib.h>

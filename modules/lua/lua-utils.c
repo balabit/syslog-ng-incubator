@@ -100,7 +100,7 @@ lua_get_config_from_current_state(lua_State *state)
     GlobalConfig *result;
 
     lua_getglobal(state, "__conf");
-    result = lua_topointer(state, -1);
+    result = lua_touserdata(state, -1);
     lua_pop(state, 1);
     return result;
 }
