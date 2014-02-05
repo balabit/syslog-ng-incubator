@@ -306,14 +306,14 @@ lua_dd_set_mode(LogDriver *d, gchar *mode)
 };
 
 LogDriver *
-lua_dd_new()
+lua_dd_new(GlobalConfig *cfg)
 {
   LuaDestDriver *self = g_new0(LuaDestDriver, 1);
 
   self->state = luaL_newstate();
   luaL_openlibs(self->state);
 
-  log_dest_driver_init_instance(&self->super);
+  log_dest_driver_init_instance(&self->super, cfg);
   self->super.super.super.init = lua_dd_init;
   self->super.super.super.deinit = lua_dd_deinit;
   self->super.super.super.free_fn = lua_dd_free;

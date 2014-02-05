@@ -42,7 +42,7 @@ typedef struct _LuaDestDriver
   gint mode;
 } LuaDestDriver;
 
-LogDriver *lua_dd_new();
+LogDriver *lua_dd_new(GlobalConfig *cfg);
 void lua_dd_set_init_func(LogDriver *d, gchar *init_func_name);
 void lua_dd_set_queue_func(LogDriver *d, gchar *queue_func_name);
 void lua_dd_set_deinit_func(LogDriver *d, gchar *deinit_func_name);

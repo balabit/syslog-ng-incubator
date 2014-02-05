@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013, 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -500,11 +500,11 @@ riemann_dd_free(LogPipe *d)
 }
 
 LogDriver *
-riemann_dd_new(void)
+riemann_dd_new(GlobalConfig *cfg)
 {
   RiemannDestDriver *self = g_new0(RiemannDestDriver, 1);
 
-  log_threaded_dest_driver_init_instance(&self->super);
+  log_threaded_dest_driver_init_instance(&self->super, cfg);
 
   self->super.super.super.super.init = riemann_worker_init;
   self->super.super.super.super.free_fn = riemann_dd_free;

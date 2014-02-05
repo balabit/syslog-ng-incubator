@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
  * Copyright (c) 2013 Tusa Viktor
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -41,7 +41,7 @@ typedef struct
   GString* feed_title;
 } RssDestDriver;
 
-LogDriver *rss_dd_new(void);
+LogDriver *rss_dd_new(GlobalConfig *cfg);
 void rss_dd_set_port(LogDriver *self, int port);
 void rss_dd_set_localip(LogDriver *s, gchar *localip);
 void rss_dd_set_title(LogDriver *s, const char *title);

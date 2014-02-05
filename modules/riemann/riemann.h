@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013, 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -27,7 +27,7 @@
 #include "driver.h"
 #include "value-pairs.h"
 
-LogDriver *riemann_dd_new(void);
+LogDriver *riemann_dd_new(GlobalConfig *cfg);
 
 void riemann_dd_set_server(LogDriver *d, const gchar *host);
 void riemann_dd_set_port(LogDriver *d, gint port);

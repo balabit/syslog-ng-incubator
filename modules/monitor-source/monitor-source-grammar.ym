@@ -53,7 +53,7 @@
 start
         : LL_CONTEXT_SOURCE KW_MONITOR
           {
-            last_driver = *instance = monitor_sd_new ();
+            last_driver = *instance = monitor_sd_new (configuration);
           }
           '(' monitor_source_params ')'         { YYACCEPT; }
         ;

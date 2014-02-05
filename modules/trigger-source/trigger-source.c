@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013, 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -161,8 +161,9 @@ static LogSource *
 trigger_source_new (TriggerSourceDriver *owner, LogSourceOptions *options)
 {
   TriggerSource *self = g_new0 (TriggerSource, 1);
+  GlobalConfig *cfg = log_pipe_get_config ((LogPipe *)owner);
 
-  log_source_init_instance (&self->super);
+  log_source_init_instance (&self->super, cfg);
   log_source_set_options (&self->super, options, 0, SCS_TRIGGER,
                           owner->super.super.id, NULL, FALSE);
 
@@ -199,7 +200,7 @@ trigger_sd_init (LogPipe *s)
   self->source = trigger_source_new (self, &self->source_options);
 
   log_pipe_append (&self->source->super, s);
-  log_pipe_init (&self->source->super, cfg);
+  log_pipe_init (&self->source->super);
 
   return TRUE;
 }
@@ -247,11 +248,11 @@ trigger_sd_set_trigger_message (LogDriver *s, const gchar *message)
 }
 
 LogDriver *
-trigger_sd_new (void)
+trigger_sd_new (GlobalConfig *cfg)
 {
   TriggerSourceDriver *self = g_new0 (TriggerSourceDriver, 1);
 
-  log_src_driver_init_instance ((LogSrcDriver *)&self->super);
+  log_src_driver_init_instance ((LogSrcDriver *)&self->super, cfg);
 
   self->super.super.super.init = trigger_sd_init;
   self->super.super.super.deinit = trigger_sd_deinit;
