@@ -298,7 +298,11 @@ rss_dd_free (LogPipe *s)
 {
   RssDestDriver *self = (RssDestDriver *)s;
 
-  g_list_free_full (self->backlog, (GDestroyNotify)log_msg_unref);
+  while (self->backlog)
+    {
+      log_msg_unref ((LogMessage *)self->backlog->data);
+      self->backlog = g_list_delete_link (self->backlog, self->backlog);
+    }
 
   g_string_free (self->address, TRUE);
   g_string_free (self->feed_title, TRUE);
