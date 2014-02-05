@@ -28,7 +28,7 @@ dnl ***************************************************************************
 dnl dependencies
 
 GLIB_MIN_VERSION="2.14"
-SYSLOG_NG_MIN_VERSION="3.5"
+SYSLOG_NG_MIN_VERSION="3.6"
 EVENTLOG_MIN_VERSION="0.2.10"
 IVYKIS_MIN_VERSION="0.30.0"
 LMC_MIN_VERSION="0.1.2"
