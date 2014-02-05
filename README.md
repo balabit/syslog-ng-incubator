@@ -14,7 +14,7 @@ also an example of a third party syslog-ng module.
   [3.5/master][3.5/master] branch for a version that works with
   syslog-ng 3.5.
 
- [3.5/master]: https://github.com/balabit/syslog-ng/tree/3.5/master
+ [3.5/master]: https://github.com/balabit/syslog-ng-incubator/tree/3.5/master
 
 Contents
 --------
