@@ -49,6 +49,15 @@ lua_message_new(lua_State *state)
 }
 
 static int
+lua_message_get_timestamp(lua_State *state)
+{
+  LogMessage *m = lua_check_and_convert_userdata(state, 1, LUA_MESSAGE_TYPE);
+  lua_Number timestamp = m->timestamps[LM_TS_RECVD].tv_sec;
+  lua_pushinteger(state, timestamp);
+  return 1;
+}
+
+static int
 lua_message_metatable__new_index(lua_State *state)
 {
   gsize value_len = 0;
@@ -105,6 +114,7 @@ lua_message_to_logmsg(lua_State *state, int index)
 static const struct luaL_Reg msg_function [] =
 {
   {"new", lua_message_new},
+  {"get_timestamp", lua_message_get_timestamp},
   {NULL, NULL}
 };
 
