@@ -54,6 +54,11 @@ Contents
 
    [sng:rss]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/rss/
 
+ * [Graphite output template][sng:graphite]: Template function, which renders a log message into
+   graphite plaintext protocol format.
+
+   [sng:graphite]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/graphite/
+
  * [logmongource][sng:mongource]: A log visualisation tool that
    extracts messages from a MongoDB collection, and visualises them
    with [Gource](https://code.google.com/p/gource/).
