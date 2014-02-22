@@ -163,6 +163,8 @@ lua_dd_init(LogPipe *s)
   lua_register_message(self->state);
   lua_register_template_class(self->state);
 
+  lua_register_utility_functions(self->state);
+
   cfg = log_pipe_get_config(s);
 
   lua_dd_set_config_variable(self->state, cfg);

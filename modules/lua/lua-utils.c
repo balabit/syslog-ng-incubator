@@ -23,6 +23,7 @@
 
 #include "lua-utils.h"
 #include <lauxlib.h>
+#include "messages.h"
 
 static void *
 lua_get_pointer_from_userdata(void *udata)
@@ -104,3 +105,50 @@ lua_get_config_from_current_state(lua_State *state)
     lua_pop(state, 1);
     return result;
 }
+
+static int
+lua_msg_debug(lua_State *state)
+{
+  const char *message = lua_tostring(state, -1);
+  msg_debug(message, NULL);
+  return 0;
+};
+
+static int
+lua_msg_error(lua_State *state)
+{
+  const char *message = lua_tostring(state, -1);
+  msg_error(message, NULL);
+  return 0;
+};
+
+static int
+lua_msg_info(lua_State *state)
+{
+  const char *message = lua_tostring(state, -1);
+  msg_info(message, NULL);
+  return 0;
+};
+
+static int
+lua_msg_verbose(lua_State *state)
+{
+  const char *message = lua_tostring(state, -1);
+  msg_verbose(message, NULL);
+  return 0;
+};
+
+static const struct luaL_Reg utility_functions [] =
+{
+  {"debug", lua_msg_debug},
+  {"error", lua_msg_error},
+  {"verbose", lua_msg_verbose},
+  {"info", lua_msg_info},
+
+  {NULL, NULL}
+};
+
+void lua_register_utility_functions(lua_State *state)
+{
+  luaL_openlib(state, "syslogng", utility_functions, 0);
+};

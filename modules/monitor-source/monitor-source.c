@@ -215,6 +215,8 @@ monitor_source_init (LogPipe *s)
       return FALSE;
     }
 
+  lua_register_utility_functions(self->state);
+
   if (!lua_check_existence_of_global_variable(self->state, self->options->monitor_func_name))
     {
       msg_error("Monitor function for monitor source cannot be found!", 
