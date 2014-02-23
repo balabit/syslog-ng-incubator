@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
  * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -26,6 +27,7 @@
 
 #include "driver.h"
 #include "logwriter.h"
+#include "value-pairs.h"
 #include <lua.h>
 
 typedef struct _LuaDestDriver
@@ -40,6 +42,7 @@ typedef struct _LuaDestDriver
   LogTemplate *template;
   LogTemplateOptions template_options;
   gint mode;
+  ValuePairs *globals;
 } LuaDestDriver;
 
 LogDriver *lua_dd_new();
@@ -49,6 +52,7 @@ void lua_dd_set_deinit_func(LogDriver *d, gchar *deinit_func_name);
 void lua_dd_set_filename(LogDriver *d, gchar *filename);
 void lua_dd_set_template(LogDriver *d, LogTemplate *template);
 void lua_dd_set_mode(LogDriver *d, gchar *mode);
+void lua_dd_set_globals(LogDriver *d, ValuePairs *vp);
 
 LogTemplateOptions *lua_dd_get_template_options(LogDriver *d);
 

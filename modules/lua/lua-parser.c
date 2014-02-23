@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
  * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -35,6 +36,7 @@ static CfgLexerKeyword lua_keywords[] = {
   { "queue_func",               KW_QUEUE_FUNC },
   { "deinit_func",              KW_DEINIT_FUNC },
   { "mode",                     KW_LUA_DEST_MODE },
+  { "globals",                  KW_GLOBALS },
   { NULL }
 };
 

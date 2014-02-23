@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
  * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -149,6 +150,51 @@ lua_dd_set_config_variable(lua_State *state, GlobalConfig *conf)
 };
 
 static gboolean
+lua_dd_inject_global(const gchar *name,
+                     TypeHint type, const gchar *value,
+                     gpointer user_data)
+{
+  lua_State *state = (lua_State *)user_data;
+
+  switch (type)
+    {
+    case TYPE_HINT_INT32:
+      {
+        gint32 i;
+
+        if (type_cast_to_int32(value, &i, NULL))
+          lua_pushinteger(state, i);
+        else
+          msg_error("Cannot cast value to integer",
+                    evt_tag_str("name", name),
+                    evt_tag_str("value", value),
+                    NULL);
+
+        break;
+      }
+    case TYPE_HINT_STRING:
+      lua_pushstring(state, value);
+      break;
+    default:
+      msg_error("Unsupported type hint (strings or integers only!)",
+                evt_tag_str("name", name),
+                evt_tag_str("value", value),
+                NULL);
+      break;
+    }
+  lua_setglobal(state, name);
+
+  return FALSE;
+}
+
+static void
+lua_dd_inject_globals(lua_State *state, ValuePairs *globals)
+{
+  value_pairs_foreach(globals, lua_dd_inject_global, NULL, 0,
+                      NULL, state);
+}
+
+static gboolean
 lua_dd_init(LogPipe *s)
 {
   LuaDestDriver *self = (LuaDestDriver *) s;
@@ -168,6 +214,7 @@ lua_dd_init(LogPipe *s)
   cfg = log_pipe_get_config(s);
 
   lua_dd_set_config_variable(self->state, cfg);
+  lua_dd_inject_globals(self->state, self->globals);
 
   if (!self->template)
     {
@@ -307,6 +354,16 @@ lua_dd_set_mode(LogDriver *d, gchar *mode)
   if (!strcmp("formatted", mode))
     self->mode = LUA_DEST_MODE_FORMATTED;
 };
+
+void
+lua_dd_set_globals(LogDriver *d, ValuePairs *vp)
+{
+  LuaDestDriver *self = (LuaDestDriver *) d;
+
+  if (self->globals)
+    value_pairs_free(self->globals);
+  self->globals = vp;
+}
 
 LogDriver *
 lua_dd_new()

@@ -26,22 +26,18 @@
 --
 -- Use this table to configure the destination
 --
-config = {
-   batch_size = 100,
-   es = {
-      host = "localhost",
-      port = "9200",
-      index = "syslog-ng",
-      type = "message"
-   }
-}
+es_batch_size = 100
+es_host = "localhost"
+es_port = "9200"
+es_index = "syslog-ng"
+es_type = "message"
 
 function elastic_request(config, ep, req)
    req = req .. "\n"
    local request_len = tostring(#req)
 
    local result, respcode, respheaders, respstatus = http.request {
-      url = "http://" .. config.es.host .. ":" .. config.es.port .. ep .. "/_bulk",
+      url = "http://" .. es_host .. ":" .. es_port .. ep .. "/_bulk",
       source = ltn12.source.string(req),
       headers = {
          ["Content-Type"] = "application/json",
@@ -57,11 +53,11 @@ function elastic_queue(msg)
    request = request .. '\n{"create":null}\n' .. msg
    msgcount = msgcount + 1
 
-  if (msgcount % config.batch_size) == 0 then
+  if (msgcount % es_batch_size) == 0 then
       request_len = tostring(#request)
       -- print ("Sending msgs, bytes=" .. request_len .. "; count="..tostring(msgcount))
 
-      elastic_request(config, "/" .. config.es.index .. "/" .. config.es.type,
+      elastic_request(config, "/" .. es_index .. "/" .. es_type,
                       request)
       request = ""
   end
