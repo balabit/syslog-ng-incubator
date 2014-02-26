@@ -1,5 +1,58 @@
 #+STARTUP: indent showall                       -*- org -*-
 
+* 0.2.0 - <2014-02-26 Wed>
+
+Most of the features of this release are contributed by Viktor Tusa
+<tusa@balabit.hu>, many thanks for them!
+
+** Feature: LuaJIT support
+When configured with --enable-luajit, and LuaJIT is available, it is
+now possible to build the Lua destination against that version of Lua.
+
+** Feature: monitor source
+This new source is somewhere between the trigger() source and the
+lua() destination, in that it allows one to write a Lua function that
+gets periodically executed, and can produce a log message.
+
+** Feature: Templating support for the Lua destination
+Destinations written in Lua can now use Templates, from within the
+Lua code itself. Most useful for raw mode.
+
+** Feature: Lua destinations have easy access to the timestamps
+The Lua destination now makes another function available:
+Message.get_timestamp(), that gets one the UNIX timestamp in integer
+format, without having to format it first with a template, and then
+converting it back.
+
+** Feature: The Lua modules now have a deinit hook
+In case the destination needs to do something at deinit time, there
+is now a deinit hook.
+
+** Feature: The Lua modules has access to logging functions
+It is now possible to use syslogng.debug, syslogng.error,
+syslogng.info and syslogng.verbose functions from within Lua, to
+construct internal log messages.
+
+** Feature: The Lua destination can have global variables set
+It is now possible to set global variables (strings and ints) from
+within the syslog-ng configuration file, that get passed down to the
+Lua destination.
+
+** Feature: graphite output template function
+This template function, with syntax much like that of $(format-json)
+allows one to easily forward data to a Graphite server, when combined
+with the tcp() destination.
+
+** Feature: An ElasticSearch SCL
+The Incubator now ships with an SCL file, and a helper program that
+makes it possible to easily send events to ElasticSearch, in a
+Kibana-compatible format.
+
+** Bugfix: RSS destination does not require newer glib
+The RSS destination used features not available in the glib version
+targeted by the Incubator. It was fixed to work with the older
+version we target.
+
 * 0.1.1 - <2014-01-24 Fri>
 
 ** Bugfix: Grammar files are not shipped in the tarball anymore
