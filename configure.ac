@@ -114,7 +114,9 @@ fi
 if test "x$lua_mod" != "xluajit"; then
  PKG_CHECK_EXISTS(lua, lua_mod="lua",
   PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
-   PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1")))
+   PKG_CHECK_EXISTS(lua-5.2, lua_mod="lua-5.2",
+    PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1",
+     PKG_CHECK_EXISTS(lua-5.1, lua_mod="lua-5.1")))))
 fi
 PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,enable_lua="yes",enable_lua="no")
 
