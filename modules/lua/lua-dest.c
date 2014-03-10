@@ -214,7 +214,8 @@ lua_dd_init(LogPipe *s)
   cfg = log_pipe_get_config(s);
 
   lua_dd_set_config_variable(self->state, cfg);
-  lua_dd_inject_all_global_variables(self->state, self->globals);
+  if (self->globals)
+    lua_dd_inject_all_global_variables(self->state, self->globals);
 
   if (!self->template)
     {
