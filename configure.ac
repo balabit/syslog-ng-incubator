@@ -3,7 +3,7 @@ dnl
 
 AC_PREREQ([2.68])
 
-AC_INIT([syslog-ng-incubator], [0.2.0], [algernon@madhouse-project.org])
+AC_INIT([syslog-ng-incubator], [0.2.1], [algernon@madhouse-project.org])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])

@@ -1,5 +1,25 @@
 #+STARTUP: indent showall                       -*- org -*-
 
+* 0.2.1 - <2014-03-12 Wed>
+
+This is a bug fix only release over the previous 0.2.0 version, with
+the following changes:
+
+** Bugfix: FreeBSD portability
+
+The Incubator can now be compiled on FreeBSD!
+
+** Bugfix: Improved Lua detection
+
+On some systems, the Lua pkg-config file is called lua-5.1, or
+lua-5.2, not lua5.1/lua5.2. The configure script was taught to
+recognise all of these.
+
+** Bugfix: Fixed a crash in the Lua destination
+
+When using the Lua destination without globals() being present does
+not crash the module anymore.
+
 * 0.2.0 - <2014-02-26 Wed>
 
 Most of the features of this release are contributed by Viktor Tusa
