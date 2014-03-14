@@ -166,7 +166,7 @@ Description: Enhanced system logging daemon (graphite plugin)
 Package: syslog-ng-mod-elasticsearch
 Architecture: all
 Multi-Arch: foreign
-Depends: ${misc:Depends}, python, python-requests
+Depends: ${misc:Depends}, syslog-ng-core, python, python-requests
 Description: Enhanced system logging daemon (ElasticSearch plugin)
  syslog-ng is an enhanced log daemon, supporting a wide range of input
  and output methods: syslog, unstructured text, message queues,
