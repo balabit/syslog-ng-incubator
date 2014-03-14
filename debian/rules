@@ -1,6 +1,6 @@
 #! /usr/bin/make -f
 ## debian/rules file for syslog-ng Incubator
-## (C) 2013 Gergely Nagy <algernon@madhouse-project.org>
+## (C) 2013, 2014 Gergely Nagy <algernon@madhouse-project.org>
 ##
 ## Released under the GPLv2+, see /usr/share/common-licenses/GPL-2 on
 ## Debian systems.
@@ -16,7 +16,9 @@ LDFLAGS		?= $(shell dpkg-buildflags --get LDFLAGS)
 
 override_dh_auto_configure:
 	install -d debian/build-tree
-	dh_auto_configure -- LDFLAGS="${LDFLAGS} -Wl,-rpath=/usr/lib/syslog-ng"
+	dh_auto_configure -- \
+		--datadir=/usr/share/syslog-ng \
+		LDFLAGS="${LDFLAGS} -Wl,-rpath=/usr/lib/syslog-ng"
 
 ##
 #* Overrides for other debhelper commands

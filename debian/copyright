@@ -1,8 +1,9 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: syslog-ng-incubator
 Upstream-Contact: Gergely Nagy <algernon@balabit.hu>
-Source: git://github.com/algernon/syslog-ng-incubator.git
+Source: git://github.com/balabit/syslog-ng-incubator.git
 Copyright: Copyright (C) 2011-2014 Gergely Nagy <algernon@balabit.hu>
+ Copyright (C) 2013-2014 Viktor Tusa <tusa@balabit.hu>
  Copyright (C) 2011-2014 BalaBit IT Security Ltd.
 
 Files: *
@@ -23,6 +24,22 @@ License: GPL-2+ with OpenSSL exception
 Files: modules/lua/elasticsearch.lua
 Copyright: Copyright (C) 2014 Viktor Tusa
  Copyright (C) 2014 Gergely Nagy
+ Copyright (C) 2014 BalaBit IT Ltd
+License: GPL-2+ with OpenSSL exception
+
+Files: modules/graphite/*
+Copyright: Copyright (C) 2014 Viktor Tusa
+ Copyright (C) 2014 Balabit IT Ltd
+License: GPL-2+ with OpenSSL exception
+
+Files: modules/monitor-source/*
+Copyright: Copyright (C) 2014 Viktor Tusa
+ Copyright (C) 2014 Gergely Nagy
+ Copyright (C) 2014 BalaBit IT Ltd
+License: GPL-2+ with OpenSSL exception
+
+Files: scl/elasticsearch/*
+Copyright: Copyright (C) 2014 Gergely Nagy
  Copyright (C) 2014 BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception
 
