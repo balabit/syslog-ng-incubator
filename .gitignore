@@ -38,4 +38,7 @@
 /debian/syslog-ng-mod-trigger/
 /debian/syslog-ng-mod-rss/
 /debian/syslog-ng-mod-basicfuncs-plus/
+/debian/syslog-ng-mod-lua/
+/debian/syslog-ng-mod-elasticsearch/
+/debian/syslog-ng-mod-graphite/
 /debian/tmp/
