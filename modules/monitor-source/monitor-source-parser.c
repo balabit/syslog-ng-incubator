@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
  * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2014 Viktor Tusa <tusa@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -22,33 +22,30 @@
  *
  */
 
-#include "lua-parser.h"
+#include "monitor-source.h"
 #include "cfg-parser.h"
-#include "lua-grammar.h"
+#include "monitor-source-grammar.h"
 
-extern int lua_debug;
-int lua_driver_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
+extern int monitor_source_debug;
+int monitor_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 
-static CfgLexerKeyword lua_keywords[] = {
-  { "lua",                      KW_LUA },
-  { "script",                   KW_SCRIPT },
-  { "init_func",                KW_INIT_FUNC },
-  { "queue_func",               KW_QUEUE_FUNC },
-  { "deinit_func",              KW_DEINIT_FUNC },
-  { "mode",                     KW_LUA_DEST_MODE },
-  { "globals",                  KW_GLOBALS },
+static CfgLexerKeyword monitor_keywords[] = {
+  { "monitor",                 KW_MONITOR },
+  { "monitor_freq",            KW_MONITOR_FREQ },
+  { "monitor_script",          KW_MONITOR_SCRIPT },
+  { "monitor_func",            KW_MONITOR_FUNC },
   { NULL }
 };
 
-CfgParser lua_parser =
+CfgParser monitor_parser =
 {
 #if ENABLE_DEBUG
-  .debug_flag = &lua_debug,
+  .debug_flag = &monitor_source_debug,
 #endif
-  .name = "lua",
-  .keywords = lua_keywords,
-  .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) lua_driver_parse,
+  .name = "monitor-source",
+  .keywords = monitor_keywords,
+  .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) monitor_parse,
   .cleanup = (void (*)(gpointer)) log_pipe_unref,
 };
 
-CFG_PARSER_IMPLEMENT_LEXER_BINDING(lua_driver_, LogDriver **)
+CFG_PARSER_IMPLEMENT_LEXER_BINDING(monitor_, LogDriver **)

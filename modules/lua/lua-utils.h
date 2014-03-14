@@ -22,11 +22,15 @@
  */
 
 #include <lua.h>
+#include <syslog-ng.h>
 
 #ifndef _LUA_UTILS_H
 #define  _LUA_UTILS_H
 
 void *lua_check_and_convert_userdata(lua_State *state, int index, const char *type);
 int lua_create_userdata_from_pointer(lua_State *state, void *data, const char *type);
+gboolean lua_check_existence_of_global_variable(lua_State *state, const char *variable_name);
+GlobalConfig *lua_get_config_from_current_state(lua_State *state);
+void lua_register_utility_functions(lua_State *state);
 
 #endif

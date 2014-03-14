@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2014 Viktor Tusa <tusa@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,16 +22,34 @@
  *
  */
 
-#include "logmsg.h"
-#include <lua.h>
+#include "monitor-source.h"
+#include "monitor-source-parser.h"
 
-#ifndef _LUA_MSG_H
-#define _LUA_MSG_H
+#include "plugin.h"
+#include "plugin-types.h"
 
-int lua_register_message(lua_State *state);
-LogMessage *lua_message_to_logmsg(lua_State *state, int index);
-int lua_message_create_from_logmsg(lua_State *state, LogMessage *self);
+extern CfgParser monitor_parser;
 
-#define LUA_MESSAGE_TYPE "SyslogNG.Message"
+static Plugin monitor_plugin =
+{
+  .type = LL_CONTEXT_SOURCE,
+  .name = "monitor",
+  .parser = &monitor_parser,
+};
 
-#endif
+gboolean
+monitor_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
+{
+  plugin_register(cfg, &monitor_plugin, 1);
+  return TRUE;
+}
+
+const ModuleInfo module_info =
+{
+  .canonical_name = "monitor",
+  .version = VERSION,
+  .description = "The monitor module provides stuff.",
+  .core_revision = VERSION_CURRENT_VER_ONLY,
+  .plugins = &monitor_plugin,
+  .plugins_len = 1,
+};

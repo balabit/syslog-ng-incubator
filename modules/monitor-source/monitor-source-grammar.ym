@@ -1,0 +1,94 @@
+/*
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2014 Viktor Tusa <tusa@balabit.hu>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
+ */
+
+%code requires {
+
+#include "monitor-source-parser.h"
+
+}
+
+%code {
+
+#include "cfg-grammar.h"
+#include "cfg-parser.h"
+#include "plugin.h"
+}
+
+%name-prefix "monitor_"
+%lex-param {CfgLexer *lexer}
+%parse-param {CfgLexer *lexer}
+%parse-param {LogDriver **instance}
+%parse-param {gpointer arg}
+
+/* INCLUDE_DECLS */
+
+%token KW_MONITOR
+%token KW_MONITOR_FREQ
+%token KW_MONITOR_SCRIPT
+%token KW_MONITOR_FUNC
+
+%%
+
+start
+        : LL_CONTEXT_SOURCE KW_MONITOR
+          {
+            last_driver = *instance = monitor_sd_new ();
+          }
+          '(' monitor_source_params ')'         { YYACCEPT; }
+        ;
+
+monitor_source_params
+        : {
+            last_source_options = monitor_sd_get_source_options (last_driver);
+          }
+          monitor_source_options
+        ;
+
+monitor_source_options
+        : monitor_source_option monitor_source_options
+        |
+        ;
+
+monitor_source_option
+        : source_option
+        | KW_MONITOR_FREQ '(' LL_NUMBER ')'
+          {
+            monitor_sd_set_monitor_freq (last_driver, $3);
+          }
+        | KW_MONITOR_SCRIPT '(' string ')'
+          {
+            monitor_sd_set_monitor_script (last_driver, $3);
+            free ($3);
+          }
+        | KW_MONITOR_FUNC '(' string ')'
+          {
+            monitor_sd_set_monitor_func (last_driver, $3);
+            free ($3);
+          }
+
+        ;
+
+/* INCLUDE_RULES */
+
+%%

@@ -23,6 +23,7 @@
 
 #include "lua-utils.h"
 #include <lauxlib.h>
+#include "messages.h"
 
 static void *
 lua_get_pointer_from_userdata(void *udata)
@@ -78,3 +79,76 @@ lua_create_userdata_from_pointer(lua_State *state, void *data, const char *type)
   lua_setmetatable(state, -2);
   return 1;
 }
+
+gboolean
+lua_check_existence_of_global_variable(lua_State *state, const char *variable_name)
+{
+  gboolean result = TRUE;
+
+  lua_getglobal(state, variable_name);
+  if (lua_isnil(state, -1))
+    {
+      result = FALSE;
+    }
+  lua_pop(state, 1);
+
+  return result;
+};
+
+GlobalConfig *
+lua_get_config_from_current_state(lua_State *state)
+{
+    GlobalConfig *result;
+
+    lua_getglobal(state, "__conf");
+    result = lua_touserdata(state, -1);
+    lua_pop(state, 1);
+    return result;
+}
+
+static int
+lua_msg_debug(lua_State *state)
+{
+  const char *message = lua_tostring(state, -1);
+  msg_debug(message, NULL);
+  return 0;
+};
+
+static int
+lua_msg_error(lua_State *state)
+{
+  const char *message = lua_tostring(state, -1);
+  msg_error(message, NULL);
+  return 0;
+};
+
+static int
+lua_msg_info(lua_State *state)
+{
+  const char *message = lua_tostring(state, -1);
+  msg_info(message, NULL);
+  return 0;
+};
+
+static int
+lua_msg_verbose(lua_State *state)
+{
+  const char *message = lua_tostring(state, -1);
+  msg_verbose(message, NULL);
+  return 0;
+};
+
+static const struct luaL_Reg utility_functions [] =
+{
+  {"debug", lua_msg_debug},
+  {"error", lua_msg_error},
+  {"verbose", lua_msg_verbose},
+  {"info", lua_msg_info},
+
+  {NULL, NULL}
+};
+
+void lua_register_utility_functions(lua_State *state)
+{
+  luaL_openlib(state, "syslogng", utility_functions, 0);
+};

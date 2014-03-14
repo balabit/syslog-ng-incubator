@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
  * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -23,6 +24,8 @@
 
 #include "lua-dest.h"
 #include "lua-msg.h"
+#include "lua-template.h"
+#include "lua-utils.h"
 #include "messages.h"
 #include <lauxlib.h>
 #include <lualib.h>
@@ -80,16 +83,17 @@ lua_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options,
 };
 
 static gboolean
-lua_dd_call_init_func(LuaDestDriver *self)
+lua_dd_check_and_call_function(LuaDestDriver *self, const char *function_name, const char *function_type)
 {
-  msg_debug("Calling lua destination init function", NULL);
+  msg_debug("Calling lua destination function", evt_tag_str("function_type", function_type), NULL);
 
-  lua_getglobal(self->state, self->init_func_name);
+  lua_getglobal(self->state, function_name);
 
   if (lua_isnil(self->state, -1))
     {
-      msg_warning("Lua destination initializing function cannot be found, continueing anyway!",
-                  evt_tag_str("init_func", self->init_func_name),
+      msg_warning("Lua destination function cannot be found, continueing anyway!",
+                  evt_tag_str("function_type", function_type),
+                  evt_tag_str("function_name", function_name),
                   evt_tag_str("filename", self->filename),
                   evt_tag_str("driver_id", self->super.super.id),
                   NULL);
@@ -100,33 +104,94 @@ lua_dd_call_init_func(LuaDestDriver *self)
     {
       msg_error("Error happened during calling Lua destination initializing function!",
                 evt_tag_str("error", lua_tostring(self->state, -1)),
-                evt_tag_str("init_func", self->init_func_name),
+                evt_tag_str("function_type", function_type),
+                evt_tag_str("function_name", function_name),
                 evt_tag_str("filename", self->filename),
                 evt_tag_str("driver_id", self->super.super.id),
                 NULL);
       return FALSE;
     }
   return TRUE;
+};
+
+static gboolean
+lua_dd_call_init_func(LuaDestDriver *self)
+{
+  return lua_dd_check_and_call_function(self, self->init_func_name, "initialization");
+}
+
+static gboolean
+lua_dd_call_deinit_func(LuaDestDriver *self)
+{
+  return lua_dd_check_and_call_function(self, self->deinit_func_name, "deinitialization");
 }
 
 static gboolean
 lua_dd_check_existence_of_queue_func(LuaDestDriver *self)
 {
-  gboolean result = TRUE;
-
-  lua_getglobal(self->state, self->queue_func_name);
-  if (lua_isnil(self->state, -1))
+  if (!lua_check_existence_of_global_variable(self->state, self->queue_func_name))
     {
       msg_error("Lua destination queue function cannot be found!",
                 evt_tag_str("queue_func", self->queue_func_name),
                 evt_tag_str("filename", self->filename),
                 evt_tag_str("driver_id", self->super.super.id),
                 NULL);
-      result = FALSE;
+      return FALSE;
     }
-  lua_pop(self->state, 1);
 
-  return result;
+  return TRUE;
+}
+
+static void
+lua_dd_set_config_variable(lua_State *state, GlobalConfig *conf)
+{
+  lua_pushlightuserdata(state, conf);
+  lua_setglobal(state, "__conf");
+};
+
+static gboolean
+lua_dd_inject_global_variable(const gchar *name,
+                              TypeHint type, const gchar *value,
+                              gpointer user_data)
+{
+  lua_State *state = (lua_State *)user_data;
+
+  switch (type)
+    {
+    case TYPE_HINT_INT32:
+      {
+        gint32 i;
+
+        if (type_cast_to_int32(value, &i, NULL))
+          lua_pushinteger(state, i);
+        else
+          msg_error("Cannot cast value to integer",
+                    evt_tag_str("name", name),
+                    evt_tag_str("value", value),
+                    NULL);
+
+        break;
+      }
+    case TYPE_HINT_STRING:
+      lua_pushstring(state, value);
+      break;
+    default:
+      msg_error("Unsupported type hint (strings or integers only!)",
+                evt_tag_str("name", name),
+                evt_tag_str("value", value),
+                NULL);
+      break;
+    }
+  lua_setglobal(state, name);
+
+  return FALSE;
+}
+
+static void
+lua_dd_inject_all_global_variables(lua_State *state, ValuePairs *globals)
+{
+  value_pairs_foreach(globals, lua_dd_inject_global_variable, NULL, 0,
+                      NULL, state);
 }
 
 static gboolean
@@ -142,8 +207,15 @@ lua_dd_init(LogPipe *s)
     }
 
   lua_register_message(self->state);
+  lua_register_template_class(self->state);
+
+  lua_register_utility_functions(self->state);
 
   cfg = log_pipe_get_config(s);
+
+  lua_dd_set_config_variable(self->state, cfg);
+  if (self->globals)
+    lua_dd_inject_all_global_variables(self->state, self->globals);
 
   if (!self->template)
     {
@@ -170,6 +242,14 @@ lua_dd_init(LogPipe *s)
       self->queue_func_name = g_strdup("lua_queue_func");
     }
 
+  if (!self->deinit_func_name)
+    {
+      msg_info("No deinit function name set, defaulting to \"lua_deinit_func\"",
+               evt_tag_str("driver_id", self->super.super.id),
+               NULL);
+      self->deinit_func_name = g_strdup("lua_deinit_func");
+    }
+
   if (!self->mode)
     self->mode = LUA_DEST_MODE_FORMATTED;
 
@@ -191,10 +271,13 @@ lua_dd_deinit(LogPipe *s)
 {
   LuaDestDriver *self = (LuaDestDriver *) s;
 
+  lua_dd_call_deinit_func(self);
+
   if (!log_dest_driver_deinit_method(s))
     return FALSE;
 
   lua_close(self->state);
+
   return TRUE;
 }
 
@@ -253,6 +336,15 @@ lua_dd_set_queue_func(LogDriver *d, gchar *queue_func_name)
 }
 
 void
+lua_dd_set_deinit_func(LogDriver *d, gchar *deinit_func_name)
+{
+  LuaDestDriver *self = (LuaDestDriver *) d;
+
+  g_free(self->deinit_func_name);
+  self->deinit_func_name = g_strdup(deinit_func_name);
+}
+
+void
 lua_dd_set_mode(LogDriver *d, gchar *mode)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
@@ -263,6 +355,16 @@ lua_dd_set_mode(LogDriver *d, gchar *mode)
   if (!strcmp("formatted", mode))
     self->mode = LUA_DEST_MODE_FORMATTED;
 };
+
+void
+lua_dd_set_globals(LogDriver *d, ValuePairs *vp)
+{
+  LuaDestDriver *self = (LuaDestDriver *) d;
+
+  if (self->globals)
+    value_pairs_free(self->globals);
+  self->globals = vp;
+}
 
 LogDriver *
 lua_dd_new()

@@ -30,8 +30,6 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#define LUA_MESSAGE_TYPE "SyslogNG.Message"
-
 int
 lua_message_create_from_logmsg(lua_State *state, LogMessage *self)
 {
@@ -48,6 +46,15 @@ lua_message_new(lua_State *state)
   self->flags |= LF_LOCAL;
 
   return lua_message_create_from_logmsg(state, self);
+}
+
+static int
+lua_message_get_timestamp(lua_State *state)
+{
+  LogMessage *m = lua_check_and_convert_userdata(state, 1, LUA_MESSAGE_TYPE);
+  lua_Number timestamp = m->timestamps[LM_TS_RECVD].tv_sec;
+  lua_pushinteger(state, timestamp);
+  return 1;
 }
 
 static int
@@ -107,6 +114,7 @@ lua_message_to_logmsg(lua_State *state, int index)
 static const struct luaL_Reg msg_function [] =
 {
   {"new", lua_message_new},
+  {"get_timestamp", lua_message_get_timestamp},
   {NULL, NULL}
 };
 

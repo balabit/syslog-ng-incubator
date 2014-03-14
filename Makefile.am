@@ -1,6 +1,8 @@
 ACLOCAL_AMFLAGS		= -I m4
 AM_YFLAGS		= -Wno-other -d
 
+scldir			= ${datadir}/include/scl
+
 check_PROGRAMS		=
 TESTS			= ${check_PROGRAMS}
 bin_PROGRAMS		=
@@ -22,5 +24,6 @@ DISTCLEANFILES		= \
 .y.c:
 
 include modules/Makefile.am
+include scl/Makefile.am
 include tools/Makefile.am
 include $(syslog_ng_tools)/lex-rules.am

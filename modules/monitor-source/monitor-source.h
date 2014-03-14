@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2014 Viktor Tusa <tusa@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,16 +22,17 @@
  *
  */
 
-#include "logmsg.h"
-#include <lua.h>
+#ifndef SNG_MONITOR_SOURCE_H_INCLUDED
+#define SNG_MONITOR_SOURCE_H_INCLUDED
 
-#ifndef _LUA_MSG_H
-#define _LUA_MSG_H
+#include "driver.h"
+#include "logsource.h"
 
-int lua_register_message(lua_State *state);
-LogMessage *lua_message_to_logmsg(lua_State *state, int index);
-int lua_message_create_from_logmsg(lua_State *state, LogMessage *self);
+LogDriver *monitor_sd_new (void);
 
-#define LUA_MESSAGE_TYPE "SyslogNG.Message"
+void monitor_sd_set_monitor_freq (LogDriver *s, gint freq);
+LogSourceOptions *monitor_sd_get_source_options (LogDriver *s);
+void monitor_sd_set_monitor_script (LogDriver *s, const gchar *script);
+void monitor_sd_set_monitor_func (LogDriver *s, const gchar *function_name);
 
 #endif

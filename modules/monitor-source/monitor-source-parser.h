@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2014 Viktor Tusa <tusa@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,16 +22,15 @@
  *
  */
 
-#include "logmsg.h"
-#include <lua.h>
+#ifndef SNG_MONITOR_SOURCE_PARSER_H_INCLUDED
+#define SNG_MONITOR_SOURCE_PARSER_H_INCLUDED
 
-#ifndef _LUA_MSG_H
-#define _LUA_MSG_H
+#include "cfg-parser.h"
+#include "cfg-lexer.h"
+#include "monitor-source.h"
 
-int lua_register_message(lua_State *state);
-LogMessage *lua_message_to_logmsg(lua_State *state, int index);
-int lua_message_create_from_logmsg(lua_State *state, LogMessage *self);
+extern CfgParser monitor_source_parser;
 
-#define LUA_MESSAGE_TYPE "SyslogNG.Message"
+CFG_PARSER_DECLARE_LEXER_BINDING(monitor_, LogDriver **)
 
 #endif

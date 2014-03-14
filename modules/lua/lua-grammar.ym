@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
  * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -25,6 +26,8 @@
 
 #include "lua-parser.h"
 #include "lua-dest.h"
+#include "value-pairs.h"
+#include "vptransform.h"
 
 }
 
@@ -47,7 +50,9 @@
 %token KW_SCRIPT
 %token KW_INIT_FUNC
 %token KW_QUEUE_FUNC
+%token KW_DEINIT_FUNC
 %token KW_LUA_DEST_MODE
+%token KW_GLOBALS
 
 %%
 
@@ -84,13 +89,40 @@ lua_option
             lua_dd_set_queue_func(last_driver, $3);
             free($3);
           }
+        | KW_DEINIT_FUNC '(' string ')'
+          {
+            lua_dd_set_deinit_func(last_driver, $3);
+            free($3);
+          }
         | KW_LUA_DEST_MODE '(' string ')'
           {
             lua_dd_set_mode(last_driver, $3);
             free($3);
           }
+        | KW_GLOBALS
+          {
+            last_value_pairs = value_pairs_new();
+          }
+          '(' lua_globals ')'
+          {
+            lua_dd_set_globals(last_driver, last_value_pairs);
+          }
         | dest_driver_option
         | { last_template_options = lua_dd_get_template_options(last_driver); } template_option
+        ;
+
+lua_globals
+        : lua_global lua_globals
+        |
+        ;
+
+lua_global
+        : LL_IDENTIFIER '(' template_content ')'
+          {
+            value_pairs_add_pair(last_value_pairs, $1,  $3);
+            free($1);
+          }
+        | vp_option
         ;
 
 /* INCLUDE_RULES */

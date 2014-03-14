@@ -10,7 +10,8 @@ also an example of a third party syslog-ng module.
 
  [sng]: https://github.com/balabit/syslog-ng
 
-**NOTE**: The Incubator requires syslog-ng 3.5.0rc1 or newer!
+**NOTE**: The Incubator requires syslog-ng 3.5.0rc1 or newer, but does
+  not work with 3.6!
 
 Contents
 --------
@@ -33,6 +34,12 @@ Contents
 
    [sng:trigger]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/trigger-source/
 
+ * [Monitor source][sng:monitor]: A module similar to the trigger
+   source, except it dispatches to a Lua function to generate the
+   message.
+
+   [sng:monitor]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/monitor-source/
+
  * [Extra template functions][sng:bf+]: Extra template functions, such
    as `$(//)` which is floating-point division, as opposed to the
    built-in `$(/)` (integer division).
@@ -43,6 +50,11 @@ Contents
    allows one to offer log messages as an RSS feed.
 
    [sng:rss]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/rss/
+
+ * [Graphite output template][sng:graphite]: Template function, which renders a log message into
+   graphite plaintext protocol format.
+
+   [sng:graphite]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/graphite/
 
  * [logmongource][sng:mongource]: A log visualisation tool that
    extracts messages from a MongoDB collection, and visualises them
@@ -72,7 +84,8 @@ License
 -------
 
 Copyright (C) 2011-2014 BalaBit IT Security Ltd., Gergely Nagy
-<algernon@balabit.hu> and other contributors, released under the terms
-of the [GNU General Public License][gpl], version 2 (or later).
+<algernon@balabit.hu>, Viktor Tusa <tusa@balabit.hu>, and other
+contributors; released under the terms of the
+[GNU General Public License][gpl], version 2 (or later).
 
  [gpl]: http://www.gnu.org/licenses/gpl-2.0.html

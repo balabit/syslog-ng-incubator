@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Viktor Tusa <tusa@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -18,19 +18,32 @@
  * As an additional exemption you are allowed to compile & link against the
  * OpenSSL libraries as published by the OpenSSL project. See the file
  * COPYING for details.
- *
  */
 
-#include "logmsg.h"
-#include <lua.h>
+#include "plugin.h"
+#include "plugin-types.h"
+#include "graphite-output.h"
+#include "cfg.h"
 
-#ifndef _LUA_MSG_H
-#define _LUA_MSG_H
+static Plugin graphite_plugins[] =
+{
+  TEMPLATE_FUNCTION_PLUGIN(tf_graphite, "graphite_output"),
+};
 
-int lua_register_message(lua_State *state);
-LogMessage *lua_message_to_logmsg(lua_State *state, int index);
-int lua_message_create_from_logmsg(lua_State *state, LogMessage *self);
+gboolean
+graphite_plugin_module_init(GlobalConfig *cfg, CfgArgs *args)
+{
+  plugin_register(cfg, graphite_plugins, G_N_ELEMENTS(graphite_plugins));
+  return TRUE;
+}
 
-#define LUA_MESSAGE_TYPE "SyslogNG.Message"
+const ModuleInfo module_info =
+{
+  .canonical_name = "graphite-plugin",
+  .version = VERSION,
+  .description = "The graphite module provides graphite output for syslog-ng.",
+  .core_revision = VERSION_CURRENT_VER_ONLY,
+  .plugins = graphite_plugins,
+  .plugins_len = G_N_ELEMENTS(graphite_plugins),
+};
 
-#endif

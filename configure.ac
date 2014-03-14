@@ -3,7 +3,7 @@ dnl
 
 AC_PREREQ([2.68])
 
-AC_INIT([syslog-ng-incubator], [0.1.1], [algernon@madhouse-project.org])
+AC_INIT([syslog-ng-incubator], [0.2.1], [algernon@madhouse-project.org])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])
@@ -45,6 +45,10 @@ AC_ARG_WITH(module-dir,
 AC_ARG_WITH(ivykis,
    [  --without-ivykis         Build without explicitly linking to ivykis])
 
+AC_ARG_ENABLE(luajit,
+   [  --enable-luajit          Use luajit instead of standard liblua for Lua support],
+   enable_luajit="yes",)
+
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -64,7 +68,7 @@ dnl ***************************************************************************
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h])
-AC_CHECK_FUNCS([floor memset strdup strtoll])
+AC_CHECK_FUNCS([floor memrchr memset strdup strtoll])
 
 dnl ***************************************************************************
 dnl Header checks
@@ -104,10 +108,17 @@ PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,enable_rie
 dnl ***************************************************************************
 dnl lua headers/libraries
 dnl ***************************************************************************
-PKG_CHECK_EXISTS(lua, lua_mod="lua",
+if test "x$enable_luajit" == "xyes"; then
+ PKG_CHECK_EXISTS(luajit, [lua_mod="luajit"; LUA_MIN_VERSION="2.0"])
+fi
+if test "x$lua_mod" != "xluajit"; then
+ PKG_CHECK_EXISTS(lua, lua_mod="lua",
   PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
-   PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1")))
-PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,,enable_lua="no")
+   PKG_CHECK_EXISTS(lua-5.2, lua_mod="lua-5.2",
+    PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1",
+     PKG_CHECK_EXISTS(lua-5.1, lua_mod="lua-5.1")))))
+fi
+PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,enable_lua="yes",enable_lua="no")
 
 dnl ***************************************************************************
 dnl misc features to be enabled
@@ -122,3 +133,17 @@ AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
+
+echo
+echo "syslog-ng Incubator $VERSION configured"
+echo "syslog-ng Incubator $VERSION configured" | sed -e "s/./-/g"
+echo " Modules:"
+echo "  basicfuncs-plus      yes"
+echo "  graphite             yes"
+echo "  logmongource:        ${enable_logmongource:-yes}"
+echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
+echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
+echo "  riemann:             ${enable_riemann:-yes}"
+echo "  rss                  yes"
+echo "  trigger-source       yes"
+echo

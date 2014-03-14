@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
  * Copyright (c) 2013, 2014 Viktor Tusa <tusa@balabit.hu>
- * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -22,33 +21,12 @@
  *
  */
 
-#include "lua-parser.h"
-#include "cfg-parser.h"
-#include "lua-grammar.h"
+#include <lua.h>
+#include <template/templates.h>
 
-extern int lua_debug;
-int lua_driver_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
+#ifndef LUA_TEMPLATE_H_INCLUDED
+#define LUA_TEMPLATE_H_INCLUDED
 
-static CfgLexerKeyword lua_keywords[] = {
-  { "lua",                      KW_LUA },
-  { "script",                   KW_SCRIPT },
-  { "init_func",                KW_INIT_FUNC },
-  { "queue_func",               KW_QUEUE_FUNC },
-  { "deinit_func",              KW_DEINIT_FUNC },
-  { "mode",                     KW_LUA_DEST_MODE },
-  { "globals",                  KW_GLOBALS },
-  { NULL }
-};
-
-CfgParser lua_parser =
-{
-#if ENABLE_DEBUG
-  .debug_flag = &lua_debug,
+int lua_register_template_class(lua_State *state);
 #endif
-  .name = "lua",
-  .keywords = lua_keywords,
-  .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) lua_driver_parse,
-  .cleanup = (void (*)(gpointer)) log_pipe_unref,
-};
 
-CFG_PARSER_IMPLEMENT_LEXER_BINDING(lua_driver_, LogDriver **)
