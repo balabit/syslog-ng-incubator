@@ -146,4 +146,5 @@ echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  riemann:             ${enable_riemann:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
+echo "  tfgetent             yes"
 echo
