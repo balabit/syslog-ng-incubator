@@ -34,6 +34,8 @@
 #include <errno.h>
 #include <features.h>
 
+typedef gboolean (*lookup_method)(GString *key, GString *result);
+
 static gboolean
 tf_getent_services(GString *key, GString *result)
 {
@@ -102,8 +104,6 @@ tf_getent_passwd(GString *key, GString *result)
 
   return TRUE;
 }
-
-typedef gboolean (*lookup_method)(GString *key, GString *result);
 
 static struct
 {
