@@ -4,6 +4,10 @@ module_LTLIBRARIES			+= \
 modules_getent_libtfgetent_la_SOURCES	= \
   modules/getent/tfgetent.c
 
+EXTRA_DIST				+=\
+  modules/getent/getent-services.c	  \
+  modules/getent/getent-passwd.c
+
 modules_getent_libtfgetent_la_CPPFLAGS	= \
   $(AM_CPPFLAGS)			  \
   $(SYSLOG_NG_CFLAGS)			  \
