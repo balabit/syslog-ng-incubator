@@ -35,21 +35,21 @@
 #include <features.h>
 #include <stddef.h>
 
-typedef gboolean (*lookup_method)(GString *key, gchar *member_name, GString *result);
+typedef gboolean (*lookup_method)(gchar *key, gchar *member_name, GString *result);
 typedef gboolean (*format_member)(gchar *member_name, gpointer member, GString *result);
 
 static gboolean
-tf_getent_services(GString *key, gchar *member_name, GString *result)
+tf_getent_services(gchar *key, gchar *member_name, GString *result)
 {
   struct servent serv, *res;
   glong d;
   gboolean is_num;
   char buf[4096];
 
-  if ((is_num = parse_number(key->str, &d)) == TRUE)
+  if ((is_num = parse_number(key, &d)) == TRUE)
     getservbyport_r((int)ntohs(d), NULL, &serv, buf, sizeof(buf), &res);
   else
-    getservbyname_r(key->str, NULL, &serv, buf, sizeof(buf), &res);
+    getservbyname_r(key, NULL, &serv, buf, sizeof(buf), &res);
 
   if (res == NULL)
     return TRUE;
@@ -123,7 +123,7 @@ _find_formatter(formatter_map_t *map, gchar *member_name)
 }
 
 static gboolean
-tf_getent_passwd(GString *key, gchar *member_name, GString *result)
+tf_getent_passwd(gchar *key, gchar *member_name, GString *result)
 {
   struct passwd pwd;
   struct passwd *res;
@@ -139,15 +139,15 @@ tf_getent_passwd(GString *key, gchar *member_name, GString *result)
 
   buf = g_malloc(bufsize);
 
-  if ((is_num = parse_number(key->str, &d)) == TRUE)
+  if ((is_num = parse_number(key, &d)) == TRUE)
     s = getpwuid_r((uid_t)d, &pwd, buf, bufsize, &res);
   else
-    s = getpwnam_r(key->str, &pwd, buf, bufsize, &res);
+    s = getpwnam_r(key, &pwd, buf, bufsize, &res);
 
   if (res == NULL && s != 0)
     {
       msg_error("$(getent passwd) failed",
-                evt_tag_str("key", key->str),
+                evt_tag_str("key", key),
                 evt_tag_errno("errno", errno),
                 NULL);
       g_free(buf);
@@ -173,7 +173,7 @@ tf_getent_passwd(GString *key, gchar *member_name, GString *result)
   if (s == -1)
     {
       msg_error("$(getent passwd): unknown member",
-                evt_tag_str("key", key->str),
+                evt_tag_str("key", key),
                 evt_tag_str("member", member_name),
                 NULL);
       g_free(buf);
@@ -233,7 +233,7 @@ tf_getent(LogMessage *msg, gint argc, GString *argv[], GString *result)
       return FALSE;
     }
 
-  return lookup(argv[1], (argc == 2) ? NULL : argv[2]->str, result);
+  return lookup(argv[1]->str, (argc == 2) ? NULL : argv[2]->str, result);
 }
 TEMPLATE_FUNCTION_SIMPLE(tf_getent);
 
