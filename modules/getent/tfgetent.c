@@ -33,11 +33,13 @@
 #include <unistd.h>
 #include <errno.h>
 #include <features.h>
+#include <stddef.h>
 
-typedef gboolean (*lookup_method)(GString *key, GString *result);
+typedef gboolean (*lookup_method)(GString *key, gchar *member_name, GString *result);
+typedef gboolean (*format_member)(gchar *member_name, gpointer member, GString *result);
 
 static gboolean
-tf_getent_services(GString *key, GString *result)
+tf_getent_services(GString *key, gchar *member_name, GString *result)
 {
   struct servent serv, *res;
   glong d;
@@ -61,7 +63,67 @@ tf_getent_services(GString *key, GString *result)
 }
 
 static gboolean
-tf_getent_passwd(GString *key, GString *result)
+_getent_format_string(gchar *member_name, gpointer member, GString *result)
+{
+  char *value = *(char **)member;
+
+  g_string_append(result, value);
+  return TRUE;
+}
+
+static gboolean
+_getent_format_uid_gid(gchar *member_name, gpointer member, GString *result)
+{
+  if (strcmp(member_name, "uid") == 0)
+    {
+      uid_t u = *(uid_t *)member;
+
+      g_string_append_printf(result, "%" G_GUINT64_FORMAT, (guint64)u);
+    }
+  else
+    {
+      gid_t g = *(gid_t *)member;
+
+      g_string_append_printf(result, "%" G_GUINT64_FORMAT, (guint64)g);
+    }
+
+  return TRUE;
+}
+
+typedef struct
+{
+  gchar *member_name;
+  format_member format;
+  size_t offset;
+} formatter_map_t;
+
+static formatter_map_t passwd_field_map[] = {
+  { "name", _getent_format_string, offsetof(struct passwd, pw_name) },
+  { "uid", _getent_format_uid_gid, offsetof(struct passwd, pw_uid) },
+  { "gid", _getent_format_uid_gid, offsetof(struct passwd, pw_gid) },
+  { "gecos", _getent_format_string, offsetof(struct passwd, pw_gecos) },
+  { "dir", _getent_format_string, offsetof(struct passwd, pw_dir) },
+  { "shell", _getent_format_string, offsetof(struct passwd, pw_shell) },
+  { NULL, NULL, 0 }
+};
+
+static int
+_find_formatter(formatter_map_t *map, gchar *member_name)
+{
+  gint i = 0;
+
+  while (map[i].member_name != NULL)
+    {
+      if (strcmp(map[i].member_name, member_name) == 0)
+        return i;
+      i++;
+    }
+
+  return -1;
+}
+
+static gboolean
+tf_getent_passwd(GString *key, gchar *member_name, GString *result)
 {
   struct passwd pwd;
   struct passwd *res;
@@ -69,7 +131,7 @@ tf_getent_passwd(GString *key, GString *result)
   long bufsize;
   int s;
   glong d;
-  gboolean is_num;
+  gboolean is_num, r;
 
   bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
   if (bufsize == -1)
@@ -92,17 +154,37 @@ tf_getent_passwd(GString *key, GString *result)
       return FALSE;
     }
 
-  if (res != NULL)
+  if (member_name == NULL)
     {
       if (is_num)
-        g_string_append(result, res->pw_name);
+        member_name = "name";
       else
-        g_string_append_printf(result, "%lu", (unsigned long)res->pw_uid);
+        member_name = "uid";
     }
 
-  g_free(buf);
+  if (res == NULL)
+    {
+      g_free(buf);
+      return FALSE;
+    }
 
-  return TRUE;
+  s = _find_formatter(passwd_field_map, member_name);
+
+  if (s == -1)
+    {
+      msg_error("$(getent passwd): unknown member",
+                evt_tag_str("key", key->str),
+                evt_tag_str("member", member_name),
+                NULL);
+      g_free(buf);
+      return FALSE;
+    }
+
+  r = passwd_field_map[s].format(member_name,
+                                 ((uint8_t *)res) + passwd_field_map[s].offset,
+                                 result);
+  g_free(buf);
+  return r;
 }
 
 static struct
@@ -134,9 +216,9 @@ tf_getent(LogMessage *msg, gint argc, GString *argv[], GString *result)
 {
   lookup_method lookup;
 
-  if (argc != 2)
+  if (argc != 2 && argc != 3)
     {
-      msg_error("$(getent) takes exactly two arguments",
+      msg_error("$(getent) takes either two or three arguments",
                 evt_tag_int("argc", argc),
                 NULL);
       return FALSE;
@@ -151,7 +233,7 @@ tf_getent(LogMessage *msg, gint argc, GString *argv[], GString *result)
       return FALSE;
     }
 
-  return lookup(argv[1], result);
+  return lookup(argv[1], (argc == 2) ? NULL : argv[2]->str, result);
 }
 TEMPLATE_FUNCTION_SIMPLE(tf_getent);
 
