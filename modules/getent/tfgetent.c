@@ -27,6 +27,7 @@
 #include <cfg.h>
 #include <parse-number.h>
 
+#include <grp.h>
 #include <pwd.h>
 #include <netdb.h>
 #include <stdlib.h>
@@ -89,6 +90,7 @@ _find_formatter(formatter_map_t *map, gchar *member_name)
 }
 
 #include "getent-services.c"
+#include "getent-group.c"
 #include "getent-passwd.c"
 
 static struct
@@ -96,6 +98,7 @@ static struct
   gchar *entity;
   lookup_method lookup;
 } tf_getent_lookup_map[] =  {
+  { "group", tf_getent_group },
   { "passwd", tf_getent_passwd },
   { "services", tf_getent_services },
   { NULL, NULL }

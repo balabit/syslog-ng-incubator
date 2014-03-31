@@ -6,6 +6,7 @@ modules_getent_libtfgetent_la_SOURCES	= \
 
 EXTRA_DIST				+=\
   modules/getent/getent-services.c	  \
+  modules/getent/getent-group.c	  \
   modules/getent/getent-passwd.c
 
 modules_getent_libtfgetent_la_CPPFLAGS	= \
