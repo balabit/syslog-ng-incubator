@@ -47,6 +47,25 @@ typedef struct
 } formatter_map_t;
 
 static gboolean
+_getent_format_array(gchar *member_name, gpointer member, GString *result)
+{
+  int i = 0;
+  char *o = *(char **)member;
+  char *p = *(char **)o;
+  char *sep = "";
+
+  do
+  {
+    g_string_append(result, sep);
+    g_string_append(result, p);
+    sep = ",";
+    p = *( (char **)o + ++i);
+  } while (p != NULL && p != '\0');
+
+  return TRUE;
+}
+
+static gboolean
 _getent_format_string(gchar *member_name, gpointer member, GString *result)
 {
   char *value = *(char **)member;

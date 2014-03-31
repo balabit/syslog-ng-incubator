@@ -23,6 +23,7 @@
 static formatter_map_t group_field_map[] = {
   { "name", _getent_format_string, offsetof(struct group, gr_name) },
   { "gid", _getent_format_uid_gid, offsetof(struct group, gr_gid) },
+  { "mem", _getent_format_array, offsetof(struct group, gr_mem) },
   { NULL, NULL, 0 }
 };
 
