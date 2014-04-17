@@ -359,14 +359,14 @@ riemann_worker_insert(LogThrDestDriver *s)
         case TYPE_HINT_STRING:
           {
             gfloat f;
-            gchar *endptr;
-            gboolean r;
+            gchar *endptr = NULL;
+            gboolean r = TRUE;
 
             errno = 0;
             f = strtof(sb_gstring_string(str)->str, &endptr);
             if (errno == ERANGE && (f == HUGE_VAL || f == -HUGE_VAL))
               r = FALSE;
-            if (endptr == sb_gstring_string(str)->str)
+            if (f == 0 && endptr == sb_gstring_string(str)->str)
               r = FALSE;
 
             if (r)
