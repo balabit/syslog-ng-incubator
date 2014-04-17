@@ -27,6 +27,7 @@
 #include <cfg.h>
 #include <parse-number.h>
 
+#include <grp.h>
 #include <pwd.h>
 #include <netdb.h>
 #include <stdlib.h>
@@ -44,6 +45,25 @@ typedef struct
   format_member format;
   size_t offset;
 } formatter_map_t;
+
+static gboolean
+_getent_format_array(gchar *member_name, gpointer member, GString *result)
+{
+  int i = 0;
+  char *o = *(char **)member;
+  char *p = *(char **)o;
+  char *sep = "";
+
+  do
+  {
+    g_string_append(result, sep);
+    g_string_append(result, p);
+    sep = ",";
+    p = *( (char **)o + ++i);
+  } while (p != NULL && p != '\0');
+
+  return TRUE;
+}
 
 static gboolean
 _getent_format_string(gchar *member_name, gpointer member, GString *result)
@@ -89,6 +109,7 @@ _find_formatter(formatter_map_t *map, gchar *member_name)
 }
 
 #include "getent-services.c"
+#include "getent-group.c"
 #include "getent-passwd.c"
 
 static struct
@@ -96,6 +117,7 @@ static struct
   gchar *entity;
   lookup_method lookup;
 } tf_getent_lookup_map[] =  {
+  { "group", tf_getent_group },
   { "passwd", tf_getent_passwd },
   { "services", tf_getent_services },
   { NULL, NULL }
