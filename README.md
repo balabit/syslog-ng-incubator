@@ -46,6 +46,12 @@ Contents
 
    [sng:bf+]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/basicfuncs-plus/
 
+ * [$(getent) template function][sng:tfgetent]: A template function to
+   look up users (by uid or name), groups or services, and retrieve
+   some of the found properties.
+
+   [sng:tfgetent]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/getent/
+
  * [RSS destination][sng:rss]: A very simple destination module that
    allows one to offer log messages as an RSS feed.
 
