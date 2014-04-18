@@ -136,6 +136,10 @@ if test "x$PERL" != "x"; then
   fi
 fi
 
+dnl ***************************************************************************
+dnl python checks
+dnl ***************************************************************************
+PKG_CHECK_MODULES(PYTHON, python >= 2.6, enable_python="yes", enable_python="no")
 
 dnl ***************************************************************************
 dnl misc features to be enabled
@@ -148,6 +152,7 @@ AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
+AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -162,6 +167,7 @@ echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  perl:                ${enable_perl:-yes}"
+echo "  python:              ${enable_python:-yes}"
 echo "  riemann:             ${enable_riemann:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
