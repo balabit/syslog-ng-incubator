@@ -121,6 +121,23 @@ fi
 PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,enable_lua="yes",enable_lua="no")
 
 dnl ***************************************************************************
+dnl Perl checks
+dnl ***************************************************************************
+enable_perl="no"
+AC_CHECK_PROG(PERL, perl, perl)
+if test "x$PERL" != "x"; then
+  AC_MSG_CHECKING(for perl module ExtUtils::Embed)
+  $PERL -e "use ExtUtils::Embed; exit" >/dev/null 2>&1
+  if test $? -ne 0; then
+    AC_MSG_RESULT(no)
+  else
+    AC_MSG_RESULT(ok)
+    enable_perl="yes"
+  fi
+fi
+
+
+dnl ***************************************************************************
 dnl misc features to be enabled
 dnl ***************************************************************************
 
@@ -130,6 +147,7 @@ AC_SUBST(moduledir)
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
+AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -143,6 +161,7 @@ echo "  graphite             yes"
 echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
+echo "  perl:                ${enable_perl:-yes}"
 echo "  riemann:             ${enable_riemann:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
