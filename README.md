@@ -28,6 +28,11 @@ Contents
 
    [sng:lua]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/lua/
 
+ * [Perl destination][sng:perl]: This destination allows one to write
+   destination plugins in Perl.
+
+   [sng:perl]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/perl/
+
  * [Trigger source][sng:trigger]: A very simple example source that
    periodically generates a message. Useful mostly for debugging
    purposes.
@@ -80,11 +85,13 @@ Installing the modules and tools follows the usual autotools way:
 
 Of course, one will need all the dependencies ([syslog-ng][sng],
 bison, flex, [riemann-c-client][lrc], [libmongo-client][lmc],
-[lua][lua]; of which the latter three are optional) installed too.
+[lua][lua], [perl][perl]; of which the latter four are optional)
+installed too.
 
  [lrc]: https://github.com/algernon/riemann-c-client
  [lmc]: https://github.com/algernon/libmongo-client
  [lua]: http://www.lua.org/
+ [perl]: http://www.perl.org/
 
 License
 -------
