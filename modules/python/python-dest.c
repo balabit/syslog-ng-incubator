@@ -420,15 +420,18 @@ python_worker_init(LogPipe *d)
       return FALSE;
     }
 
-  self->py.init = PyObject_GetAttrString(self->py.module,
+  if (self->init_func_name)
+    self->py.init = PyObject_GetAttrString(self->py.module,
                                            self->init_func_name);
   if (self->py.init && !PyCallable_Check(self->py.init))
     {
       Py_DECREF(self->py.init);
       self->py.init = NULL;
     }
-  self->py.deinit = PyObject_GetAttrString(self->py.module,
-                                           self->deinit_func_name);
+
+  if (self->deinit_func_name)
+    self->py.deinit = PyObject_GetAttrString(self->py.module,
+                                             self->deinit_func_name);
   if (self->py.deinit && !PyCallable_Check(self->py.deinit))
     {
       Py_DECREF(self->py.deinit);
