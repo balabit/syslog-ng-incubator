@@ -140,7 +140,7 @@ perl_dd_format_persist_name(LogThrDestDriver *d)
 /** Perl calling helpers **/
 
 static gboolean
-_perl_call_func_noargs(PerlDestDriver *self, const gchar *fname)
+_call_perl_function_with_no_arguments(PerlDestDriver *self, const gchar *fname)
 {
   PerlInterpreter *my_perl = self->perl;
   char *args[] = { NULL };
@@ -250,7 +250,7 @@ static gboolean
 perl_worker_eval(LogThrDestDriver *d)
 {
   PerlDestDriver *self = (PerlDestDriver *)d;
-  gboolean success, need_drop;
+  gboolean success, vp_ok;
   LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
   PerlInterpreter *my_perl = self->perl;
@@ -275,10 +275,10 @@ perl_worker_eval(LogThrDestDriver *d)
   args[0] = self->perl;
   args[1] = kvmap;
   args[2] = self;
-  need_drop = !value_pairs_foreach(self->vp, perl_worker_vp_add_one,
+  vp_ok = value_pairs_foreach(self->vp, perl_worker_vp_add_one,
                                    msg, self->seq_num, &self->template_options,
                                    args);
-  if (need_drop && (self->template_options.on_error & ON_ERROR_DROP_MESSAGE))
+  if (!vp_ok && (self->template_options.on_error & ON_ERROR_DROP_MESSAGE))
     goto exit;
 
   XPUSHs(sv_2mortal(newRV_noinc((SV *)kvmap)));
@@ -326,7 +326,7 @@ perl_worker_eval(LogThrDestDriver *d)
   FREETMPS;
   LEAVE;
 
-  if (success && !need_drop)
+  if (success && vp_ok)
     {
       stats_counter_inc(self->super.stored_messages);
       step_sequence_number(&self->seq_num);
@@ -351,6 +351,7 @@ perl_worker_init(LogPipe *d)
   GlobalConfig *cfg = log_pipe_get_config(d);
   char *argv[] = { "syslog-ng", self->filename };
   PerlInterpreter *my_perl;
+  gboolean ret = TRUE;
 
   if (!self->filename)
     {
@@ -375,14 +376,15 @@ perl_worker_init(LogPipe *d)
     self->queue_func_name = g_strdup("queue");
 
   if (self->init_func_name)
-    _perl_call_func_noargs(self, self->init_func_name);
+    ret = _call_perl_function_with_no_arguments(self, self->init_func_name);
 
   msg_verbose("Initializing Perl destination",
               evt_tag_str("driver", self->super.super.super.id),
               evt_tag_str("script", self->filename),
               NULL);
 
-  return log_threaded_dest_driver_start(d);
+  ret &= log_threaded_dest_driver_start(d);
+  return ret;
 }
 
 static gboolean
@@ -390,8 +392,9 @@ perl_worker_deinit(LogPipe *d)
 {
   PerlDestDriver *self = (PerlDestDriver *)d;
 
-  if (self->deinit_func_name)
-    _perl_call_func_noargs(self, self->deinit_func_name);
+  if (self->deinit_func_name &&
+      !_call_perl_function_with_no_arguments(self, self->deinit_func_name))
+    return FALSE;
 
   perl_destruct(self->perl);
   perl_free(self->perl);
