@@ -7,7 +7,7 @@ install:
   - sudo ./add-release.sh syslog-ng-3.5
   - sudo apt-get update -qq
   - sudo apt-get install -qq aptitude
-  - sudo aptitude install -q -y pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-dev
+  - sudo aptitude install -q -y pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-dev libperl-dev
 before_script:
   - autoreconf -i
 script:
