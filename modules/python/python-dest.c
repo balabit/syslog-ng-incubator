@@ -155,9 +155,9 @@ python_dd_format_persist_name(LogThrDestDriver *d)
 
 /** Python calling helpers **/
 static gboolean
-_py_check_bool_ret(PythonDestDriver *self,
-                   const gchar *func_name,
-                   PyObject *ret)
+_py_function_return_value_as_bool(PythonDestDriver *self,
+                                  const gchar *func_name,
+                                  PyObject *ret)
 {
   if (!ret)
     {
@@ -201,9 +201,9 @@ _py_check_bool_ret(PythonDestDriver *self,
 }
 
 static gboolean
-_py_call_noarg_boolish(PythonDestDriver *self,
-                       const gchar *func_name,
-                       PyObject *func)
+_call_python_function_with_no_args_and_bool_return_value(PythonDestDriver *self,
+                                                         const gchar *func_name,
+                                                         PyObject *func)
 {
   PyObject *ret;
   gboolean success;
@@ -212,7 +212,7 @@ _py_call_noarg_boolish(PythonDestDriver *self,
     return TRUE;
 
   ret = PyObject_CallObject(func, NULL);
-  success = _py_check_bool_ret(self, func_name, ret);
+  success = _py_function_return_value_as_bool(self, func_name, ret);
   Py_DECREF(ret);
   return success;
 }
@@ -262,14 +262,51 @@ python_worker_vp_add_one(const gchar *name,
 /** Main code **/
 
 static gboolean
+_py_create_dict_from_message(PythonDestDriver *self, LogMessage *msg, PyObject **func_args)
+{
+  PyObject *dict;
+  gpointer args[2];
+  gboolean vp_ok;
+
+  *func_args = PyTuple_New(1);
+  dict = PyDict_New();
+
+  args[0] = self;
+  args[1] = dict;
+
+  vp_ok = value_pairs_foreach(self->vp, python_worker_vp_add_one,
+                              msg, self->seq_num, &self->template_options,
+                              args);
+  PyTuple_SetItem(*func_args, 0, dict);
+
+  return vp_ok;
+}
+
+static gboolean
+_py_call_function_with_arguments(PythonDestDriver *self,
+                                 const gchar *func_name, PyObject *func,
+                                 PyObject *func_args)
+{
+  gboolean success;
+  PyObject *ret;
+
+  ret = PyObject_CallObject(func, func_args);
+  success = _py_function_return_value_as_bool(self, func_name, ret);
+
+  Py_DECREF(func_args);
+  Py_DECREF(ret);
+
+  return success;
+}
+
+static gboolean
 python_worker_eval(LogThrDestDriver *d)
 {
   PythonDestDriver *self = (PythonDestDriver *)d;
-  gboolean success, need_drop;
+  gboolean success, vp_ok;
   LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
-  PyObject *dict, *ret, *pargs;
-  gpointer args[2];
+  PyObject *func_args;
 
   success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
   if (!success)
@@ -277,28 +314,14 @@ python_worker_eval(LogThrDestDriver *d)
 
   msg_set_context(msg);
 
-  /** setup */
-  pargs = PyTuple_New(1);
-  dict = PyDict_New();
+  vp_ok = _py_create_dict_from_message(self, msg, &func_args);
 
-  args[0] = self;
-  args[1] = dict;
-  need_drop = !value_pairs_foreach(self->vp, python_worker_vp_add_one,
-                                   msg, self->seq_num, &self->template_options,
-                                   args);
-  if (need_drop && (self->template_options.on_error & ON_ERROR_DROP_MESSAGE))
+  if (!vp_ok && (self->template_options.on_error & ON_ERROR_DROP_MESSAGE))
     goto exit;
 
-  PyTuple_SetItem(pargs, 0, dict);
-
-  ret = PyObject_CallObject(self->py.queue, pargs);
-  success = _py_check_bool_ret(self, self->queue_func_name, ret);
-
-  msg_set_context(NULL);
-
-  Py_DECREF(pargs);
-  Py_DECREF(ret);
-
+  success = _py_call_function_with_arguments(self,
+                                             self->queue_func_name, self->py.queue,
+                                             func_args);
   if (!success)
     {
       msg_error("Error while calling a Python function",
@@ -310,7 +333,9 @@ python_worker_eval(LogThrDestDriver *d)
 
  exit:
 
-  if (success && !need_drop)
+  msg_set_context(NULL);
+
+  if (success && vp_ok)
     {
       stats_counter_inc(self->super.stored_messages);
       step_sequence_number(&self->seq_num);
@@ -440,8 +465,9 @@ python_worker_init(LogPipe *d)
 
   if (self->py.init)
     {
-      if (!_py_call_noarg_boolish(self, self->init_func_name,
-                                  self->py.init))
+      if (!_call_python_function_with_no_args_and_bool_return_value(self,
+                                                                    self->init_func_name,
+                                                                    self->py.init))
         {
           if (self->py.init)
             Py_DECREF(self->py.init);
@@ -468,8 +494,9 @@ python_worker_deinit(LogPipe *d)
 
   if (self->py.deinit)
     {
-      if (!_py_call_noarg_boolish(self, self->deinit_func_name,
-                                  self->py.deinit))
+      if (!_call_python_function_with_no_args_and_bool_return_value(self,
+                                                                    self->deinit_func_name,
+                                                                    self->py.deinit))
         return FALSE;
     }
 
