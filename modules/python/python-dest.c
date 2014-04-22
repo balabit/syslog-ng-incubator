@@ -170,10 +170,7 @@ _py_function_return_value_as_bool(PythonDestDriver *self,
     }
 
   if (ret == Py_None)
-    {
-      Py_DECREF(ret);
-      return TRUE;
-    }
+    return TRUE;
 
   if (!PyBool_Check(ret))
     {
@@ -197,6 +194,7 @@ _py_function_return_value_as_bool(PythonDestDriver *self,
       return FALSE;
     }
 
+  Py_DECREF(ret);
   return TRUE;
 }
 
@@ -213,7 +211,6 @@ _call_python_function_with_no_args_and_bool_return_value(PythonDestDriver *self,
 
   ret = PyObject_CallObject(func, NULL);
   success = _py_function_return_value_as_bool(self, func_name, ret);
-  Py_DECREF(ret);
   return success;
 }
 
@@ -294,7 +291,8 @@ _py_call_function_with_arguments(PythonDestDriver *self,
   success = _py_function_return_value_as_bool(self, func_name, ret);
 
   Py_DECREF(func_args);
-  Py_DECREF(ret);
+  if (ret != Py_None)
+    Py_DECREF(ret);
 
   return success;
 }
@@ -307,12 +305,15 @@ python_worker_eval(LogThrDestDriver *d)
   LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
   PyObject *func_args;
+  PyGILState_STATE gstate;
 
   success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
   if (!success)
     return TRUE;
 
   msg_set_context(msg);
+
+  gstate = PyGILState_Ensure();
 
   vp_ok = _py_create_dict_from_message(self, msg, &func_args);
 
@@ -332,6 +333,8 @@ python_worker_eval(LogThrDestDriver *d)
     }
 
  exit:
+
+  PyGILState_Release(gstate);
 
   msg_set_context(NULL);
 
@@ -389,6 +392,7 @@ python_worker_init(LogPipe *d)
   PythonDestDriver *self = (PythonDestDriver *)d;
   GlobalConfig *cfg = log_pipe_get_config(d);
   PyObject *modname;
+  PyGILState_STATE gstate;
 
   if (!self->filename)
     {
@@ -406,7 +410,7 @@ python_worker_init(LogPipe *d)
   if (!self->queue_func_name)
     self->queue_func_name = g_strdup("queue");
 
-  Py_Initialize();
+  gstate = PyGILState_Ensure();
 
   g_list_foreach(self->imports, _py_do_import, self);
 
@@ -417,6 +421,7 @@ python_worker_init(LogPipe *d)
                 evt_tag_str("driver", self->super.super.super.id),
                 evt_tag_str("script", self->filename),
                 NULL);
+      PyGILState_Release(gstate);
       return FALSE;
     }
 
@@ -429,6 +434,7 @@ python_worker_init(LogPipe *d)
                 evt_tag_str("driver", self->super.super.super.id),
                 evt_tag_str("script", self->filename),
                 NULL);
+      PyGILState_Release(gstate);
       return FALSE;
     }
 
@@ -442,6 +448,7 @@ python_worker_init(LogPipe *d)
                 evt_tag_str("queue-function", self->queue_func_name),
                 NULL);
       Py_DECREF(self->py.module);
+      PyGILState_Release(gstate);
       return FALSE;
     }
 
@@ -475,9 +482,12 @@ python_worker_init(LogPipe *d)
             Py_DECREF(self->py.deinit);
           Py_DECREF(self->py.queue);
           Py_DECREF(self->py.module);
+          PyGILState_Release(gstate);
           return FALSE;
         }
     }
+
+  PyGILState_Release(gstate);
 
   msg_verbose("Initializing Python destination",
               evt_tag_str("driver", self->super.super.super.id),
@@ -491,16 +501,22 @@ static gboolean
 python_worker_deinit(LogPipe *d)
 {
   PythonDestDriver *self = (PythonDestDriver *)d;
+  PyGILState_STATE gstate;
+
+  gstate = PyGILState_Ensure();
 
   if (self->py.deinit)
     {
       if (!_call_python_function_with_no_args_and_bool_return_value(self,
                                                                     self->deinit_func_name,
                                                                     self->py.deinit))
-        return FALSE;
+        {
+          PyGILState_Release(gstate);
+          return FALSE;
+        }
     }
 
-  Py_Finalize();
+  PyGILState_Release(gstate);
 
   return log_threaded_dest_driver_deinit_method(d);
 }

@@ -27,6 +27,8 @@
 #include "plugin.h"
 #include "plugin-types.h"
 
+#include <Python.h>
+
 extern CfgParser python_parser;
 
 static Plugin python_plugin =
@@ -39,6 +41,14 @@ static Plugin python_plugin =
 gboolean
 python_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 {
+  Py_Initialize();
+
+  if (!PyEval_ThreadsInitialized())
+    {
+      PyEval_InitThreads();
+      PyEval_ReleaseLock();
+    }
+
   plugin_register(cfg, &python_plugin, 1);
   return TRUE;
 }
