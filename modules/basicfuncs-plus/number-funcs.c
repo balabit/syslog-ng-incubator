@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013, 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -51,9 +51,9 @@ tf_num_parse(gint argc, GString *argv[],
 
   if (!parse_number_with_suffix(argv[1]->str, m))
     {
-      msg_debug("Parsing failed, template function's first argument is not a number",
+      msg_debug("Parsing failed, template function's second argument is not a number",
                 evt_tag_str("function", func_name),
-                evt_tag_str("arg1", argv[1]->str), NULL);
+                evt_tag_str("arg2", argv[1]->str), NULL);
       return FALSE;
     }
 
