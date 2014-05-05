@@ -21,6 +21,8 @@
  *
  */
 
+#define LUA_COMPAT_MODULE
+
 #include "lua-utils.h"
 #include <lauxlib.h>
 #include "messages.h"
