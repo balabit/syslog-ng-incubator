@@ -183,7 +183,7 @@ _py_function_return_value_as_bool(PythonDestDriver *self,
       return FALSE;
     }
 
-  if (PyInt_AsLong(ret) != 1)
+  if (PyLong_AsLong(ret) != 1)
     {
       msg_error("Python function returned FALSE",
                 evt_tag_str("driver", self->super.super.super.id),
@@ -234,19 +234,19 @@ python_worker_vp_add_one(const gchar *name,
         gint64 i;
 
         if (type_cast_to_int64(value, &i, NULL))
-          PyDict_SetItemString(dict, name, PyInt_FromLong(i));
+          PyDict_SetItemString(dict, name, PyLong_FromLong(i));
         else
           {
             need_drop = type_cast_drop_helper(self->template_options.on_error,
                                               value, "int");
 
             if (fallback)
-              PyDict_SetItemString(dict, name, PyString_FromString(value));
+              PyDict_SetItemString(dict, name, PyUnicode_FromString(value));
           }
         break;
       }
     case TYPE_HINT_STRING:
-      PyDict_SetItemString(dict, name, PyString_FromString(value));
+      PyDict_SetItemString(dict, name, PyUnicode_FromString(value));
       break;
     default:
       need_drop = type_cast_drop_helper(self->template_options.on_error,
@@ -363,7 +363,7 @@ _py_do_import(gpointer data, gpointer user_data)
   PythonDestDriver *self = (PythonDestDriver *)user_data;
   PyObject *module, *modobj;
 
-  module = PyString_FromString(modname);
+  module = PyUnicode_FromString(modname);
   if (!module)
     {
       msg_error("Error allocating Python string",
@@ -414,7 +414,7 @@ python_worker_init(LogPipe *d)
 
   g_list_foreach(self->imports, _py_do_import, self);
 
-  modname = PyString_FromString(self->filename);
+  modname = PyUnicode_FromString(self->filename);
   if (!modname)
     {
       msg_error("Unable to convert filename to Python string",

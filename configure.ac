@@ -49,6 +49,9 @@ AC_ARG_ENABLE(luajit,
    [  --enable-luajit          Use luajit instead of standard liblua for Lua support],
    enable_luajit="yes",)
 
+AC_ARG_WITH(python,
+   [  --with-python=VERSION    Build with a specific version of python])
+
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -139,7 +142,17 @@ fi
 dnl ***************************************************************************
 dnl python checks
 dnl ***************************************************************************
-PKG_CHECK_MODULES(PYTHON, python >= 2.6, enable_python="yes", enable_python="no")
+if test "x$with_python" != "xno"; then
+  case "$with_python" in
+    "yes"|"")
+        with_python="python"
+        ;;
+    [[0-9]]*)
+        with_python="python-${with_python}"
+        ;;
+  esac
+  PKG_CHECK_MODULES(PYTHON, $with_python >= 2.6, enable_python="yes", enable_python="no")
+fi
 
 dnl ***************************************************************************
 dnl misc features to be enabled
@@ -167,7 +180,7 @@ echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  perl:                ${enable_perl:-yes}"
-echo "  python:              ${enable_python:-yes}"
+echo "  python:              ${enable_python:-yes} (${with_python})"
 echo "  riemann:             ${enable_riemann:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
