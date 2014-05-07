@@ -1,0 +1,11 @@
+#! /bin/sh
+set -e
+set -x
+
+builddir="build/$(date +%s)"
+install -d "${builddir}"
+cd "${builddir}"
+../../configure --enable-silent-rules $@
+make distcheck \
+     DESTDIR="$(pwd)/distcheck-dir" \
+     DISTCHECK_CONFIGURE_FLAGS="--enable-silent-rules $@"
