@@ -29,9 +29,55 @@
 typedef struct _TFGraphiteState
 {
   TFSimpleFuncState super;
-  NVHandle unix_timestamp_handle;
   ValuePairs *vp;
+  LogTemplate *timestamp_template;
 } TFGraphiteState;
+
+typedef struct _TFGraphiteArgumentsUserData
+{
+  TFGraphiteState *state;
+  GlobalConfig *cfg;
+} TFGraphiteArgumentsUserData;
+
+static gboolean
+tf_graphite_set_timestamp(const gchar *option_name, const gchar *value,
+                       gpointer data, GError **error)
+{
+  TFGraphiteArgumentsUserData *args = (TFGraphiteArgumentsUserData *) data;
+  
+  args->state->timestamp_template = log_template_new(args->cfg, "graphite_timestamp_template");
+  log_template_compile(args->state->timestamp_template, value, NULL);
+  return TRUE;
+};
+
+static gboolean
+tf_graphite_parse_command_line_arguments(TFGraphiteState *self, gint *argc, gchar ***argv, LogTemplate *parent)
+{
+  GOptionContext *ctx;
+  GOptionGroup *og; 
+  TFGraphiteArgumentsUserData userdata;
+  gboolean success;
+  GError *error = NULL;
+
+  GOptionEntry graphite_options[] = {
+     { "timestamp", 't', 0, G_OPTION_ARG_CALLBACK, tf_graphite_set_timestamp, NULL, NULL }, 
+     { NULL },
+  };
+
+  userdata.state = self;
+  userdata.cfg = parent->cfg;
+
+  ctx = g_option_context_new ("graphite-options");
+  og = g_option_group_new (NULL, NULL, NULL, &userdata, NULL);
+  g_option_group_add_entries(og, graphite_options);
+  g_option_context_set_main_group(ctx, og); 
+  g_option_context_set_ignore_unknown_options(ctx, TRUE);
+
+  success = g_option_context_parse (ctx, argc, argv, &error);
+  g_option_context_free (ctx);
+
+  return success;
+}
 
 static gboolean
 tf_graphite_prepare(LogTemplateFunction *self, gpointer s, LogTemplate *parent,
@@ -41,11 +87,18 @@ tf_graphite_prepare(LogTemplateFunction *self, gpointer s, LogTemplate *parent,
   TFGraphiteState *state = (TFGraphiteState *)s;
   ValuePairsTransformSet *vpts;
 
+  if (!tf_graphite_parse_command_line_arguments(state, &argc, &argv, parent))
+    return FALSE;
+
+  if (!state->timestamp_template)
+   {
+     state->timestamp_template = log_template_new(parent->cfg, "graphite_timestamp_template");
+     log_template_compile(state->timestamp_template, "$R_UNIXTIME", NULL);
+   }
+
   state->vp = value_pairs_new_from_cmdline (parent->cfg, argc, argv, error);
   if (!state->vp)
     return FALSE;
-
-  state->unix_timestamp_handle = log_msg_get_value_handle("R_UNIXTIME");
 
   /* Always replace a leading dot with an underscore. */
   vpts = value_pairs_transform_set_new(".*");
@@ -77,13 +130,14 @@ tf_graphite_foreach_func(const gchar *name, TypeHint type, const gchar *value, g
 }
 
 static gboolean
-tf_graphite_format(GString *result, ValuePairs *vp, LogMessage *msg, const LogTemplateOptions *template_options, NVHandle unix_timestamp_handle)
+tf_graphite_format(GString *result, ValuePairs *vp, LogMessage *msg, const LogTemplateOptions *template_options, LogTemplate *timestamp_template)
 {
   TFGraphiteForeachUserData userdata;
   gboolean return_value;
 
   userdata.result = result;
-  userdata.formatted_unixtime = g_string_new(log_msg_get_value(msg, unix_timestamp_handle, NULL));
+  userdata.formatted_unixtime = g_string_new("");
+  log_template_format(timestamp_template, msg, NULL, 0, 0, NULL, userdata.formatted_unixtime);
 
   return_value = value_pairs_foreach(vp, tf_graphite_foreach_func, msg, 0, template_options, &userdata);
 
@@ -101,7 +155,7 @@ tf_graphite_call(LogTemplateFunction *self, gpointer s,
   gsize orig_size = result->len;
 
   for (i = 0; i < args->num_messages; i++)
-    r &= tf_graphite_format(result, state->vp, args->messages[i], args->opts, state->unix_timestamp_handle);
+    r &= tf_graphite_format(result, state->vp, args->messages[i], args->opts, state->timestamp_template);
 
   if (!r && (args->opts->on_error & ON_ERROR_DROP_MESSAGE))
     g_string_set_size(result, orig_size);
