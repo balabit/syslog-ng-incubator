@@ -128,7 +128,8 @@ dnl Perl checks
 dnl ***************************************************************************
 enable_perl="no"
 AC_CHECK_PROG(PERL, perl, perl)
-AC_CHECK_LIB(perl, perl_construct,,PERL="")
+
+AC_CHECK_LIB(perl, perl_construct, [true], [PERL=""])
 if test "x$PERL" != "x"; then
   AC_MSG_CHECKING(for perl module ExtUtils::Embed)
   $PERL -e "use ExtUtils::Embed; exit" >/dev/null 2>&1
