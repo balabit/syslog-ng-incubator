@@ -3,7 +3,7 @@ dnl
 
 AC_PREREQ([2.68])
 
-AC_INIT([syslog-ng-incubator], [0.2.1], [algernon@madhouse-project.org])
+AC_INIT([syslog-ng-incubator], [0.3.0], [tusavik@gmail.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])
@@ -48,6 +48,9 @@ AC_ARG_WITH(ivykis,
 AC_ARG_ENABLE(luajit,
    [  --enable-luajit          Use luajit instead of standard liblua for Lua support],
    enable_luajit="yes",)
+
+AC_ARG_WITH(python,
+   [  --with-python=VERSION    Build with a specific version of python])
 
 dnl ***************************************************************************
 dnl Checks for programs.
@@ -121,6 +124,38 @@ fi
 PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,enable_lua="yes",enable_lua="no")
 
 dnl ***************************************************************************
+dnl Perl checks
+dnl ***************************************************************************
+enable_perl="no"
+AC_CHECK_PROG(PERL, perl, perl)
+AC_CHECK_LIB(perl, perl_construct,,PERL="")
+if test "x$PERL" != "x"; then
+  AC_MSG_CHECKING(for perl module ExtUtils::Embed)
+  $PERL -e "use ExtUtils::Embed; exit" >/dev/null 2>&1
+  if test $? -ne 0; then
+    AC_MSG_RESULT(no)
+  else
+    AC_MSG_RESULT(ok)
+    enable_perl="yes"
+  fi
+fi
+
+dnl ***************************************************************************
+dnl python checks
+dnl ***************************************************************************
+if test "x$with_python" != "xno"; then
+  case "$with_python" in
+    "yes"|"")
+        with_python="python"
+        ;;
+    [[0-9]]*)
+        with_python="python-${with_python}"
+        ;;
+  esac
+  PKG_CHECK_MODULES(PYTHON, $with_python >= 2.6, enable_python="yes", enable_python="no")
+fi
+
+dnl ***************************************************************************
 dnl misc features to be enabled
 dnl ***************************************************************************
 
@@ -130,6 +165,8 @@ AC_SUBST(moduledir)
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
+AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
+AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -143,7 +180,10 @@ echo "  graphite             yes"
 echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
+echo "  perl:                ${enable_perl:-yes}"
+echo "  python:              ${enable_python:-yes} (${with_python})"
 echo "  riemann:             ${enable_riemann:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
+echo "  tfgetent             yes"
 echo

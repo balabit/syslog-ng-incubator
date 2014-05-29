@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,46 +21,43 @@
  *
  */
 
+#include "perl-parser.h"
+#include "perl-dest.h"
+
 #include "plugin.h"
-#include "cfg.h"
 #include "plugin-types.h"
 
-#include "number-funcs.c"
-#include "cond-funcs.c"
-#include "string-funcs.c"
+#include <EXTERN.h>
+#include <perl.h>
 
-#if GLIB_CHECK_VERSION(2,32,0)
-#include "state-funcs.c"
-#endif
+extern CfgParser perl_parser;
 
-/*
- * Plugin glue
- */
-
-static Plugin basicfuncs_plus_plugins[] =
+static Plugin perl_plugin =
 {
-  TEMPLATE_FUNCTION_PLUGIN(tf_num_divx, "//"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_or, "or"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_string_padding, "padding"),
-#if GLIB_CHECK_VERSION(2,32,0)
-  TEMPLATE_FUNCTION_PLUGIN(tf_state, "state"),
-#endif
+  .type = LL_CONTEXT_DESTINATION,
+  .name = "perl",
+  .parser = &perl_parser,
 };
 
 gboolean
-basicfuncs_plus_module_init(GlobalConfig *cfg, CfgArgs *args)
+perl_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 {
-  plugin_register(cfg, basicfuncs_plus_plugins,
-                  G_N_ELEMENTS(basicfuncs_plus_plugins));
+  int argc = 1;
+  char *argv[] = {"syslog-ng"};
+  char *env[] = {NULL};
+
+  PERL_SYS_INIT3(&argc, (char ***)&argv, (char ***)&env);
+
+  plugin_register(cfg, &perl_plugin, 1);
   return TRUE;
 }
 
 const ModuleInfo module_info =
 {
-  .canonical_name = "basicfuncs-plus",
+  .canonical_name = "perl",
   .version = VERSION,
-  .description = "The basicfuncs-plus module provides some additional template functions for syslog-ng.",
+  .description = "The perl module provides Perl scripted destination support for syslog-ng.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
-  .plugins = basicfuncs_plus_plugins,
-  .plugins_len = G_N_ELEMENTS(basicfuncs_plus_plugins),
+  .plugins = &perl_plugin,
+  .plugins_len = 1,
 };

@@ -28,6 +28,7 @@
 /ylwrap
 
 /b/
+/build/
 
 /debian/autoreconf.*
 /debian/build-tree/

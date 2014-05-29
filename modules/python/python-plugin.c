@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013, 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013, 2014 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Gergely Nagy <algernon@balabit.hu>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,46 +21,44 @@
  *
  */
 
+#include "python-parser.h"
+#include "python-dest.h"
+
 #include "plugin.h"
-#include "cfg.h"
 #include "plugin-types.h"
 
-#include "number-funcs.c"
-#include "cond-funcs.c"
-#include "string-funcs.c"
+#include <Python.h>
 
-#if GLIB_CHECK_VERSION(2,32,0)
-#include "state-funcs.c"
-#endif
+extern CfgParser python_parser;
 
-/*
- * Plugin glue
- */
-
-static Plugin basicfuncs_plus_plugins[] =
+static Plugin python_plugin =
 {
-  TEMPLATE_FUNCTION_PLUGIN(tf_num_divx, "//"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_or, "or"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_string_padding, "padding"),
-#if GLIB_CHECK_VERSION(2,32,0)
-  TEMPLATE_FUNCTION_PLUGIN(tf_state, "state"),
-#endif
+  .type = LL_CONTEXT_DESTINATION,
+  .name = "python",
+  .parser = &python_parser,
 };
 
 gboolean
-basicfuncs_plus_module_init(GlobalConfig *cfg, CfgArgs *args)
+python_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 {
-  plugin_register(cfg, basicfuncs_plus_plugins,
-                  G_N_ELEMENTS(basicfuncs_plus_plugins));
+  Py_Initialize();
+
+  if (!PyEval_ThreadsInitialized())
+    {
+      PyEval_InitThreads();
+      PyEval_ReleaseLock();
+    }
+
+  plugin_register(cfg, &python_plugin, 1);
   return TRUE;
 }
 
 const ModuleInfo module_info =
 {
-  .canonical_name = "basicfuncs-plus",
+  .canonical_name = "python",
   .version = VERSION,
-  .description = "The basicfuncs-plus module provides some additional template functions for syslog-ng.",
+  .description = "The python module provides Python scripted destination support for syslog-ng.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
-  .plugins = basicfuncs_plus_plugins,
-  .plugins_len = G_N_ELEMENTS(basicfuncs_plus_plugins),
+  .plugins = &python_plugin,
+  .plugins_len = 1,
 };

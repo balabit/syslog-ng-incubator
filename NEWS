@@ -1,5 +1,31 @@
 #+STARTUP: indent showall                       -*- org -*-
 
+* 0.3.0 - <2014-05-28 Wed>
+
+New scripted destinations are introduced by algernon 
+<algernon@madhouse-project.org>: Python and Perl. Additionally
+several bugfixes, small features and the getent template function are
+introduced.
+
+** Feature: Python and Perl destination
+
+These destinations are very similar to the current Lua destination,
+except that their queue method get a dict (or hash in Perl) as a parameter.
+
+** Feature: getent template function.
+
+Getent template function can query information from the system user databases.
+For example it can convert uid to username and can get other fields from
+user databases.
+
+** Feature: Graphite output timestamp now configurable as a template.
+
+** Feature: Padding template function allows user to pad a string to a specified width.
+
+** Bugfix: Fixed float casting in Riemann destination
+
+** Bugfix: Fixed an error messsage in + template function.
+
 * 0.2.1 - <2014-03-12 Wed>
 
 This is a bug fix only release over the previous 0.2.0 version, with
