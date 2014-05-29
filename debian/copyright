@@ -11,6 +11,11 @@ Copyright: Copyright (C) 2011-2014 Gergely Nagy <algernon@balabit.hu>
  Copyright (C) 2011-2014 BalaBit IT Security Ltd.
 License: GPL-2+ with OpenSSL exception
 
+Files: modules/basicfuncs-plus/string-funcs.c
+Copyright: Copyright (C) 2014 Viktor Tusa <tusavik@gmail.com>
+ Copyright (C) 2014 BalaBit IT Ltd
+License: GPL-2+ with OpenSSL exception
+
 Files: modules/rss/*
 Copyright: Copyright (C) 2013 Viktor Tusa
  Copyright (C) 2013 BalaBit IT Ltd
@@ -38,7 +43,7 @@ Copyright: Copyright (C) 2014 Viktor Tusa
  Copyright (C) 2014 BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception
 
-Files: scl/elasticsearch/*
+Files: scl/elasticsearch/* modules/getent/* modules/perl/* modules/python/*
 Copyright: Copyright (C) 2014 Gergely Nagy
  Copyright (C) 2014 BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception

@@ -42,4 +42,6 @@
 /debian/syslog-ng-mod-lua/
 /debian/syslog-ng-mod-elasticsearch/
 /debian/syslog-ng-mod-graphite/
+/debian/syslog-ng-mod-perl/
+/debian/syslog-ng-mod-python/
 /debian/tmp/

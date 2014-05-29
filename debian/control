@@ -13,7 +13,9 @@ Build-Depends: debhelper (>= 9~),
                pkg-config, flex, bison,
                libmongo-client-dev (>= 0.1.6~),
                libriemann-client-dev,
-               liblua5.2-dev
+               liblua5.2-dev,
+               libperl-dev,
+               python-dev, dh-python
 Build-Conflicts: autoconf2.13
 Standards-Version: 3.9.5
 Homepage: https://github.com/balabit/syslog-ng-incubator
@@ -111,7 +113,8 @@ Description: Enhanced system logging daemon (extra template functions)
  .
  This package provides additional template functions such as $(//),
  which is a floating point division function, $(or) which does what
- the name implies and a $(state) function.
+ the name implies and a $(state) function. It also provides $(getent)
+ to query the passwd, group or services databases.
 
 Package: syslog-ng-mod-lua
 Architecture: any
@@ -137,6 +140,52 @@ Description: Enhanced system logging daemon (Lua destination)
  destination drivers without having to touch C, in Lua. It also
  includes the monitor() source driver, which allows one to write Lua
  functions that periodically trigger and emit log messages.
+
+Package: syslog-ng-mod-perl
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Enhanced system logging daemon (Perl destination)
+ syslog-ng is an enhanced log daemon, supporting a wide range of input
+ and output methods: syslog, unstructured text, message queues,
+ databases (SQL and NoSQL alike) and more.
+ .
+ Key features:
+ .
+  * receive and send RFC3164 and RFC5424 style syslog messages
+  * work with any kind of unstructured data
+  * receive and send JSON formatted messages
+  * classify and structure logs with builtin parsers (csv-parser(),
+    db-parser(), etc.)
+  * normalize, crunch and process logs as they flow through the system
+  * hand on messages for further processing using message queues (like
+    AMQP), files or databases (like PostgreSQL or MongoDB).
+ .
+ This package provides the Perl destination, allowing one to write
+ destination drivers without having to touch C, in Perl.
+
+Package: syslog-ng-mod-python
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Enhanced system logging daemon (Python destination)
+ syslog-ng is an enhanced log daemon, supporting a wide range of input
+ and output methods: syslog, unstructured text, message queues,
+ databases (SQL and NoSQL alike) and more.
+ .
+ Key features:
+ .
+  * receive and send RFC3164 and RFC5424 style syslog messages
+  * work with any kind of unstructured data
+  * receive and send JSON formatted messages
+  * classify and structure logs with builtin parsers (csv-parser(),
+    db-parser(), etc.)
+  * normalize, crunch and process logs as they flow through the system
+  * hand on messages for further processing using message queues (like
+    AMQP), files or databases (like PostgreSQL or MongoDB).
+ .
+ This package provides the Python destination, allowing one to write
+ destination drivers without having to touch C, in Python.
 
 Package: syslog-ng-mod-graphite
 Architecture: any

@@ -1,1 +1,2 @@
 usr/lib/syslog-ng/*/libbasicfuncs-plus.so
+usr/lib/syslog-ng/*/libtfgetent.so
