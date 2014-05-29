@@ -35,13 +35,5 @@
 /debian/files
 /debian/*.debhelper.log
 /debian/*.substvars
-/debian/syslog-ng-mod-riemann/
-/debian/syslog-ng-mod-trigger/
-/debian/syslog-ng-mod-rss/
-/debian/syslog-ng-mod-basicfuncs-plus/
-/debian/syslog-ng-mod-lua/
-/debian/syslog-ng-mod-elasticsearch/
-/debian/syslog-ng-mod-graphite/
-/debian/syslog-ng-mod-perl/
-/debian/syslog-ng-mod-python/
+/debian/syslog-ng-mod-*/
 /debian/tmp/
