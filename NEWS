@@ -1,5 +1,14 @@
 #+STARTUP: indent showall                       -*- org -*-
 
+* 0.3.1 - <2014-06-02 Mon>
+ 
+** Bugfix: Fixed linkage of modules 
+All modules were accidentally linked to libperl, now only 
+perl destination module is linked to libperl.
+
+** Bugfix: Fixed rss module linkage. 
+It wasn't linked to libsyslog-ng.so.
+
 * 0.3.0 - <2014-05-28 Wed>
 
 New scripted destinations are introduced by algernon 
