@@ -52,6 +52,23 @@ AC_ARG_ENABLE(luajit,
 AC_ARG_WITH(python,
    [  --with-python=VERSION    Build with a specific version of python])
 
+AC_ARG_ENABLE(riemann,
+   [  --disable-riemann	       Disable riemann destination],
+   ,enable_riemann="yes")
+
+AC_ARG_ENABLE(lua,
+   [  --disable-lua	       Disable lua based modules (lua-dest, monitoring source)],
+   ,enable_lua="yes")
+
+AC_ARG_ENABLE(perl,	       
+   [  --disable-perl	       Disable perl based modules (perl-dest)],
+   ,enable_perl="yes")
+
+AC_ARG_ENABLE(logmongource,
+   [  --disable-logmongource	      Disable logmongource tool],
+   ,enable_logmongource="yes")
+
+
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -101,45 +118,56 @@ fi
 dnl ***************************************************************************
 dnl libmongo-client headers/libraries
 dnl ***************************************************************************
-PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,enable_logmongource="no")
+if test "x$enable_logmongource" != "xno"; then
+  PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,enable_logmongource="no")
+fi
 
 dnl ***************************************************************************
 dnl riemann-client headers/libraries
 dnl ***************************************************************************
-PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,enable_riemann="no")
+if test "x$enable_riemann" != "xno"; then
+  PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,enable_riemann="no")
+fi
 
 dnl ***************************************************************************
 dnl lua headers/libraries
 dnl ***************************************************************************
-if test "x$enable_luajit" == "xyes"; then
- PKG_CHECK_EXISTS(luajit, [lua_mod="luajit"; LUA_MIN_VERSION="2.0"])
+if test "x$enable_lua" != "xno"; then
+  if test "x$enable_luajit" == "xyes"; then
+   PKG_CHECK_EXISTS(luajit, [lua_mod="luajit"; LUA_MIN_VERSION="2.0"])
+  fi
+  if test "x$lua_mod" != "xluajit"; then
+   PKG_CHECK_EXISTS(lua, lua_mod="lua",
+    PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
+     PKG_CHECK_EXISTS(lua-5.2, lua_mod="lua-5.2",
+      PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1",
+       PKG_CHECK_EXISTS(lua-5.1, lua_mod="lua-5.1")))))
+  fi
+  PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,enable_lua="yes",enable_lua="no")
 fi
-if test "x$lua_mod" != "xluajit"; then
- PKG_CHECK_EXISTS(lua, lua_mod="lua",
-  PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
-   PKG_CHECK_EXISTS(lua-5.2, lua_mod="lua-5.2",
-    PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1",
-     PKG_CHECK_EXISTS(lua-5.1, lua_mod="lua-5.1")))))
-fi
-PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,enable_lua="yes",enable_lua="no")
 
 dnl ***************************************************************************
 dnl Perl checks
 dnl ***************************************************************************
-enable_perl="no"
-AC_CHECK_PROG(PERL, perl, perl)
+if test "x$enable_perl" != "xno"; then
+  AC_CHECK_PROG(PERL, perl, perl)
+fi
 
 if test "x$PERL" != "x"; then
   AC_MSG_CHECKING(for perl module ExtUtils::Embed)
   $PERL -e "use ExtUtils::Embed; exit" >/dev/null 2>&1
   if test $? -ne 0; then
     AC_MSG_RESULT(no)
+    enable_perl="no"
   else
     AC_MSG_RESULT(ok)
     enable_perl="yes"
   fi
+else
+  enable_perl="no"
 fi
-if test "x$enable_perl" != "xno"; then
+
+if test "x$enable_perl" == "xyes"; then
    LDFLAGS_SAVE="$LDFLAGS"
    LDFLAGS="$LDFLAGS `$PERL -MExtUtils::Embed -e ldopts`"
    AC_CHECK_LIB(perl, perl_construct, [true], enable_perl="no")
@@ -159,6 +187,8 @@ if test "x$with_python" != "xno"; then
         ;;
   esac
   PKG_CHECK_MODULES(PYTHON, $with_python >= 2.6, enable_python="yes", enable_python="no")
+else
+  enable_python="no"
 fi
 
 dnl ***************************************************************************
