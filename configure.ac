@@ -89,7 +89,9 @@ dnl ***************************************************************************
 PKG_CHECK_MODULES(SYSLOG_NG, syslog-ng >= $SYSLOG_NG_MIN_VERSION)
 PKG_CHECK_MODULES(EVENTLOG, eventlog >= $EVENTLOG_MIN_VERSION)
 
-if test "x$with_ivykis" != "xno"; then
+syslog_ng_ivykis=[`pkg-config syslog-ng --variable ivykis`]
+
+if test "x$with_ivykis" != "xno" && test "x$syslog_ng_ivykis" != "xinternal"; then
    PKG_CHECK_MODULES(IVYKIS, ivykis >= $IVYKIS_MIN_VERSION,,true)
 fi
 
