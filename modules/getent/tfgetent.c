@@ -109,6 +109,7 @@ _find_formatter(formatter_map_t *map, gchar *member_name)
   return -1;
 }
 
+#include "getent-protocols.c"
 #include "getent-services.c"
 #include "getent-group.c"
 #include "getent-passwd.c"
@@ -121,6 +122,7 @@ static struct
   { "group", tf_getent_group },
   { "passwd", tf_getent_passwd },
   { "services", tf_getent_services },
+  { "protocols", tf_getent_protocols },
   { NULL, NULL }
 };
 
