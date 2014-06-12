@@ -33,7 +33,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <features.h>
 #include <stddef.h>
 
 typedef gboolean (*lookup_method)(gchar *key, gchar *member_name, GString *result);
