@@ -5,6 +5,7 @@ modules_getent_libtfgetent_la_SOURCES	= \
   modules/getent/tfgetent.c
 
 EXTRA_DIST				+=\
+  modules/getent/getent-protocols.c	  \
   modules/getent/getent-services.c	  \
   modules/getent/getent-group.c	  \
   modules/getent/getent-passwd.c
