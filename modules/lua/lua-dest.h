@@ -43,7 +43,8 @@ typedef struct _LuaDestDriver
   LogTemplate *template;
   LogTemplateOptions template_options;
   gint mode;
-  ValuePairs *globals;
+  ValuePairs *params;
+  GList *globals;
 } LuaDestDriver;
 
 LogDriver *lua_dd_new();
@@ -53,7 +54,10 @@ void lua_dd_set_deinit_func(LogDriver *d, gchar *deinit_func_name);
 void lua_dd_set_filename(LogDriver *d, gchar *filename);
 void lua_dd_set_template(LogDriver *d, LogTemplate *template);
 void lua_dd_set_mode(LogDriver *d, gchar *mode);
-void lua_dd_set_globals(LogDriver *d, ValuePairs *vp);
+void lua_dd_set_params(LogDriver *d, ValuePairs *vp);
+void lua_dd_add_global_constant(LogDriver *d, const char *name, const char *value);
+void lua_dd_add_global_constant_with_type_hint(LogDriver *d, const char *name, const char *value, const char *type_hint);
+void lua_dd_init_global_contants(LogDriver *d);
 
 LogTemplateOptions *lua_dd_get_template_options(LogDriver *d);
 
