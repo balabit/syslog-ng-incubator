@@ -28,11 +28,12 @@
 #include "driver.h"
 #include "logwriter.h"
 #include "value-pairs.h"
+#include "logthrdestdrv.h"
 #include <lua.h>
 
 typedef struct _LuaDestDriver
 {
-  LogDestDriver super;
+  LogThrDestDriver super;
   lua_State *state;
   gchar *template_string;
   gchar *filename;
