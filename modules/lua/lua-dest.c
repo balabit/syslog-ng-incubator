@@ -34,6 +34,10 @@
 #define LUA_DEST_MODE_RAW 1
 #define LUA_DEST_MODE_FORMATTED 2
 
+#ifndef SCS_LUA
+#define SCS_LUA 0
+#endif
+
 static gboolean
 lua_dd_load_file(LuaDestDriver *self)
 {
@@ -43,19 +47,45 @@ lua_dd_load_file(LuaDestDriver *self)
       msg_error("Error parsing lua script file for lua destination",
                 evt_tag_str("error", lua_tostring(self->state, -1)),
                 evt_tag_str("filename", self->filename),
-                evt_tag_str("driver_id", self->super.super.id),
+                evt_tag_str("driver_id", self->super.super.super.id),
                 NULL);
       return FALSE;
     }
   return TRUE;
 };
 
-static void
-lua_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options,
-             gpointer user_data)
+static void lua_dd_accept_message(LogMessage *msg, LogPathOptions *path_options)
 {
-  LuaDestDriver *self = (LuaDestDriver *) s;
+   log_msg_ack(msg, path_options);
+   log_msg_unref(msg);
+};
+
+static void lua_dd_ack_message(LuaDestDriver *self, LogMessage *msg, LogPathOptions *path_options)
+{
+   stats_counter_inc(self->super.stored_messages);
+   lua_dd_accept_message(msg, path_options);
+};
+
+static void lua_dd_drop_message(LuaDestDriver *self, LogMessage *msg, LogPathOptions *path_options)
+{
+   stats_counter_inc(self->super.dropped_messages);
+   lua_dd_accept_message(msg, path_options);
+};
+
+static gboolean
+lua_dd_queue(LogThrDestDriver *d)
+{
+  LuaDestDriver *self = (LuaDestDriver *) d;
+  LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
+  LogMessage *msg;
   SBGString *str = sb_gstring_acquire();
+  gboolean success;
+
+  success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
+  if (!success)
+    return TRUE;
+
+  msg_set_context(msg);
 
   lua_getglobal(self->state, self->queue_func_name);
 
@@ -70,16 +100,28 @@ lua_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options,
       lua_message_create_from_logmsg(self->state, msg);
     }
 
-  if (lua_pcall(self->state, 1, 0, 0))
-    msg_error("Error happened during calling Lua destination function!",
+  success = !lua_pcall(self->state, 1, 0, 0);
+
+  msg_set_context(NULL);
+  sb_gstring_release(str);
+
+  if (success)
+   {
+     lua_dd_ack_message(self, msg, &path_options);
+   }
+  else
+   {
+     msg_error("Error happened during calling Lua destination function!",
               evt_tag_str("error", lua_tostring(self->state, -1)),
               evt_tag_str("queue_func", self->queue_func_name),
               evt_tag_str("filename", self->filename),
-              evt_tag_str("driver_id", self->super.super.id),
+              evt_tag_str("driver_id", self->super.super.super.id),
               NULL);
 
-  log_dest_driver_queue_method(s, msg, path_options, user_data);
-  sb_gstring_release(str);
+     lua_dd_drop_message(self, msg, &path_options);
+   }  
+
+  return success;
 };
 
 static gboolean
@@ -95,7 +137,7 @@ lua_dd_check_and_call_function(LuaDestDriver *self, const char *function_name, c
                   evt_tag_str("function_type", function_type),
                   evt_tag_str("function_name", function_name),
                   evt_tag_str("filename", self->filename),
-                  evt_tag_str("driver_id", self->super.super.id),
+                  evt_tag_str("driver_id", self->super.super.super.id),
                   NULL);
       return TRUE;
     }
@@ -107,7 +149,7 @@ lua_dd_check_and_call_function(LuaDestDriver *self, const char *function_name, c
                 evt_tag_str("function_type", function_type),
                 evt_tag_str("function_name", function_name),
                 evt_tag_str("filename", self->filename),
-                evt_tag_str("driver_id", self->super.super.id),
+                evt_tag_str("driver_id", self->super.super.super.id),
                 NULL);
       return FALSE;
     }
@@ -134,7 +176,7 @@ lua_dd_check_existence_of_queue_func(LuaDestDriver *self)
       msg_error("Lua destination queue function cannot be found!",
                 evt_tag_str("queue_func", self->queue_func_name),
                 evt_tag_str("filename", self->filename),
-                evt_tag_str("driver_id", self->super.super.id),
+                evt_tag_str("driver_id", self->super.super.super.id),
                 NULL);
       return FALSE;
     }
@@ -220,7 +262,7 @@ lua_dd_init(LogPipe *s)
   if (!self->template)
     {
       msg_info("No template set in lua destination, falling back to template \"$MESSAGE\"",
-               evt_tag_str("driver_id", self->super.super.id),
+               evt_tag_str("driver_id", self->super.super.super.id),
                NULL);
       self->template = log_template_new(cfg, "default_lua_template");
       log_template_compile(self->template, "$MESSAGE", NULL);
@@ -229,7 +271,7 @@ lua_dd_init(LogPipe *s)
   if (!self->init_func_name)
     {
       msg_info("No init function name set, defaulting to \"lua_init_func\"",
-               evt_tag_str("driver_id", self->super.super.id),
+               evt_tag_str("driver_id", self->super.super.super.id),
                NULL);
       self->init_func_name = g_strdup("lua_init_func");
     }
@@ -237,7 +279,7 @@ lua_dd_init(LogPipe *s)
   if (!self->queue_func_name)
     {
       msg_info("No queue function name set, defaulting to \"lua_queue_func\"",
-               evt_tag_str("driver_id", self->super.super.id),
+               evt_tag_str("driver_id", self->super.super.super.id),
                NULL);
       self->queue_func_name = g_strdup("lua_queue_func");
     }
@@ -245,7 +287,7 @@ lua_dd_init(LogPipe *s)
   if (!self->deinit_func_name)
     {
       msg_info("No deinit function name set, defaulting to \"lua_deinit_func\"",
-               evt_tag_str("driver_id", self->super.super.id),
+               evt_tag_str("driver_id", self->super.super.super.id),
                NULL);
       self->deinit_func_name = g_strdup("lua_deinit_func");
     }
@@ -263,7 +305,7 @@ lua_dd_init(LogPipe *s)
       return FALSE;
     }
 
-  return log_dest_driver_init_method(s);
+  return log_threaded_dest_driver_start(s);
 }
 
 static gboolean
@@ -356,6 +398,36 @@ lua_dd_set_mode(LogDriver *d, gchar *mode)
     self->mode = LUA_DEST_MODE_FORMATTED;
 };
 
+static gchar *
+lua_dd_format_string_instance(LogThrDestDriver *d, char* name, size_t name_len)
+{
+  LuaDestDriver *self = (LuaDestDriver *)d;
+
+  g_snprintf(name, name_len,
+             "python,%s,%s,%s,%s",
+             self->filename,
+             self->init_func_name,
+             self->queue_func_name,
+             self->deinit_func_name);
+  return name;
+};
+
+static gchar *
+lua_dd_format_stats_instance(LogThrDestDriver *d)
+{
+  static gchar stats_name[1024];
+
+  return lua_dd_format_string_instance(d, stats_name, sizeof(stats_name));
+}
+
+static gchar *
+lua_dd_format_persist_name(LogThrDestDriver *d)
+{
+  static gchar persist_name[1024];
+
+  return lua_dd_format_string_instance(d, persist_name, sizeof(persist_name));
+}
+
 void
 lua_dd_set_globals(LogDriver *d, ValuePairs *vp)
 {
@@ -374,11 +446,17 @@ lua_dd_new()
   self->state = luaL_newstate();
   luaL_openlibs(self->state);
 
-  log_dest_driver_init_instance(&self->super);
-  self->super.super.super.init = lua_dd_init;
-  self->super.super.super.deinit = lua_dd_deinit;
-  self->super.super.super.free_fn = lua_dd_free;
-  self->super.super.super.queue = lua_dd_queue;
+  log_threaded_dest_driver_init_instance(&self->super);
+  self->super.super.super.super.init = lua_dd_init;
+  self->super.super.super.super.deinit = lua_dd_deinit;
+  self->super.super.super.super.free_fn = lua_dd_free;
 
-  return &self->super.super;
+  self->super.worker.insert = lua_dd_queue;
+  self->super.worker.disconnect = NULL;
+
+  self->super.format.stats_instance = lua_dd_format_stats_instance;
+  self->super.format.persist_name = lua_dd_format_persist_name;
+  self->super.stats_source = SCS_LUA;
+
+  return &self->super.super.super;
 }
