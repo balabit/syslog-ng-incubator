@@ -246,6 +246,31 @@ perl_worker_vp_add_one(const gchar *name,
 
 /** Main code **/
 
+static void
+_perl_thread_init(LogThrDestDriver *d)
+{
+  PerlDestDriver *self = (PerlDestDriver *)d;
+  PerlInterpreter *my_perl;
+  char *argv[] = { "syslog-ng", self->filename };
+
+  self->perl = perl_alloc();
+  perl_construct(self->perl);
+  my_perl = self->perl;
+  PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
+  perl_parse(self->perl, xs_init, 2, (char **)argv, NULL);
+
+  if (!self->queue_func_name)
+    self->queue_func_name = g_strdup("queue");
+
+  if (self->init_func_name)
+    _call_perl_function_with_no_arguments(self, self->init_func_name);
+
+  msg_verbose("Initializing Perl destination",
+              evt_tag_str("driver", self->super.super.super.id),
+              evt_tag_str("script", self->filename),
+              NULL);
+}
+
 static gboolean
 perl_worker_eval(LogThrDestDriver *d)
 {
@@ -349,9 +374,6 @@ perl_worker_init(LogPipe *d)
 {
   PerlDestDriver *self = (PerlDestDriver *)d;
   GlobalConfig *cfg = log_pipe_get_config(d);
-  char *argv[] = { "syslog-ng", self->filename };
-  PerlInterpreter *my_perl;
-  gboolean ret = TRUE;
 
   if (!self->filename)
     {
@@ -366,40 +388,20 @@ perl_worker_init(LogPipe *d)
 
   log_template_options_init(&self->template_options, cfg);
 
-  self->perl = perl_alloc();
-  perl_construct(self->perl);
-  my_perl = self->perl;
-  PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-  perl_parse(self->perl, xs_init, 2, (char **)argv, NULL);
-
-  if (!self->queue_func_name)
-    self->queue_func_name = g_strdup("queue");
-
-  if (self->init_func_name)
-    ret = _call_perl_function_with_no_arguments(self, self->init_func_name);
-
-  msg_verbose("Initializing Perl destination",
-              evt_tag_str("driver", self->super.super.super.id),
-              evt_tag_str("script", self->filename),
-              NULL);
-
-  ret &= log_threaded_dest_driver_start(d);
-  return ret;
+  return log_threaded_dest_driver_start(d);
 }
 
-static gboolean
-perl_worker_deinit(LogPipe *d)
+static void
+_perl_thread_deinit(LogThrDestDriver *d)
 {
   PerlDestDriver *self = (PerlDestDriver *)d;
 
   if (self->deinit_func_name &&
       !_call_perl_function_with_no_arguments(self, self->deinit_func_name))
-    return FALSE;
+    return;
 
   perl_destruct(self->perl);
   perl_free(self->perl);
-
-  return log_threaded_dest_driver_deinit_method(d);
 }
 
 static void
@@ -428,9 +430,10 @@ perl_dd_new(GlobalConfig *cfg)
   log_threaded_dest_driver_init_instance(&self->super);
 
   self->super.super.super.super.init = perl_worker_init;
-  self->super.super.super.super.deinit = perl_worker_deinit;
   self->super.super.super.super.free_fn = perl_dd_free;
 
+  self->super.worker.thread_init = _perl_thread_init;
+  self->super.worker.thread_deinit = _perl_thread_deinit;
   self->super.worker.disconnect = NULL;
   self->super.worker.insert = perl_worker_eval;
 
