@@ -50,7 +50,7 @@ AC_ARG_ENABLE(luajit,
    enable_luajit="yes",)
 
 AC_ARG_WITH(python,
-   [  --with-python=VERSION    Build with a specific version of python])
+   [  --with-python=VERSION    Build with a specific version of python],,with_python="auto")
 
 AC_ARG_ENABLE(riemann,
    [  --disable-riemann	       Disable riemann destination],
