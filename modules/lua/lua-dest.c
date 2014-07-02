@@ -38,6 +38,20 @@
 #define SCS_LUA 0
 #endif
 
+typedef struct _LuaGlobalConstant {
+   char *name;
+   char *value;
+   TypeHint type;
+} LuaGlobalConstant;
+
+static void
+lua_global_constant_free(LuaGlobalConstant *self)
+{
+  g_free(self->name);
+  g_free(self->value);
+  g_free(self);
+};
+
 static gboolean
 lua_dd_load_file(LuaDestDriver *self)
 {
@@ -72,6 +86,57 @@ static void lua_dd_drop_message(LuaDestDriver *self, LogMessage *msg, LogPathOpt
    lua_dd_accept_message(msg, path_options);
 };
 
+static void 
+lua_cast_and_push_value_to_stack(lua_State *state, const gchar *name, TypeHint type, const gchar *value)
+{
+  switch (type)
+    {
+    case TYPE_HINT_INT32:
+      {
+        gint32 i;
+
+        if (type_cast_to_int32(value, &i, NULL))
+          lua_pushinteger(state, i);
+        else
+          msg_error("Cannot cast value to integer",
+                    evt_tag_str("name", name),
+                    evt_tag_str("value", value),
+                    NULL);
+
+        break;
+      }
+    case TYPE_HINT_STRING:
+      lua_pushstring(state, value);
+      break;
+    default:
+      msg_error("Unsupported type hint (strings or integers only!)",
+                evt_tag_str("name", name),
+                evt_tag_str("value", value),
+                NULL);
+      break;
+    }
+
+};
+
+static void
+lua_dd_add_parameter_to_table(const gchar *name, TypeHint type, const gchar *value, gpointer user_data)
+{
+  lua_State *state = (lua_State *) user_data;
+
+  lua_pushstring(state, name);
+  lua_cast_and_push_value_to_stack(state, name, type, value);
+  
+  lua_settable(state, -3);  
+};
+
+static void
+lua_dd_create_parameter_table_for_queue_func(lua_State *state, ValuePairs *params, LogMessage *msg)
+{
+  lua_newtable(state);
+  value_pairs_foreach(params, lua_dd_add_parameter_to_table, msg, 0,
+                      NULL, state);
+}
+
 static gboolean
 lua_dd_queue(LogThrDestDriver *d)
 {
@@ -80,6 +145,7 @@ lua_dd_queue(LogThrDestDriver *d)
   LogMessage *msg;
   SBGString *str = sb_gstring_acquire();
   gboolean success;
+  int number_of_parameters = 1;
 
   success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
   if (!success)
@@ -100,7 +166,13 @@ lua_dd_queue(LogThrDestDriver *d)
       lua_message_create_from_logmsg(self->state, msg);
     }
 
-  success = !lua_pcall(self->state, 1, 0, 0);
+  if (self->params)
+    {
+      lua_dd_create_parameter_table_for_queue_func(self->state, self->params, msg);
+      number_of_parameters = 2;
+    }
+
+  success = !lua_pcall(self->state, number_of_parameters, 0, 0);
 
   msg_set_context(NULL);
   sb_gstring_release(str);
@@ -123,6 +195,7 @@ lua_dd_queue(LogThrDestDriver *d)
 
   return success;
 };
+
 
 static gboolean
 lua_dd_check_and_call_function(LuaDestDriver *self, const char *function_name, const char *function_type)
@@ -192,49 +265,24 @@ lua_dd_set_config_variable(lua_State *state, GlobalConfig *conf)
 };
 
 static gboolean
-lua_dd_inject_global_variable(const gchar *name,
-                              TypeHint type, const gchar *value,
+lua_dd_inject_global_variable(gpointer data,
                               gpointer user_data)
 {
+  LuaGlobalConstant *constant = (LuaGlobalConstant *) data;
   lua_State *state = (lua_State *)user_data;
 
-  switch (type)
-    {
-    case TYPE_HINT_INT32:
-      {
-        gint32 i;
+  lua_cast_and_push_value_to_stack(state, constant->name, constant->type, constant->value);
 
-        if (type_cast_to_int32(value, &i, NULL))
-          lua_pushinteger(state, i);
-        else
-          msg_error("Cannot cast value to integer",
-                    evt_tag_str("name", name),
-                    evt_tag_str("value", value),
-                    NULL);
-
-        break;
-      }
-    case TYPE_HINT_STRING:
-      lua_pushstring(state, value);
-      break;
-    default:
-      msg_error("Unsupported type hint (strings or integers only!)",
-                evt_tag_str("name", name),
-                evt_tag_str("value", value),
-                NULL);
-      break;
-    }
-  lua_setglobal(state, name);
+  lua_setglobal(state, constant->name);
 
   return FALSE;
 }
 
 static void
-lua_dd_inject_all_global_variables(lua_State *state, ValuePairs *globals)
+lua_dd_inject_all_global_variables(lua_State *state, GList *globals)
 {
-  value_pairs_foreach(globals, lua_dd_inject_global_variable, NULL, 0,
-                      NULL, state);
-}
+  g_list_foreach(globals, lua_dd_inject_global_variable, state);
+};
 
 static gboolean
 lua_dd_init(LogPipe *s)
@@ -257,7 +305,11 @@ lua_dd_init(LogPipe *s)
 
   lua_dd_set_config_variable(self->state, cfg);
   if (self->globals)
-    lua_dd_inject_all_global_variables(self->state, self->globals);
+    {
+      lua_dd_inject_all_global_variables(self->state, self->globals);
+      g_list_free_full(self->globals, lua_global_constant_free);
+      self->globals = NULL;
+    }
 
   if (!self->template)
     {
@@ -398,6 +450,57 @@ lua_dd_set_mode(LogDriver *d, gchar *mode)
     self->mode = LUA_DEST_MODE_FORMATTED;
 };
 
+void
+lua_dd_init_global_contants(LogDriver *d)
+{
+  LuaDestDriver *self = (LuaDestDriver *)d;
+  
+  if (self->globals)
+    g_list_free_full(self->globals, lua_global_constant_free);
+
+  self->globals = NULL;
+};
+
+static void
+lua_dd_create_global_constant_from_params(LuaDestDriver *self, const char *name, const char *value, TypeHint type)
+{
+  LuaGlobalConstant *constant = g_new0(LuaGlobalConstant, 1);
+  constant->name = g_strdup(name);
+  constant->value = g_strdup(value);
+  constant->type = type;
+
+  self->globals = g_list_append(self->globals, constant); 
+};
+
+void
+lua_dd_add_global_constant(LogDriver *d, const char *name, const char *value)
+{
+  LuaDestDriver *self = (LuaDestDriver *)d;
+  lua_dd_create_global_constant_from_params(self, name, value, TYPE_HINT_STRING);
+};
+
+void
+lua_dd_add_global_constant_with_type_hint(LogDriver *d, const char *name, const char *value, const char *type)
+{
+  TypeHint type_hint;
+  LuaDestDriver *self = (LuaDestDriver *)d;
+  
+  if (!type_hint_parse(type, &type_hint, NULL))
+   {
+     msg_error("Type hint parsing failed for lua constant, adding with default type hint",
+	       evt_tag_str("name", name),
+	       evt_tag_str("value", value),
+	       evt_tag_str("type", type),
+               NULL);
+     lua_dd_create_global_constant_from_params(self, name, value, TYPE_HINT_STRING);
+   }
+  else
+   {
+     lua_dd_create_global_constant_from_params(self, name, value, type_hint);
+   }
+  
+};
+
 static gchar *
 lua_dd_format_string_instance(LogThrDestDriver *d, char* name, size_t name_len)
 {
@@ -429,13 +532,13 @@ lua_dd_format_persist_name(LogThrDestDriver *d)
 }
 
 void
-lua_dd_set_globals(LogDriver *d, ValuePairs *vp)
+lua_dd_set_params(LogDriver *d, ValuePairs *vp)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
 
-  if (self->globals)
-    value_pairs_free(self->globals);
-  self->globals = vp;
+  if (self->params)
+    value_pairs_free(self->params);
+  self->params = vp;
 }
 
 LogDriver *

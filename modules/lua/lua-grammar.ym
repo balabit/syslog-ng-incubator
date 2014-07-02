@@ -53,6 +53,7 @@
 %token KW_DEINIT_FUNC
 %token KW_LUA_DEST_MODE
 %token KW_GLOBALS
+%token KW_PARAMS
 
 %%
 
@@ -99,24 +100,49 @@ lua_option
             lua_dd_set_mode(last_driver, $3);
             free($3);
           }
-        | KW_GLOBALS
+        | KW_PARAMS
           {
             last_value_pairs = value_pairs_new();
           }
-          '(' lua_globals ')'
+          '(' lua_params ')'
           {
-            lua_dd_set_globals(last_driver, last_value_pairs);
+            lua_dd_set_params(last_driver, last_value_pairs);
           }
+        | KW_GLOBALS {
+            lua_dd_init_global_contants(last_driver);
+          }
+          '(' lua_globals ')'
         | dest_driver_option
         | { last_template_options = lua_dd_get_template_options(last_driver); } template_option
         ;
 
-lua_globals
-        : lua_global lua_globals
+lua_globals 
+	: lua_global lua_globals
+	|
+	;
+
+lua_global
+	: LL_IDENTIFIER '(' string_or_number ')'
+	  {
+	     lua_dd_add_global_constant(last_driver, $1, $3);
+	     free($1);
+             free($3);
+          }
+	| LL_IDENTIFIER '(' LL_IDENTIFIER '(' string_or_number ')' ')'
+	  {
+	     lua_dd_add_global_constant_with_type_hint(last_driver, $1, $5, $3);
+	     free($1);
+             free($3);
+	     free($5);
+          }
+	;
+
+lua_params
+        : lua_param lua_params
         |
         ;
 
-lua_global
+lua_param
         : LL_IDENTIFIER '(' template_content ')'
           {
             value_pairs_add_pair(last_value_pairs, $1,  $3);
