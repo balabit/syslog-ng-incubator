@@ -301,7 +301,7 @@ perl_worker_eval(LogThrDestDriver *d)
   args[1] = kvmap;
   args[2] = self;
   vp_ok = value_pairs_foreach(self->vp, perl_worker_vp_add_one,
-                                   msg, self->seq_num, &self->template_options,
+                                   msg, self->seq_num, LTZ_LOCAL, &self->template_options,
                                    args);
   if (!vp_ok && (self->template_options.on_error & ON_ERROR_DROP_MESSAGE))
     goto exit;

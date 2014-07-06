@@ -272,7 +272,7 @@ _py_create_dict_from_message(PythonDestDriver *self, LogMessage *msg, PyObject *
   args[1] = dict;
 
   vp_ok = value_pairs_foreach(self->vp, python_worker_vp_add_one,
-                              msg, self->seq_num, &self->template_options,
+                              msg, self->seq_num, LTZ_LOCAL, &self->template_options,
                               args);
   PyTuple_SetItem(*func_args, 0, dict);
 
