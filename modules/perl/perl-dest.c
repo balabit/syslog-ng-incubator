@@ -304,6 +304,7 @@ perl_worker_eval(LogThrDestDriver *d)
                               msg, self->seq_num, LTZ_SEND,
                               &self->template_options,
                               args);
+
   if (!vp_ok && (self->template_options.on_error & ON_ERROR_DROP_MESSAGE))
     goto exit;
 

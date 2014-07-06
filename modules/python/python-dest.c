@@ -275,6 +275,7 @@ _py_create_dict_from_message(PythonDestDriver *self, LogMessage *msg, PyObject *
                               msg, self->seq_num,
                               LTZ_SEND, &self->template_options,
                               args);
+
   PyTuple_SetItem(*func_args, 0, dict);
 
   return vp_ok;
