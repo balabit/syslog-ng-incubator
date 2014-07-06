@@ -41,7 +41,7 @@ typedef struct
   GString* feed_title;
 } RssDestDriver;
 
-LogDriver *rss_dd_new(void);
+LogDriver *rss_dd_new(GlobalConfig *cfg);
 void rss_dd_set_port(LogDriver *self, int port);
 void rss_dd_set_localip(LogDriver *s, gchar *localip);
 void rss_dd_set_title(LogDriver *s, const char *title);

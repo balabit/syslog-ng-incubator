@@ -311,11 +311,11 @@ rss_dd_free (LogPipe *s)
 }
 
 LogDriver *
-rss_dd_new (void)
+rss_dd_new (GlobalConfig *cfg)
 {
   RssDestDriver *self = g_new0 (RssDestDriver, 1);
 
-  log_dest_driver_init_instance (&self->super);
+  log_dest_driver_init_instance (&self->super, cfg);
   self->super.super.super.queue = rss_dd_queue;
   self->super.super.super.init = rss_dd_init;
   self->super.super.super.deinit = rss_dd_deinit;

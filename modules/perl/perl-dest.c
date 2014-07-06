@@ -428,7 +428,7 @@ perl_dd_new(GlobalConfig *cfg)
 {
   PerlDestDriver *self = g_new0(PerlDestDriver, 1);
 
-  log_threaded_dest_driver_init_instance(&self->super);
+  log_threaded_dest_driver_init_instance(&self->super, cfg);
 
   self->super.super.super.super.init = perl_worker_init;
   self->super.super.super.super.free_fn = perl_dd_free;
