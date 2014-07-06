@@ -51,7 +51,7 @@
 start
         : LL_CONTEXT_SOURCE KW_TRIGGER
           {
-            last_driver = *instance = trigger_sd_new ();
+            last_driver = *instance = trigger_sd_new (configuration);
           }
           '(' trigger_source_params ')'         { YYACCEPT; }
         ;

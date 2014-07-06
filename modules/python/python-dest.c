@@ -544,7 +544,7 @@ python_dd_new(GlobalConfig *cfg)
 {
   PythonDestDriver *self = g_new0(PythonDestDriver, 1);
 
-  log_threaded_dest_driver_init_instance(&self->super);
+  log_threaded_dest_driver_init_instance(&self->super, cfg);
 
   self->super.super.super.super.init = python_worker_init;
   self->super.super.super.super.deinit = python_worker_deinit;
