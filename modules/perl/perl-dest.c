@@ -23,7 +23,7 @@
 
 #include "perl-dest.h"
 #include "logthrdestdrv.h"
-#include "stats.h"
+#include "stats/stats.h"
 #include "misc.h"
 
 #include <EXTERN.h>
@@ -301,7 +301,7 @@ perl_worker_eval(LogThrDestDriver *d)
   args[1] = kvmap;
   args[2] = self;
   vp_ok = value_pairs_foreach(self->vp, perl_worker_vp_add_one,
-                                   msg, self->seq_num, &self->template_options,
+                                   msg, self->seq_num, LTZ_LOCAL, &self->template_options,
                                    args);
   if (!vp_ok && (self->template_options.on_error & ON_ERROR_DROP_MESSAGE))
     goto exit;
@@ -427,7 +427,7 @@ perl_dd_new(GlobalConfig *cfg)
 {
   PerlDestDriver *self = g_new0(PerlDestDriver, 1);
 
-  log_threaded_dest_driver_init_instance(&self->super);
+  log_threaded_dest_driver_init_instance(&self->super, cfg);
 
   self->super.super.super.super.init = perl_worker_init;
   self->super.super.super.super.free_fn = perl_dd_free;

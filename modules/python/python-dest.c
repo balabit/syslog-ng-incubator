@@ -23,7 +23,7 @@
 
 #include "python-dest.h"
 #include "logthrdestdrv.h"
-#include "stats.h"
+#include "stats/stats.h"
 #include "misc.h"
 
 #include <Python.h>
@@ -272,7 +272,7 @@ _py_create_dict_from_message(PythonDestDriver *self, LogMessage *msg, PyObject *
   args[1] = dict;
 
   vp_ok = value_pairs_foreach(self->vp, python_worker_vp_add_one,
-                              msg, self->seq_num, &self->template_options,
+                              msg, self->seq_num, LTZ_LOCAL, &self->template_options,
                               args);
   PyTuple_SetItem(*func_args, 0, dict);
 
@@ -544,7 +544,7 @@ python_dd_new(GlobalConfig *cfg)
 {
   PythonDestDriver *self = g_new0(PythonDestDriver, 1);
 
-  log_threaded_dest_driver_init_instance(&self->super);
+  log_threaded_dest_driver_init_instance(&self->super, cfg);
 
   self->super.super.super.super.init = python_worker_init;
   self->super.super.super.super.deinit = python_worker_deinit;

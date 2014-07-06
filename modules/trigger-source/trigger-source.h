@@ -27,7 +27,7 @@
 #include "driver.h"
 #include "logsource.h"
 
-LogDriver *trigger_sd_new (void);
+LogDriver *trigger_sd_new (GlobalConfig *cfg);
 
 void trigger_sd_set_trigger_freq (LogDriver *s, gint freq);
 LogSourceOptions *trigger_sd_get_source_options (LogDriver *s);
