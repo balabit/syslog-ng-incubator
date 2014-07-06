@@ -23,7 +23,7 @@
 
 #include "perl-dest.h"
 #include "logthrdestdrv.h"
-#include "stats.h"
+#include "stats/stats.h"
 #include "misc.h"
 
 #include <EXTERN.h>
