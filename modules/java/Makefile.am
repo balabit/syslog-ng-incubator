@@ -7,8 +7,7 @@ modules_java_libjava_la_CFLAGS = \
     $(EVENTLOG_CFLAGS) \
     $(IVYKIS_CFLAGS) \
     -I$(top_srcdir)/modules/java    \
-    -I$(top_builddir)/modules/java \
-    -Wall -Werror
+    -I$(top_builddir)/modules/java
 
 modules_java_libjava_la_SOURCES = \
     modules/java/java-grammar.y \
