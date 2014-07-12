@@ -29,6 +29,12 @@
 
 void java_dd_start_watches(JavaDestDriver *self);
 
+
+#define CALL_JAVA_FUNCTION_ENV(env, function, ...) \
+		(*(env))->function(env, __VA_ARGS__)
+
+#define CALL_JAVA_FUNCTION(function, ...)  CALL_JAVA_FUNCTION_ENV(self->java_env, function, __VA_ARGS__)
+
 static void
 java_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
 {
@@ -36,63 +42,43 @@ java_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, g
 	log_queue_push_tail(self->log_queue, msg, path_options);
 }
 
-static gboolean
-java_dd_init_jvm(JavaDestDriver *self)
-{
-	long status;
-	self->options[0].optionString = g_strdup_printf("-Djava.class.path=%s", self->class_path);
-
-	self->vm_args.version = JNI_VERSION_1_6;
-	self->vm_args.nOptions = 1;
-	self->vm_args.options = self->options;
-	status = JNI_CreateJavaVM(&self->jvm, (void**)&self->env, &self->vm_args);
-	if (status == JNI_ERR)
-	{
-		return FALSE;
-	}
-	return TRUE;
-}
-
 gboolean java_dd_load_class(JavaDestDriver *self) {
-	JNIEnv env = *(self->env);
-	self->loaded_class = (*(self->env))->FindClass(self->env, self->class_name);
+	self->loaded_class = CALL_JAVA_FUNCTION(FindClass, self->class_name);
 	if (!self->loaded_class) {
 		msg_error("Can't find class",
 				evt_tag_str("class_name", self->class_name),
-				evt_tag_str("class_path", self->class_path), NULL);
+				evt_tag_str("class_path", self->class_path->str), NULL);
 		return FALSE;
 	}
-	self->mi_constructor = env->GetMethodID(self->env, self->loaded_class,
-			"<init>", "()V");
+	self->mi_constructor = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "<init>", "()V");
 	if (!self->mi_constructor) {
 		msg_error("Can't find default constructor for class",
 				evt_tag_str("class_name", self->class_name), NULL);
 		return FALSE;
 	}
-	self->mi_init = env->GetMethodID(self->env, self->loaded_class, "init", "()Z");
+	self->mi_init = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "init", "()Z");
+
 	if (!self->mi_init) {
 		msg_error("Can't find method in class",
 				evt_tag_str("class_name", self->class_name),
 				evt_tag_str("method", "boolean init()"), NULL);
 		return FALSE;
 	}
-	self->mi_deinit = env->GetMethodID(self->env, self->loaded_class, "deinit",
-			"()V");
+	self->mi_deinit = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "deinit", "()V");
 	if (!self->mi_deinit) {
 		msg_error("Can't find method in class",
 				evt_tag_str("class_name", self->class_name),
 				evt_tag_str("method", "void deinit()"), NULL);
 		return FALSE;
 	}
-	self->mi_queue = env->GetMethodID(self->env, self->loaded_class, "queue",
-			"(Ljava/lang/String;)Z");
+	self->mi_queue = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "queue", "(Ljava/lang/String;)Z");
 	if (!self->mi_queue) {
 		msg_error("Can't find method in class",
 				evt_tag_str("class_name", self->class_name),
 				evt_tag_str("method", "boolean queue(String)"), NULL);
 		return FALSE;
 	}
-	self->dest_object = env->NewObject(self->env, self->loaded_class, self->mi_constructor);
+	self->dest_object = CALL_JAVA_FUNCTION(NewObject, self->loaded_class, self->mi_constructor);
 	if (!self->dest_object)
 	{
 		msg_error("Failed to create object", NULL);
@@ -104,23 +90,21 @@ gboolean java_dd_load_class(JavaDestDriver *self) {
 gboolean
 java_dd_init_dest_object(JavaDestDriver *self)
 {
-	JNIEnv env = *(self->env);
-	return env->CallBooleanMethod(self->env, self->dest_object, self->mi_init);
+	return CALL_JAVA_FUNCTION(CallBooleanMethod, self->dest_object, self->mi_init);
 }
 
 void
 java_dd_deinit_dest_object(JavaDestDriver *self)
 {
-	JNIEnv env = *(self->env);
-	env->CallVoidMethod(self->env, self->dest_object, self->mi_deinit);
+	CALL_JAVA_FUNCTION(CallVoidMethod, self->dest_object, self->mi_deinit);
 }
 
 void
 java_dd_set_class_path(LogDriver *s, const gchar *class_path)
 {
 	JavaDestDriver *self = (JavaDestDriver *)s;
-	g_free(self->class_path);
-	self->class_path = g_strdup(class_path);
+	g_assert(!(self->super.super.super.flags & PIF_INITIALIZED));
+	g_string_assign(self->class_path, class_path);
 }
 
 void
@@ -155,8 +139,9 @@ java_dd_init(LogPipe *s)
 				);
 		return FALSE;
 	}
-	if(!java_dd_init_jvm(self))
+	if(!java_machine_start(self->java_machine, &self->java_env))
 		return FALSE;
+
 	if(!java_dd_load_class(self))
 		return FALSE;
 	self->log_queue = log_dest_driver_acquire_queue(&self->super, "testjava");
@@ -173,29 +158,6 @@ java_dd_deinit(LogPipe *s)
 }
 
 void
-java_dd_free(LogPipe *s)
-{
-	JavaDestDriver *self = (JavaDestDriver *)s;
-	if (self->dest_object)
-	{
-		JNIEnv env = *(self->env);
-		env->DeleteLocalRef(self->env, self->dest_object);
-	}
-	if(self->loaded_class)
-	{
-		JNIEnv env = *(self->env);
-		env->DeleteLocalRef(self->env, self->loaded_class);
-	}
-
-	if(self->jvm)
-	{
-		JavaVM jvm = *(self->jvm);
-		jvm->DestroyJavaVM(self->jvm);
-	}
-	g_free(self->class_name);
-	g_free(self->class_path);
-}
-void
 java_dd_wake_up(gpointer user_data)
 {
 	JavaDestDriver *self = (JavaDestDriver *)user_data;
@@ -206,31 +168,15 @@ void
 java_dd_stop_watches(JavaDestDriver *self)
 {
 	log_queue_reset_parallel_push(self->log_queue);
-	if(iv_task_registered(&self->immed_io_task))
-	{
-		iv_task_unregister(&self->immed_io_task);
-	}
-}
-
-void
-java_dd_attach_env(JavaDestDriver *self, JNIEnv **penv)
-{
-	(*(self->jvm))->AttachCurrentThread(self->jvm, (void **)penv, &self->vm_args);
-}
-
-void
-java_dd_detach_env(JavaDestDriver *self)
-{
-	(*(self->jvm))->DetachCurrentThread(self->jvm);
 }
 
 gboolean
 java_dd_send_to_object(JavaDestDriver *self, LogMessage *msg, JNIEnv *env)
 {
 	log_template_format(self->template, msg, NULL, LTZ_LOCAL, 0, NULL, self->formatted_message);
-	jstring message = (*env)->NewStringUTF(env, self->formatted_message->str);
-	jboolean res = (*env)->CallBooleanMethod(env, self->dest_object, self->mi_queue, message);
-	(*env)->DeleteLocalRef(env, message);
+	jstring message = CALL_JAVA_FUNCTION_ENV(env, NewStringUTF, self->formatted_message->str);
+	jboolean res = CALL_JAVA_FUNCTION_ENV(env, CallBooleanMethod, self->dest_object, self->mi_queue, message);
+	CALL_JAVA_FUNCTION_ENV(env, DeleteLocalRef, message);
 	return !!(res);
 }
 
@@ -240,12 +186,11 @@ java_dd_work_perform(gpointer data)
 	JavaDestDriver *self = (JavaDestDriver *)data;
 	gboolean sent = TRUE;
 	JNIEnv *env = NULL;
-	java_dd_attach_env(self, &env);
+	java_machine_attach_thread(self->java_machine, &env);
 	while (sent && !main_loop_io_worker_job_quit())
 	{
 		LogMessage *lm;
 		LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
-		gboolean consumed = FALSE;
 
 		if (!log_queue_pop_head(self->log_queue, &lm, &path_options, TRUE, TRUE))
 		{
@@ -263,7 +208,7 @@ java_dd_work_perform(gpointer data)
 		msg_set_context(NULL);
 		log_msg_refcache_stop();
 	}
-	java_dd_detach_env(self);
+	java_machine_detach_thread(self->java_machine);
 }
 
 void
@@ -332,14 +277,33 @@ java_dd_init_watches(JavaDestDriver *self)
   self->wake_up_event.handler = java_dd_update_watches;
   iv_event_register(&self->wake_up_event);
 
-  IV_TASK_INIT(&self->immed_io_task);
-  self->immed_io_task.cookie = self;
-  self->immed_io_task.handler = java_dd_update_watches;
-
   main_loop_io_worker_job_init(&self->io_job);
   self->io_job.user_data = self;
   self->io_job.work = (void (*)(void *)) java_dd_work_perform;
   self->io_job.completion = (void (*)(void *)) java_dd_work_finished;
+}
+
+void
+java_dd_free(LogPipe *s)
+{
+	JavaDestDriver *self = (JavaDestDriver *)s;
+	log_template_unref(self->template);
+	if (self->dest_object)
+	{
+		CALL_JAVA_FUNCTION(DeleteLocalRef, self->dest_object);
+	}
+	if(self->loaded_class)
+	{
+		CALL_JAVA_FUNCTION(DeleteLocalRef, self->loaded_class);
+	}
+
+	if(self->java_machine)
+	{
+		java_machine_unref(self->java_machine);
+		self->java_machine = NULL;
+	}
+	g_free(self->class_name);
+	g_string_free(self->class_path, TRUE);
 }
 
 LogDriver *
@@ -354,8 +318,11 @@ java_dd_new(GlobalConfig *cfg)
   self->super.super.super.queue = java_dd_queue;
 
   self->template = log_template_new(cfg, "java_dd_template");
+  self->class_path = g_string_new(".");
+  self->java_machine = java_machine_ref();
+  java_machine_add_class_path(self->java_machine, self->class_path);
+
   java_dd_set_class_name(&self->super.super, "TestClass");
-  java_dd_set_class_path(&self->super.super, ".");
   java_dd_set_template_string(&self->super.super, "$ISODATE $HOST $MSGHDR$MSG");
   self->threaded = cfg->threaded;
   self->formatted_message = g_string_sized_new(1024);
