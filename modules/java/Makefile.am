@@ -7,7 +7,8 @@ modules_java_libjava_la_CFLAGS = \
     $(EVENTLOG_CFLAGS) \
     $(IVYKIS_CFLAGS) \
     -I$(top_srcdir)/modules/java    \
-    -I$(top_builddir)/modules/java
+    -I$(top_builddir)/modules/java \
+    -Wall -Werror
 
 modules_java_libjava_la_SOURCES = \
     modules/java/java-grammar.y \
@@ -15,7 +16,9 @@ modules_java_libjava_la_SOURCES = \
     modules/java/java-destination.c \
     modules/java/java-destination.h \
     modules/java/java-parser.c \
-    modules/java/java-parser.h
+    modules/java/java-parser.h \
+    modules/java/java_machine.c \
+    modules/java/java_machine.h
 
 modules_java_libjava_la_LIBADD = \
     $(JNI_LIBS) $(EVENTLOG_LIBS) \

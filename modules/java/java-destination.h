@@ -30,16 +30,17 @@
 #include "driver.h"
 #include "logqueue.h"
 #include "mainloop.h"
+#include "java_machine.h"
+
+
 
 typedef struct
 {
   LogDestDriver super;
-  JavaVMOption options[1];
-  JNIEnv *env;
-  JavaVM *jvm;
-  JavaVMInitArgs vm_args;
+  JavaVMSingleton *java_machine;
+  JNIEnv *java_env;
   jclass loaded_class;
-  gchar *class_path;
+  GString *class_path;
   gchar *class_name;
   jobject dest_object;
   jmethodID mi_constructor;
@@ -52,7 +53,6 @@ typedef struct
   gboolean threaded;
   GString *formatted_message;
   MainLoopIOWorkerJob io_job;
-  struct iv_task immed_io_task;
   struct iv_event wake_up_event;
 } JavaDestDriver;
 
