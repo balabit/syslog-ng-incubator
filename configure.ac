@@ -76,6 +76,15 @@ AC_ARG_ENABLE(logmongource,
    ,enable_logmongource="auto")
 
 
+AC_ARG_ENABLE(kafka,
+              [ --disable-kafka           Disable Kafka support (default: auto)]
+              ,,enable_kafka="auto")
+
+AC_ARG_WITH(librdkafka,
+             AC_HELP_STRING([--with-librdkafka=DIR],
+                            [use librdkafka library from (prefix) directory DIR]),,)
+
+
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -204,11 +213,48 @@ if test "x$with_python" != "xno" ; then
 fi
 
 dnl ***************************************************************************
+dnl librdkafka headers/libraries
+dnl ***************************************************************************
+if test "x$enable_kafka" != "xno" && test "x$with_kafka" != "xno"; then
+       rdkafka="yes"
+       if test "x$with_librdkafka" != "xno"; then
+               CFLAGS_SAVE="$CFLAGS"
+               LDFLAGS_SAVE="$LDFLAGS"
+               CFLAGS="$CFLAGS -I$with_librdkafka/include"
+               LDFLAGS="$LDFLAGS -L$with_librdkafka/lib"
+               AC_CHECK_HEADER(librdkafka/rdkafka.h, [RDKAFKA_CFLAGS="-I$with_librdkafka/include"
+                                                      RDKAFKA_LIBS="-L$with_librdkafka/lib -lrdkafka"], [rdkafka=no])
+               CFLAGS="$CFLAGS_SAVE"
+               LDFLAGS="$LDFLAGS_SAVE"
+       else
+               rdkafka="no"	
+       fi
+
+       if test "x$enable_kafka" = "xyes" && test "x$rdkafka" = "xno"; then
+               AC_MSG_ERROR(librdkafka not found)
+       fi
+
+       AC_CHECK_LIB(rdkafka, rd_kafka_conf_set_log_cb, [with_librdkafka_log_cb="yes"], [with_librdkafka_log_cb="no"])
+       AC_CHECK_LIB(rdkafka, rd_kafka_set_logger, [with_librdkafka_logger="yes"], [with_librdkafka_logger="no"])
+       if test "x$with_librdkafka_log_cb" = "xyes"; then
+         AC_DEFINE(HAVE_LIBRDKAFKA_LOG_CB, 1, [Define if librdkafka log_cb facility is present and usable.])
+       fi
+       if test "x$with_librdkafka_logger" = "xyes"; then
+         AC_DEFINE(HAVE_LIBRDKAFKA_LOGGER, 1, [Define if librdkafka logger facility is present and usable.])
+       fi
+
+       enable_kafka=$rdkafka
+fi
+
+dnl ***************************************************************************
 dnl misc features to be enabled
 dnl ***************************************************************************
 
 AC_SUBST(syslog_ng_tools)
 AC_SUBST(moduledir)
+
+AC_SUBST(RDKAFKA_CFLAGS)
+AC_SUBST(RDKAFKA_LIBS)
 
 AC_DEFINE_UNQUOTED(ENABLE_DEBUG, `enable_value $enable_debug`, [Enable debugging])
 
@@ -217,6 +263,7 @@ AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
 AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
+AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -228,6 +275,7 @@ echo " Debugging:            ${enable_debug:=no}"
 echo " Modules:"
 echo "  basicfuncs-plus      yes"
 echo "  graphite             yes"
+echo "  kafka                ${enable_kafka:=no}"
 echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
