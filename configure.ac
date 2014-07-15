@@ -177,20 +177,28 @@ INCUBATOR_CHECK_DEP(perl,[
 dnl ***************************************************************************
 dnl python checks
 dnl ***************************************************************************
-INCUBATOR_CHECK_DEP(python,[
-  if test "x$with_python" != "xno"; then
-    case "$with_python" in
-      "yes"|"")
-	  with_python="python"
-	  ;;
-      [[0-9]]*)
-	  with_python="python-${with_python}"
-	  ;;
-    esac
-    PKG_CHECK_MODULES(PYTHON, $with_python >= 2.6, python_found="yes", python_found="no")
+if test "x$with_python" != "xno" ; then
+  if test "x$with_python" = "xauto"  -o "x$with_python" = "xforce" ; then
+    python_versions="python python3 python-3.4 python-3.3 python-3.2 python-3.0 python2 python-2.7 python-2.6"
+    python_version=""
+    for version in $python_versions; do
+        PKG_CHECK_EXISTS($version, python_version=$version, python_version="")
+        if test "x$python_version" != "x" ; then
+           break
+        fi
+    done
+    if test "x$with_python" = "xforce" -a  "x$python_version" = "x" ; then
+       AC_MSG_ERROR([Python is forced to be required, but no suitable python version found!])
+    fi
   else
-    python_found="no"
-  fi])
+    python_version=$with_python
+  fi
+  PKG_CHECK_MODULES(PYTHON, $python_version >= 2.6, enable_python="yes", [if test "x$with_python" != "xauto"  -a "x$with_python" != "xforce";then
+       AC_MSG_ERROR([Python is forced to be required with version $python_version, but this version is not found!])
+     else
+       enable_python="no"
+     fi])
+fi
 
 dnl ***************************************************************************
 dnl misc features to be enabled
@@ -218,7 +226,7 @@ echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  perl:                ${enable_perl:-yes}"
-echo "  python:              ${enable_python:-yes} (${with_python})"
+echo "  python:              ${enable_python:-yes} (${python_version})"
 echo "  riemann:             ${enable_riemann:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
