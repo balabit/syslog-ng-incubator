@@ -43,7 +43,7 @@ Copyright: Copyright (C) 2014 Viktor Tusa
  Copyright (C) 2014 BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception
 
-Files: scl/elasticsearch/* modules/getent/* modules/perl/* modules/python/*
+Files: scl/elasticsearch/* modules/getent/* modules/perl/* modules/python/* scl/graphite/*
 Copyright: Copyright (C) 2014 Gergely Nagy
  Copyright (C) 2014 BalaBit IT Ltd
 License: GPL-2+ with OpenSSL exception

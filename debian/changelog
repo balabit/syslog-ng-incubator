@@ -1,3 +1,9 @@
+syslog-ng-incubator (0.3.2-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Gergely Nagy <algernon@madhouse-project.org>  Wed, 16 Jul 2014 13:12:42 +0200
+
 syslog-ng-incubator (0.3.0-1) unstable; urgency=medium
 
   * New upstream release:
