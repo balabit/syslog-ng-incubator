@@ -37,6 +37,7 @@ static CfgLexerKeyword lua_keywords[] = {
   { "deinit_func",              KW_DEINIT_FUNC },
   { "mode",                     KW_LUA_DEST_MODE },
   { "globals",                  KW_GLOBALS },
+  { "params",                   KW_PARAMS },
   { NULL }
 };
 

@@ -3,7 +3,7 @@ dnl
 
 AC_PREREQ([2.68])
 
-AC_INIT([syslog-ng-incubator], [0.3.0], [tusavik@gmail.com])
+AC_INIT([syslog-ng-incubator], [0.3.2], [tusavik@gmail.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])
@@ -50,7 +50,28 @@ AC_ARG_ENABLE(luajit,
    enable_luajit="yes",)
 
 AC_ARG_WITH(python,
-   [  --with-python=VERSION    Build with a specific version of python])
+   [  --with-python=VERSION    Build with a specific version of python],,with_python="auto")
+
+AC_ARG_ENABLE(riemann,
+   [  --disable-riemann	       Disable riemann destination],
+   ,enable_riemann="auto")
+
+AC_ARG_ENABLE(lua,
+   [  --disable-lua	       Disable lua based modules (lua-dest, monitoring source)],
+   ,enable_lua="auto")
+
+AC_ARG_ENABLE(perl,	       
+   [  --disable-perl	       Disable perl based modules (perl-dest)],
+   ,enable_perl="auto")
+
+AC_ARG_ENABLE(python,	       
+   [  --disable-python	       Disable python based modules (python-dest)],
+   ,enable_python="auto")
+
+AC_ARG_ENABLE(logmongource,
+   [  --disable-logmongource	      Disable logmongource tool],
+   ,enable_logmongource="auto")
+
 
 dnl ***************************************************************************
 dnl Checks for programs.
@@ -89,7 +110,9 @@ dnl ***************************************************************************
 PKG_CHECK_MODULES(SYSLOG_NG, syslog-ng >= $SYSLOG_NG_MIN_VERSION)
 PKG_CHECK_MODULES(EVENTLOG, eventlog >= $EVENTLOG_MIN_VERSION)
 
-if test "x$with_ivykis" != "xno"; then
+syslog_ng_ivykis=[`pkg-config syslog-ng --variable ivykis`]
+
+if test "x$with_ivykis" != "xno" && test "x$syslog_ng_ivykis" != "xinternal"; then
    PKG_CHECK_MODULES(IVYKIS, ivykis >= $IVYKIS_MIN_VERSION,,true)
 fi
 
@@ -101,58 +124,80 @@ fi
 dnl ***************************************************************************
 dnl libmongo-client headers/libraries
 dnl ***************************************************************************
-PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,enable_logmongource="no")
+INCUBATOR_CHECK_DEP(logmongource,[PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,logmongource_found="no")])
 
 dnl ***************************************************************************
 dnl riemann-client headers/libraries
 dnl ***************************************************************************
-PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,enable_riemann="no")
+INCUBATOR_CHECK_DEP(riemann,[PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,riemann_found="no")])
 
 dnl ***************************************************************************
 dnl lua headers/libraries
 dnl ***************************************************************************
-if test "x$enable_luajit" == "xyes"; then
- PKG_CHECK_EXISTS(luajit, [lua_mod="luajit"; LUA_MIN_VERSION="2.0"])
-fi
-if test "x$lua_mod" != "xluajit"; then
- PKG_CHECK_EXISTS(lua, lua_mod="lua",
-  PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
-   PKG_CHECK_EXISTS(lua-5.2, lua_mod="lua-5.2",
-    PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1",
-     PKG_CHECK_EXISTS(lua-5.1, lua_mod="lua-5.1")))))
-fi
-PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,enable_lua="yes",enable_lua="no")
+dnl if test "x$enable_lua" != "xno"; then
+INCUBATOR_CHECK_DEP(lua,[
+  if test "x$enable_luajit" == "xyes"; then
+   PKG_CHECK_EXISTS(luajit, [lua_mod="luajit"; LUA_MIN_VERSION="2.0"])
+  fi
+  if test "x$lua_mod" != "xluajit"; then
+   PKG_CHECK_EXISTS(lua, lua_mod="lua",
+    PKG_CHECK_EXISTS(lua5.2, lua_mod="lua5.2",
+     PKG_CHECK_EXISTS(lua-5.2, lua_mod="lua-5.2",
+      PKG_CHECK_EXISTS(lua5.1, lua_mod="lua5.1",
+       PKG_CHECK_EXISTS(lua-5.1, lua_mod="lua-5.1")))))
+  fi
+  PKG_CHECK_MODULES(LUA, $lua_mod >= $LUA_MIN_VERSION,,lua_found="no")])
 
 dnl ***************************************************************************
 dnl Perl checks
 dnl ***************************************************************************
-enable_perl="no"
-AC_CHECK_PROG(PERL, perl, perl)
-AC_CHECK_LIB(perl, perl_construct,,PERL="")
-if test "x$PERL" != "x"; then
-  AC_MSG_CHECKING(for perl module ExtUtils::Embed)
-  $PERL -e "use ExtUtils::Embed; exit" >/dev/null 2>&1
-  if test $? -ne 0; then
-    AC_MSG_RESULT(no)
+INCUBATOR_CHECK_DEP(perl,[
+  AC_CHECK_PROG(PERL, perl, perl)
+
+  if test "x$PERL" != "x"; then
+    AC_MSG_CHECKING(for perl module ExtUtils::Embed)
+    $PERL -e "use ExtUtils::Embed; exit" >/dev/null 2>&1
+    if test $? -ne 0; then
+      AC_MSG_RESULT(no)
+      perl_found="no"
+    else
+      AC_MSG_RESULT(ok)
+    fi
   else
-    AC_MSG_RESULT(ok)
-    enable_perl="yes"
+    perl_found="no"
   fi
-fi
+
+  if test "x$perl_found" != "xno"; then
+     LDFLAGS_SAVE="$LDFLAGS"
+     LDFLAGS="$LDFLAGS `$PERL -MExtUtils::Embed -e ldopts`"
+     AC_CHECK_LIB(perl, perl_construct, [true], perl_found="no")
+     LDFLAGS="$LDFLAGS_SAVE"
+  fi])
 
 dnl ***************************************************************************
 dnl python checks
 dnl ***************************************************************************
-if test "x$with_python" != "xno"; then
-  case "$with_python" in
-    "yes"|"")
-        with_python="python"
-        ;;
-    [[0-9]]*)
-        with_python="python-${with_python}"
-        ;;
-  esac
-  PKG_CHECK_MODULES(PYTHON, $with_python >= 2.6, enable_python="yes", enable_python="no")
+if test "x$with_python" != "xno" ; then
+  if test "x$with_python" = "xauto"  -o "x$with_python" = "xforce" ; then
+    python_versions="python python3 python-3.4 python-3.3 python-3.2 python-3.0 python2 python-2.7 python-2.6"
+    python_version=""
+    for version in $python_versions; do
+        PKG_CHECK_EXISTS($version, python_version=$version, python_version="")
+        if test "x$python_version" != "x" ; then
+           break
+        fi
+    done
+    if test "x$with_python" = "xforce" -a  "x$python_version" = "x" ; then
+       AC_MSG_ERROR([Python is forced to be required, but no suitable python version found!])
+    fi
+  else
+    python_version=$with_python
+  fi
+  PKG_CHECK_MODULES(PYTHON, $python_version >= 2.6, enable_python="yes", [if test "x$with_python" != "xauto"  -a "x$with_python" != "xforce";then
+       AC_MSG_ERROR([Python is forced to be required with version $python_version, but this version is not found!])
+     else
+       enable_python="no"
+     fi])
 fi
 
 dnl ***************************************************************************
@@ -181,7 +226,7 @@ echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  perl:                ${enable_perl:-yes}"
-echo "  python:              ${enable_python:-yes} (${with_python})"
+echo "  python:              ${enable_python:-yes} (${python_version})"
 echo "  riemann:             ${enable_riemann:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"

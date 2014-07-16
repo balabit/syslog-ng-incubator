@@ -7,7 +7,7 @@ modules_rss_librss_la_CFLAGS		= \
 	-I$(top_srcdir)/modules/rss	  \
 	-I$(top_builddir)/modules/rss
 
-module_rss_librss_la_LIBS		= \
+modules_rss_librss_la_LIBADD		= \
 	$(SYSLOG_NG_LIBS)		  \
 	$(EVENTLOG_LIBS)
 
