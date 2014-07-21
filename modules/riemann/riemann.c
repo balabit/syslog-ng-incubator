@@ -437,7 +437,7 @@ riemann_worker_insert(LogThrDestDriver *s)
 
       if (self->fields.attributes)
         value_pairs_foreach(self->fields.attributes, riemann_dd_field_add_attribute_vp,
-                            msg, self->seq_num, &self->template_options, event);
+                            msg, self->seq_num, LTZ_SEND, &self->template_options, event);
 
       riemann_client_send_message_oneshot
         (self->client,

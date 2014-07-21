@@ -135,7 +135,7 @@ lua_dd_create_parameter_table_for_queue_func(lua_State *state, ValuePairs *param
 {
   lua_newtable(state);
   value_pairs_foreach(params, lua_dd_add_parameter_to_table, msg, 0,
-                      NULL, state);
+                      LTZ_SEND, NULL, state);
 }
 
 static gboolean
