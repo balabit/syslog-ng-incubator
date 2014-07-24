@@ -84,6 +84,12 @@ Contents
 
    [sng:mongource]: https://github.com/balabit/syslog-ng-incubator/tree/master/tools/visualize/
 
+ * [Kafka destination][sng:kafka]: A simple, work in progress
+   destination that allows syslog-ng to send events to the
+   [Apache Kafka](http://kafka.apache.org/) distributed queue.
+
+   [sng:kafka]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/kafka/
+
 Installation
 ------------
 
@@ -96,14 +102,15 @@ Installing the modules and tools follows the usual autotools way:
 
 Of course, one will need all the dependencies ([syslog-ng][sng],
 bison, flex, [riemann-c-client][lrc], [libmongo-client][lmc],
-[lua][lua], [perl][perl], [python][python]; of which the latter five
-are optional) installed too.
+[lua][lua], [perl][perl], [python][python], [rdkafka][kafka];
+of which the latter six are optional) installed too.
 
  [lrc]: https://github.com/algernon/riemann-c-client
  [lmc]: https://github.com/algernon/libmongo-client
  [lua]: http://www.lua.org/
  [perl]: http://www.perl.org/
  [python]: http://www.python.org/
+ [kafka]: https://github.com/edenhill/librdkafka
 
 License
 -------
