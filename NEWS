@@ -1,4 +1,18 @@
 #+STARTUP: indent showall                       -*- org -*-
+
+* 0.3.3 - <2014-07-25 Fri>
+
+** Bugfix: Compatibility with syslog-ng 3.5.5
+
+The newest syslog-ng release, syslog-ng 3.5.5 introduced a breaking
+API change. The Incubator has been updated, and now works with - and
+requires - at least syslog-ng 3.5.5.
+
+** Bugfix: Fix for the ElasticSearch SCL plugin
+
+The ElasticSearch SCL plugin has been fixed, and will now work out of
+the box.
+
 * 0.3.2 - <2014-07-15 Tue>
 
 Larger bugfix release with several small features.
