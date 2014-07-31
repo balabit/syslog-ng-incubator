@@ -83,12 +83,14 @@ typedef struct
     } partition_type;
 } KafkaDriver;
 
+#ifdef HAVE_LIBRDKAFKA_LOG
 void
 kafka_log(rd_kafka_t *rkt, int level,
           const char *fac, const char *msg)
 {
     msg_send_formatted_message(level, msg);
 }
+#endif
 
 void
 kafka_property_free(void *p)
@@ -137,7 +139,9 @@ kafka_dd_set_props(LogDriver *d, GList *props)
       rd_kafka_conf_set(conf, kp->key, kp->val,
                         errbuf, sizeof(errbuf));
   }
+#ifdef HAVE_LIBRDKAFKA_LOG
   rd_kafka_conf_set_log_cb(conf, kafka_log);
+#endif
   self->kafka = rd_kafka_new(RD_KAFKA_PRODUCER, conf,
                              errbuf, sizeof(errbuf));
 }
