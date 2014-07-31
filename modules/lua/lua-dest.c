@@ -118,7 +118,7 @@ lua_cast_and_push_value_to_stack(lua_State *state, const gchar *name, TypeHint t
 
 };
 
-static void
+static gboolean
 lua_dd_add_parameter_to_table(const gchar *name, TypeHint type, const gchar *value, gpointer user_data)
 {
   lua_State *state = (lua_State *) user_data;
@@ -126,7 +126,8 @@ lua_dd_add_parameter_to_table(const gchar *name, TypeHint type, const gchar *val
   lua_pushstring(state, name);
   lua_cast_and_push_value_to_stack(state, name, type, value);
   
-  lua_settable(state, -3);  
+  lua_settable(state, -3);
+  return FALSE;
 };
 
 static void
@@ -134,7 +135,7 @@ lua_dd_create_parameter_table_for_queue_func(lua_State *state, ValuePairs *param
 {
   lua_newtable(state);
   value_pairs_foreach(params, lua_dd_add_parameter_to_table, msg, 0,
-                      NULL, state);
+                      LTZ_SEND, NULL, state);
 }
 
 static gboolean

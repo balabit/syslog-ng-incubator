@@ -130,7 +130,7 @@ tf_graphite_foreach_func(const gchar *name, TypeHint type, const gchar *value, g
 }
 
 static gboolean
-tf_graphite_format(GString *result, ValuePairs *vp, LogMessage *msg, const LogTemplateOptions *template_options, LogTemplate *timestamp_template)
+tf_graphite_format(GString *result, ValuePairs *vp, LogMessage *msg, const LogTemplateOptions *template_options, LogTemplate *timestamp_template, gint time_zone_mode)
 {
   TFGraphiteForeachUserData userdata;
   gboolean return_value;
@@ -139,7 +139,7 @@ tf_graphite_format(GString *result, ValuePairs *vp, LogMessage *msg, const LogTe
   userdata.formatted_unixtime = g_string_new("");
   log_template_format(timestamp_template, msg, NULL, 0, 0, NULL, userdata.formatted_unixtime);
 
-  return_value = value_pairs_foreach(vp, tf_graphite_foreach_func, msg, 0, template_options, &userdata);
+  return_value = value_pairs_foreach(vp, tf_graphite_foreach_func, msg, 0, time_zone_mode, template_options, &userdata);
 
   g_string_free(userdata.formatted_unixtime, FALSE);
   return return_value;
@@ -155,7 +155,7 @@ tf_graphite_call(LogTemplateFunction *self, gpointer s,
   gsize orig_size = result->len;
 
   for (i = 0; i < args->num_messages; i++)
-    r &= tf_graphite_format(result, state->vp, args->messages[i], args->opts, state->timestamp_template);
+    r &= tf_graphite_format(result, state->vp, args->messages[i], args->opts, state->timestamp_template, args->tz);
 
   if (!r && (args->opts->on_error & ON_ERROR_DROP_MESSAGE))
     g_string_set_size(result, orig_size);

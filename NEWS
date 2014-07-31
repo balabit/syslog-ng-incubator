@@ -1,5 +1,59 @@
 #+STARTUP: indent showall                       -*- org -*-
 
+* 0.3.3 - <2014-07-25 Fri>
+
+** Bugfix: Compatibility with syslog-ng 3.5.5
+
+The newest syslog-ng release, syslog-ng 3.5.5 introduced a breaking
+API change. The Incubator has been updated, and now works with - and
+requires - at least syslog-ng 3.5.5.
+
+** Bugfix: Fix for the ElasticSearch SCL plugin
+
+The ElasticSearch SCL plugin has been fixed, and will now work out of
+the box.
+
+* 0.3.2 - <2014-07-15 Tue>
+
+Larger bugfix release with several small features.
+
+** Bugfix: Fixed getent template function compilation on FreeBSD. 
+There was an unnecessary header file, which isn't present on FreeBSD.
+
+** Feature: Added support for protocols in getent template function.
+Getent template function can now resolve protocol names.
+
+** Bugfix: Lua destination became a so-called threaded destination.
+It has now a separate thread, and it prevents race conditions in multi-threaded
+mode.
+
+** Feature: Lua destination init parameters and queue parameters are reworked.
+Globals are now constants as they should ever be. There is a new feature
+with the params() option, which works exactly as the old globals(), eg.
+uses value pairs, and templates can be used. The result is manifested as a lua
+table as the second parameter of the queue func. Although the same result
+can be achieved by using raw mode and Template class in Lua, using params
+is more comfortable in some cases (eg: SCL).
+
+** Bugfix: Perl destination driver has a separate thread.
+This prevents reace conditions like in Lua.
+
+** Feature: Graphite SCL is added.
+This allows a brand new graphite destination on top of tcp() driver
+and graphite-output template function.
+
+** Bugfix: Consolidated --enable-* configure parameters.
+They are now working similarly, yes means that if configure doesn't find
+the depending lib, it fails, auto means, that if configure doesn't find the
+depending lib, it disables the feature, and no means configure simply disables the 
+feature. The only exception is python.
+
+** Feature: Python version autodetection.
+--with-python switch has now the following options: no: disables python 
+related modules; auto: autodetects python version, disables python modules 
+if not found; force: autodetects python version, fails if not found;
+python-<version>: forces specified version, fails if not found.
+
 * 0.3.1 - <2014-06-02 Mon>
  
 ** Bugfix: Fixed linkage of modules 
