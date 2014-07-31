@@ -239,8 +239,11 @@ if test "x$enable_kafka" != "xno" && test "x$with_kafka" != "xno"; then
        fi
 
        AC_CHECK_LIB(rdkafka, rd_kafka_conf_set_log_cb, [with_librdkafka_log="yes"], [with_librdkafka_log="no"])
-       if test "x$with_librdkafka_log" = "xyes"; then
-         AC_DEFINE(HAVE_LIBRDKAFKA_LOG, 1, [Define if librdkafka log facility is present and usable.])
+       if test "x$with_librdkafka_log_cb" = "xyes"; then
+         AC_DEFINE(HAVE_LIBRDKAFKA_LOG_CB, 1, [Define if librdkafka log_cb facility is present and usable.])
+       fi
+       if test "x$with_librdkafka_log_cb" = "xyes"; then
+         AC_DEFINE(HAVE_LIBRDKAFKA_LOGGERR, 1, [Define if librdkafka logger facility is present and usable.])
        fi
 
        enable_kafka=$rdkafka
