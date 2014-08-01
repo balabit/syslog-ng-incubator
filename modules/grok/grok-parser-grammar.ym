@@ -1,0 +1,86 @@
+/*
+ * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
+ */
+
+%code requires {
+
+#include "grok-parser-parser.h"
+
+}
+
+%code {
+
+#include "cfg-grammar.h"
+#include "cfg-parser.h"
+#include "plugin.h"
+#include "parser/parser-expr.h"
+#include "grok-parser.h"
+
+LogParser *last_parser;
+GrokInstance *last_grok_instance;
+}
+
+%name-prefix "grok_"
+%lex-param {CfgLexer *lexer}
+%parse-param {CfgLexer *lexer}
+%parse-param {LogParser **instance}
+%parse-param {gpointer arg}
+
+/* INCLUDE_DECLS */
+
+%token KW_GROK
+%token KW_GROK_PATTERN
+%token KW_GROK_PATTERN_DIRECTORY
+
+%type <ptr> grok_pattern
+
+%%
+
+start
+        : LL_CONTEXT_PARSER grok_parser { YYACCEPT; }
+        ;
+
+grok_parser 
+        : KW_GROK '('
+          {
+            last_parser = *instance = grok_parser_new ();
+          }
+          grok_parser_options ')'
+        ;
+
+grok_parser_options
+        : grok_parser_option grok_parser_options
+        |
+        ;
+
+grok_parser_option
+        : grok_pattern { grok_parser_add_pattern_instance(last_parser, last_grok_instance); }
+        | KW_GROK_PATTERN_DIRECTORY '(' string ')' { grok_parser_set_pattern_directory(last_parser, $3); free($3); }
+        ;
+
+grok_pattern 
+        : KW_GROK_PATTERN { last_grok_instance = grok_instance_new(); }  '(' string ')' { grok_instance_set_pattern(last_grok_instance, $3); free($3); }
+        ;
+
+/* INCLUDE_RULES */
+
+%%

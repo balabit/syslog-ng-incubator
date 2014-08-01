@@ -216,6 +216,13 @@ if test "x$with_python" != "xno" ; then
      fi])
 fi
 
+
+dnl ***************************************************************************
+dnl grok headers/libraries
+dnl ***************************************************************************
+
+AC_CHECK_LIB(grok, grok_new, [enable_grok="yes"; GROK_LIBS="-lgrok"], [enable_grok="no"])
+
 dnl ***************************************************************************
 dnl librdkafka headers/libraries
 dnl ***************************************************************************
@@ -273,6 +280,7 @@ dnl ***************************************************************************
 
 AC_SUBST(syslog_ng_tools)
 AC_SUBST(moduledir)
+AC_SUBST(GROK_LIBS)
 
 AC_SUBST(INCUBATOR_CFLAGS)
 AC_SUBST(INCUBATOR_LIBS)
@@ -291,6 +299,7 @@ AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
 AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
 AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
+AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -311,4 +320,5 @@ echo "  rss                  yes"
 echo "  trigger-source       yes"
 echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
+echo "  grok-parser          ${enable_grok}"
 echo
