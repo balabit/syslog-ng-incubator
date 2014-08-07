@@ -38,6 +38,9 @@ LUA_MIN_VERSION="5.1.4"
 dnl ***************************************************************************
 dnl Initial setup
 
+AC_ARG_ENABLE(debug,
+   [  --enable-debug           Enable debugging code.],, enable_debug="no")
+
 AC_ARG_WITH(module-dir,
    [  --with-module-dir=path   Use path as the list of directories looked up when searching for modules],
    moduledir=$with_module_dir,moduledir="auto")
@@ -207,6 +210,8 @@ dnl ***************************************************************************
 AC_SUBST(syslog_ng_tools)
 AC_SUBST(moduledir)
 
+AC_DEFINE_UNQUOTED(ENABLE_DEBUG, `enable_value $enable_debug`, [Enable debugging])
+
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
@@ -219,6 +224,7 @@ AC_OUTPUT
 echo
 echo "syslog-ng Incubator $VERSION configured"
 echo "syslog-ng Incubator $VERSION configured" | sed -e "s/./-/g"
+echo " Debugging:            ${enable_debug:=no}"
 echo " Modules:"
 echo "  basicfuncs-plus      yes"
 echo "  graphite             yes"
