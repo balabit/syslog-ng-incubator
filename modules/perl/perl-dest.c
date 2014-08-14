@@ -354,7 +354,6 @@ perl_worker_eval(LogThrDestDriver *d)
 
   if (success && vp_ok)
     {
-      stats_counter_inc(self->super.stored_messages);
       step_sequence_number(&self->seq_num);
       log_msg_ack(msg, &path_options);
       log_msg_unref(msg);

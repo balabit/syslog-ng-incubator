@@ -76,7 +76,6 @@ static void lua_dd_accept_message(LogMessage *msg, LogPathOptions *path_options)
 
 static void lua_dd_ack_message(LuaDestDriver *self, LogMessage *msg, LogPathOptions *path_options)
 {
-   stats_counter_inc(self->super.stored_messages);
    lua_dd_accept_message(msg, path_options);
 };
 
