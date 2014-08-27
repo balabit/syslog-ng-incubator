@@ -1,15 +1,12 @@
 module_LTLIBRARIES              += modules/rss/librss.la
 
 modules_rss_librss_la_CFLAGS		= \
-	$(SYSLOG_NG_CFLAGS)		  \
-	$(EVENTLOG_CFLAGS)		  \
-	$(IVYKIS_CFLAGS)		  \
+	$(INCUBATOR_CFLAGS)		  \
 	-I$(top_srcdir)/modules/rss	  \
 	-I$(top_builddir)/modules/rss
 
 modules_rss_librss_la_LIBADD		= \
-	$(SYSLOG_NG_LIBS)		  \
-	$(EVENTLOG_LIBS)
+	$(INCUBATOR_LIBS)
 
 modules_rss_librss_la_SOURCES		= \
 	modules/rss/rss-grammar.y	  \

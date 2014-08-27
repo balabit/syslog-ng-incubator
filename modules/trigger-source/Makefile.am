@@ -1,9 +1,7 @@
 module_LTLIBRARIES					+= modules/trigger-source/libtrigger-source.la
 
 modules_trigger_source_libtrigger_source_la_CFLAGS	 = \
-	$(SYSLOG_NG_CFLAGS)				   \
-	$(EVENTLOG_CFLAGS)				   \
-	$(IVYKIS_CFLAGS)				   \
+	$(INCUBATOR_CFLAGS)				   \
 	-I$(top_srcdir)/modules/trigger-source		   \
 	-I$(top_builddir)/modules/trigger-source
 
@@ -16,9 +14,7 @@ modules_trigger_source_libtrigger_source_la_SOURCES	 = \
 	modules/trigger-source/trigger-source-plugin.c
 
 modules_trigger_source_libtrigger_source_la_LIBADD	 = \
-	$(EVENTLOG_LIBS)				   \
-	$(SYSLOG_NG_LIBS)				   \
-	$(IVYKIS_LIBS)
+	$(INCUBATOR_LIBS)
 
 modules_trigger_source_libtrigger_source_la_LDFLAGS	 = \
 	-avoid-version -module -no-undefined
