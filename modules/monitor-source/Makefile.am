@@ -3,9 +3,7 @@ if ENABLE_LUA
 module_LTLIBRARIES					+= modules/monitor-source/libmonitor-source.la
 
 modules_monitor_source_libmonitor_source_la_CFLAGS	 = \
-	$(SYSLOG_NG_CFLAGS)				   \
-	$(EVENTLOG_CFLAGS)				   \
-	$(IVYKIS_CFLAGS)				   \
+	$(INCUBATOR_CFLAGS)				   \
 	$(LUA_CFLAGS)				   \
 	-I$(top_srcdir)/modules/monitor-source		   \
 	-I$(top_builddir)/modules/monitor-source
@@ -19,9 +17,7 @@ modules_monitor_source_libmonitor_source_la_SOURCES	 = \
 	modules/monitor-source/monitor-source-plugin.c
 
 modules_monitor_source_libmonitor_source_la_LIBADD	 = \
-	$(EVENTLOG_LIBS)				   \
-	$(SYSLOG_NG_LIBS)				   \
-	$(IVYKIS_LIBS)					   \
+	$(INCUBATOR_LIBS)				   \
 	$(LUA_LIBS)                \
   modules/lua/libluautil.la
 

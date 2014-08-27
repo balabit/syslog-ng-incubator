@@ -1,25 +1,22 @@
 if ENABLE_LUA
 
-module_LTLIBRARIES				+= modules/lua/liblua.la
+module_LTLIBRARIES	  += modules/lua/liblua.la
 noinst_LTLIBRARIES        = modules/lua/libluautil.la
 
 modules_lua_liblua_la_CFLAGS		 = \
 	$(LUA_CFLAGS)		   \
-	$(SYSLOG_NG_CFLAGS)			   \
-	$(EVENTLOG_CFLAGS)			   \
-	$(IVYKIS_CFLAGS)			   \
+	$(INCUBATOR_CFLAGS)			   \
 	-I$(top_srcdir)/modules/lua		   \
 	-I$(top_builddir)/modules/lua
 
 modules_lua_libluautil_la_CFLAGS = \
-  $(LUA_CFLAGS) \
-  $(SYSLOG_NG_CFLAGS)			   \
-	$(EVENTLOG_CFLAGS)			   \
+	$(LUA_CFLAGS) \
+	$(INCUBATOR_CFLAGS)			   \
 	-I$(top_srcdir)/modules/lua		   \
 	-I$(top_builddir)/modules/lua
 
 modules_lua_libluautil_la_SOURCES = \
-  modules/lua/lua-msg.h	   	\
+	modules/lua/lua-msg.h	   	\
 	modules/lua/lua-msg.c	   	\
 	modules/lua/lua-utils.h	   	\
 	modules/lua/lua-utils.c     \
@@ -27,8 +24,8 @@ modules_lua_libluautil_la_SOURCES = \
 	modules/lua/lua-template.c
 
 modules_lua_libluautil_la_LIBADD		 = \
-	$(LUA_LIBS) $(EVENTLOG_LIBS)    \
-	$(SYSLOG_NG_LIBS) $(IVYKIS_LIBS)
+	$(LUA_LIBS)    \
+	$(INCUBATOR_LIBS)
 
 modules_lua_liblua_la_SOURCES		 = \
 	modules/lua/lua-grammar.y	   \
@@ -39,9 +36,9 @@ modules_lua_liblua_la_SOURCES		 = \
 	modules/lua/lua-plugin.c
 
 modules_lua_liblua_la_LIBADD		 = \
-	$(LUA_LIBS) $(EVENTLOG_LIBS)    \
-	$(SYSLOG_NG_LIBS) $(IVYKIS_LIBS) \
-  modules/lua/libluautil.la
+	$(LUA_LIBS) 			   \
+	$(INCUBATOR_LIBS) 
+	modules/lua/libluautil.la
 
 modules_lua_liblua_la_LDFLAGS		 = \
 	-avoid-version -module -no-undefined

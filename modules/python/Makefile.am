@@ -4,17 +4,13 @@ module_LTLIBRARIES				+= modules/python/libmod-python.la
 
 modules_python_libmod_python_la_CFLAGS		= \
 	$(PYTHON_CFLAGS)			  \
-	$(SYSLOG_NG_CFLAGS)			  \
-	$(EVENTLOG_CFLAGS)			  \
-	$(IVYKIS_CFLAGS)			  \
+	$(INCUBATOR_CFLAGS)			  \
 	-I$(top_srcdir)/modules/python		  \
 	-I$(top_builddir)/modules/python
 
 modules_python_libmod_python_la_LIBADD		= \
 	$(PYTHON_LIBS)				  \
-	$(EVENTLOG_LIBS)			  \
-	$(SYSLOG_NG_LIBS)			  \
-	$(IVYKIS_LIBS)
+	$(INCUBATOR_LIBS)
 
 modules_python_libmod_python_la_SOURCES		= \
 	modules/python/python-plugin.c		  \

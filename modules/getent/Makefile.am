@@ -12,11 +12,10 @@ EXTRA_DIST				+=\
 
 modules_getent_libtfgetent_la_CPPFLAGS	= \
   $(AM_CPPFLAGS)			  \
-  $(SYSLOG_NG_CFLAGS)			  \
-  $(EVENTLOG_CFLAGS)			  \
+  $(INCUBATOR_CFLAGS)			  \
   -I$(top_srcdir)/modules/getent
 modules_getent_libtfgetent_la_LIBADD	= \
-  $(SYSLOG_NG_LIBS) $(EVENTLOG_LIBS)
+  $(INCUBATOR_LIBS)
 modules_getent_libtfgetent_la_LDFLAGS	= \
   -avoid-version -module -no-undefined
 

@@ -7,16 +7,12 @@ PERL_LDADD	= $(shell perl -MExtUtils::Embed -e ldopts)
 
 modules_perl_libmod_perl_la_CFLAGS		= \
 	$(PERL_CFLAGS)				  \
-	$(SYSLOG_NG_CFLAGS)			  \
-	$(EVENTLOG_CFLAGS)			  \
-	$(IVYKIS_CFLAGS)			  \
+	$(INCUBATOR_CFLAGS)			  \
 	-I$(top_srcdir)/modules/perl		  \
 	-I$(top_builddir)/modules/perl
 
 modules_perl_libmod_perl_la_LIBADD		= \
-	$(EVENTLOG_LIBS)			  \
-	$(SYSLOG_NG_LIBS)			  \
-	$(IVYKIS_LIBS)
+	$(INCUBATOR_LIBS)
 
 modules_perl_libmod_perl_la_SOURCES		= \
 	modules/perl/perl-plugin.c		  \

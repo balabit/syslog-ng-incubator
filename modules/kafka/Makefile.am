@@ -4,9 +4,7 @@ module_LTLIBRARIES			+=	\
 
 modules_kafka_libkafka_la_CFLAGS	=	\
 	$(RDKAFKA_CFLAGS)			\
-	$(SYSLOG_NG_CFLAGS)			\
-	$(EVENTLOG_CFLAGS)			\
-	$(IVYKIS_CFLAGS)			\
+	$(INCUBATOR_CFLAGS)			\
 	-I$(top_srcdir)/modules/kafka		\
 	-I$(top_builddir)/modules/kafka
 modules_kafka_libkafka_la_SOURCES	=	\
@@ -17,11 +15,7 @@ modules_kafka_libkafka_la_SOURCES	=	\
 	modules/kafka/kafka-parser.c
 
 modules_kafka_libkafka_la_LIBADD	=	\
-	$(RDKAFKA_LIBS) $(MODULE_DEPS_LIBS)
-modules_kafka_libkafka_la_LDFLAGS	=	\
-	$(MODULE_LDFLAGS)
-modules_kafka_libkafka_la_DEPENDENCIES	=	\
-	$(MODULE_DEPS_LIBS)
+	$(RDKAFKA_LIBS) $(INCUBATOR_LIBS)
 
 modules/kafka modules/kafka/ mod-kafka: \
 	modules/kafka/libkafka.la

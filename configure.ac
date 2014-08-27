@@ -247,14 +247,31 @@ if test "x$enable_kafka" != "xno" && test "x$with_kafka" != "xno"; then
 fi
 
 dnl ***************************************************************************
+dnl create common cflags/libs for incubator modules.
+dnl ***************************************************************************
+
+SYSLOG_NG_LIBDIR="`$PKG_CONFIG --variable=libdir syslog-ng`"
+
+INCUBATOR_CFLAGS="$EVENTLOG_CFLAGS $GLIB_CFLAGS $SYSLOG_NG_CFLAGS $IVYKIS_CFLAGS"
+INCUBATOR_LIBS="$EVENTLOG_LIBS $GLIB_LIBS $SYSLOG_NG_LIBS $IVYKIS_LIBS"
+
+INCUBATOR_TEST_LDADD="$SYSLOG_NG_LIBDIR/syslog-ng/libtest/libsyslog-ng-test.a -rpath $SYSLOG_NG_LIBDIR"
+
+dnl ***************************************************************************
 dnl misc features to be enabled
 dnl ***************************************************************************
 
 AC_SUBST(syslog_ng_tools)
 AC_SUBST(moduledir)
 
+AC_SUBST(INCUBATOR_CFLAGS)
+AC_SUBST(INCUBATOR_LIBS)
+
 AC_SUBST(RDKAFKA_CFLAGS)
 AC_SUBST(RDKAFKA_LIBS)
+
+AC_SUBST(INCUBATOR_TEST_LDADD)
+AC_SUBST(SYSLOG_NG_LIBDIR)
 
 AC_DEFINE_UNQUOTED(ENABLE_DEBUG, `enable_value $enable_debug`, [Enable debugging])
 

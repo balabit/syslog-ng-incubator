@@ -8,11 +8,10 @@ modules_graphite_libgraphite_la_SOURCES  = \
 
 modules_graphite_libgraphite_la_CPPFLAGS   = \
   $(AM_CPPFLAGS)             \
-  $(SYSLOG_NG_CFLAGS)          \
-  $(EVENTLOG_CFLAGS)           \
+  $(INCUBATOR_CFLAGS)          \
   -I$(top_srcdir)/modules/graphite
 modules_graphite_libgraphite_la_LIBADD   = \
-  $(SYSLOG_NG_LIBS) $(EVENTLOG_LIBS)
+  $(INCUBATOR_LIBS)
 modules_graphite_libgraphite_la_LDFLAGS  = \
   -avoid-version -module -no-undefined
 
