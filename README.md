@@ -111,6 +111,13 @@ of which the latter six are optional) installed too.
  [perl]: http://www.perl.org/
  [python]: http://www.python.org/
  [kafka]: https://github.com/edenhill/librdkafka
+ 
+ 
+Docker container
+----------------
+
+An automatically built docker container is available at https://registry.hub.docker.com/u/talien/syslog-ng-incubator/
+from the latest development snapshot.
 
 License
 -------
