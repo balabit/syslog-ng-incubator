@@ -78,7 +78,7 @@ grok_parser_option
         ;
 
 grok_pattern 
-        : KW_GROK_PATTERN { last_grok_instance = grok_instance_new(); }  '(' string ')' { grok_instance_set_pattern(last_grok_instance, $3); free($3); }
+        : KW_GROK_PATTERN { last_grok_instance = grok_instance_new(); }  '(' string ')' { grok_instance_set_pattern(last_grok_instance, $4); free($4); }
         ;
 
 /* INCLUDE_RULES */
