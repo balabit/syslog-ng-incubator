@@ -41,3 +41,5 @@ EXTRA_DIST						+= \
 	modules/grok/grok-parser-example.conf
 
 .PHONY: modules/grok mod-grok
+
+include modules/grok/tests/Makefile.am
