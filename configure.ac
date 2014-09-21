@@ -86,9 +86,8 @@ AC_ARG_WITH(librdkafka,
                             [use librdkafka library from (prefix) directory DIR]),,)
 
 AC_ARG_ENABLE(zmq,
-          [  --enable-zmq        Enable zmq destination (default: yes)]
-              ,,enable_zmq="yes")
-
+   [  --enable-zmq        Enable zmq destination ],
+   ,enable_zmq="auto")
 
 dnl ***************************************************************************
 dnl Checks for programs.
@@ -255,9 +254,7 @@ dnl ***************************************************************************
 dnl zmq headers/libraries
 dnl ***************************************************************************
 
-if test "x$enable_zmq" != "xno"; then
-    PKG_CHECK_MODULES(ZMQ, libzmq >= $ZMQ_MIN_VERSION,,)
-fi
+INCUBATOR_CHECK_DEP(zmq,[PKG_CHECK_MODULES(ZMQ_CLIENT, libzmq >= $ZMQ_MIN_VERSION, zmq_found="yes", zmq_found="no")])
 
 dnl ***************************************************************************
 dnl create common cflags/libs for incubator modules.
@@ -293,7 +290,7 @@ AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
 AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
 AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
-AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" = "yes"])
+AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
