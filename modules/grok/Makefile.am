@@ -2,9 +2,7 @@
 module_LTLIBRARIES					+= modules/grok/libgrok-parser.la
 
 modules_grok_libgrok_parser_la_CFLAGS	 = \
-	$(SYSLOG_NG_CFLAGS)				   \
-	$(EVENTLOG_CFLAGS)				   \
-	$(IVYKIS_CFLAGS)				   \
+	$(INCUBATOR_CFLAGS)				   \
 	-I$(top_srcdir)/modules/grok		   \
 	-I$(top_builddir)/modules/grok
 
@@ -17,9 +15,7 @@ modules_grok_libgrok_parser_la_SOURCES	 = \
 	modules/grok/grok-parser-plugin.c
 
 modules_grok_libgrok_parser_la_LIBADD	 = \
-	$(EVENTLOG_LIBS)				   \
-	$(SYSLOG_NG_LIBS)				   \
-	$(IVYKIS_LIBS)
+	$(INCUBATOR_LIBS)	
 
 modules_grok_libgrok_parser_la_LDFLAGS	 = \
 	-avoid-version -module -no-undefined  $(GROK_LIBS)

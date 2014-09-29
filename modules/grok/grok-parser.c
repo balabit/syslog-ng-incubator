@@ -36,10 +36,17 @@ struct _GrokInstance
   GList *values;
 }; 
 
+typedef struct _GrokPattern 
+{
+  char *name;
+  char *pattern;
+} GrokPattern;
+
 typedef struct _GrokParser
 {
   LogParser super;
   GList *instances;
+  GList *custom_patterns;
   char *grok_pattern_dir;
   char *key_prefix;
   int key_prefix_len;
@@ -51,6 +58,30 @@ GrokInstance *grok_instance_new()
 {
   return g_new0(GrokInstance, 1);
 }
+
+void 
+grok_parser_add_named_subpattern(LogParser *parser, const char *name, const char *pattern)
+{
+  GrokParser *self = (GrokParser *)parser;
+  GrokPattern *grok_pattern = g_new0(GrokPattern, 1);
+  grok_pattern->name = g_strdup(name);
+  grok_pattern->pattern = g_strdup(pattern);
+  self->custom_patterns = g_list_append(self->custom_patterns, grok_pattern);
+};
+
+void
+grok_instance_pattern_list_foreach(gpointer pattern, gpointer user_data)
+{
+  GrokPattern *grok_pattern = (GrokPattern *)pattern;
+  GrokInstance *self = (GrokInstance *)user_data;
+  grok_pattern_add(self->grok, grok_pattern->name, strlen(grok_pattern->name), grok_pattern->pattern, strlen(grok_pattern->pattern));
+};
+
+void 
+grok_instance_load_named_subpatterns(GrokInstance *self, GrokParser *parser)
+{
+  g_list_foreach(parser->custom_patterns, grok_instance_pattern_list_foreach, self);
+};
 
 void grok_instance_set_pattern(GrokInstance *self, char *pattern)
 {
@@ -68,10 +99,17 @@ gboolean grok_instance_init(GrokInstance *self, GrokParser *parser)
 {
   self->grok = g_new0(grok_t, 1);
   grok_init(self->grok);
-  grok_patterns_import_from_file(self->grok, parser->grok_pattern_dir);
-  grok_compile(self->grok, self->grok_pattern);
+  self->grok->logmask = (~0);
+  //grok_patterns_import_from_file(self->grok, parser->grok_pattern_dir);
+  grok_instance_load_named_subpatterns(self, parser);
+  if (grok_compile(self->grok, self->grok_pattern) != GROK_OK)
+    {
+      msg_error("Grok pattern compilation failed", evt_tag_str("error", self->grok->errstr), evt_tag_str("pattern", self->grok_pattern),NULL);
+      return FALSE;
+    }
   self->key_prefix = parser->key_prefix;
   self->key_prefix_len = parser->key_prefix_len;
+  return TRUE;
 };
 
 void grok_instance_add_matched_values_to_msg(GrokInstance *self, grok_match_t *match, LogMessage *msg)
@@ -83,12 +121,21 @@ void grok_instance_add_matched_values_to_msg(GrokInstance *self, grok_match_t *m
   grok_match_walk_init(match);
   while (grok_match_walk_next(match, &key, &key_len, &value, &value_len) == 0)
     {
-      fprintf(stderr, "%.*s:%.*s\n", key_len, key, value_len, value);
+      fprintf(stderr, "WALK: '%.*s' : '%.*s'\n", key_len, key, value_len, value);
+      char *key_start = strchr(key, ':');
+      if (key_start == NULL)
+         key_start = key;
+      else
+         {
+           key_start = key_start + 1;
+           key_len = key_len - (key_start - key);
+         }
       if (key_len > 1023 - self->key_prefix_len) 
         key_len = 1023 - self->key_prefix_len;
       if (self->key_prefix_len > 0)
          strncpy(key_buffer, self->key_prefix, self->key_prefix_len);
-      strncpy(key_buffer + self->key_prefix_len, key, key_len);
+      strncpy(key_buffer + self->key_prefix_len, key_start, key_len);
+      fprintf(stderr, "KEY: %s", key_buffer);
       key_buffer[key_len+self->key_prefix_len] = '\0';
       NVHandle handle = log_msg_get_value_handle(key_buffer);
       log_msg_set_value(msg, handle, value, value_len);
@@ -142,8 +189,9 @@ gboolean grok_parser_init(LogParser *parser, GlobalConfig *cfg)
   if (!self->grok_pattern_dir)
     self->grok_pattern_dir = g_strdup("/home/balabit/tmp/grok/grok/patterns/base");
   //grok_instance_set_pattern(self->instance, "%{SYSLOGBASE}");
-  self->key_prefix = g_strdup("grok.");
-  self->key_prefix_len = strlen(self->key_prefix);
+  //self->key_prefix = g_strdup("grok.");
+  if (self->key_prefix != NULL)
+    self->key_prefix_len = strlen(self->key_prefix);
 
   if (!self->template)
   {
@@ -178,11 +226,13 @@ gboolean grok_parser_process(LogParser *s, LogMessage **pmsg, const LogPathOptio
   LogMessage *msg = *pmsg;
   GString *str;
   GList *instance;
+  LogTemplateOptions template_options;
  
   GrokParser *self = (GrokParser *)s;
   str = g_string_new("");
+  log_template_options_defaults(&template_options);
 
-  log_template_format(self->template, msg, NULL, 0, 0, NULL, str);
+  log_template_format(self->template, msg, &template_options, 0, 0, NULL, str);
 
   instance = self->instances;
   while (instance && !(grok_instance_match(instance->data, str->str, msg)))
@@ -194,11 +244,20 @@ gboolean grok_parser_process(LogParser *s, LogMessage **pmsg, const LogPathOptio
   return TRUE;
 };
 
+void grok_pattern_free(GrokPattern *self)
+{
+  g_free(self->name);
+  g_free(self->pattern);
+  g_free(self);
+};
+
 void grok_parser_free(LogParser *s)
 {
   GrokParser *self = (GrokParser *)s;
 
   g_list_free_full(self->instances, grok_instance_free);
+  g_list_free_full(self->custom_patterns, grok_pattern_free);
+
   g_free(self->grok_pattern_dir);
   log_parser_free_method(s);
 };
