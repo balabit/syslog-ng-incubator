@@ -35,5 +35,5 @@ void grok_parser_add_named_subpattern(LogParser *self, const char *name, const c
 void grok_parser_set_pattern_directory(LogParser *s, gchar *pattern_directory);
 void grok_parser_set_key_prefix(LogParser *s, gchar *key_prefix);
 void grok_parser_add_pattern_instance(LogParser *s, GrokInstance *instance);
-
+void grok_parser_turn_on_debug(LogParser *s);
 #endif

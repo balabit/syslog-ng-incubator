@@ -2,14 +2,23 @@
 #include <apphook.h>
 #include <libtest/testutils.h>
 
+LogParser*
+create_simple_parser()
+{
+   LogParser *parser = grok_parser_new();
+   grok_parser_turn_on_debug(parser);
+   grok_parser_add_named_subpattern(parser, "STRING", "[a-zA-Z]*");
+   return parser; 
+};
+
 void
 test_grok_pattern()
 {
-   LogParser *parser = grok_parser_new();
+   LogParser *parser = create_simple_parser(); 
+
    GrokInstance *instance = grok_instance_new();
    grok_instance_set_pattern(instance, "%{STRING:field}");
    grok_parser_add_pattern_instance(parser, instance);
-   grok_parser_add_named_subpattern(parser, "STRING", "[a-zA-Z]*");
    
    LogMessage *msg = log_msg_new_empty();
    NVHandle handle = LM_V_MESSAGE;

@@ -52,6 +52,7 @@ typedef struct _GrokParser
   int key_prefix_len;
   LogTemplate *template;
   GlobalConfig *config;
+  gboolean debug;
 } GrokParser;
 
 GrokInstance *grok_instance_new()
@@ -68,6 +69,13 @@ grok_parser_add_named_subpattern(LogParser *parser, const char *name, const char
   grok_pattern->pattern = g_strdup(pattern);
   self->custom_patterns = g_list_append(self->custom_patterns, grok_pattern);
 };
+
+void
+grok_parser_turn_on_debug(LogParser *parser)
+{
+  GrokParser *self = (GrokParser *)parser;
+  self->debug = TRUE;
+}
 
 void
 grok_instance_pattern_list_foreach(gpointer pattern, gpointer user_data)
@@ -99,7 +107,8 @@ gboolean grok_instance_init(GrokInstance *self, GrokParser *parser)
 {
   self->grok = g_new0(grok_t, 1);
   grok_init(self->grok);
-  self->grok->logmask = (~0);
+  if (parser->debug)
+     self->grok->logmask = (~0);
   //grok_patterns_import_from_file(self->grok, parser->grok_pattern_dir);
   grok_instance_load_named_subpatterns(self, parser);
   if (grok_compile(self->grok, self->grok_pattern) != GROK_OK)
