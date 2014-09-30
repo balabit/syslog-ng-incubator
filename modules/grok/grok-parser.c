@@ -33,7 +33,6 @@ struct _GrokInstance
   char *key_prefix;
   int key_prefix_len;
   GList *tags;
-  GList *values;
 }; 
 
 typedef struct _GrokPattern 
@@ -71,6 +70,12 @@ grok_parser_add_named_subpattern(LogParser *parser, const char *name, const char
 };
 
 void
+grok_instance_add_tag(GrokInstance *instance, const char *tag)
+{
+  instance->tags = g_list_append(instance->tags, tag);
+};
+
+void
 grok_parser_turn_on_debug(LogParser *parser)
 {
   GrokParser *self = (GrokParser *)parser;
@@ -98,10 +103,35 @@ void grok_instance_set_pattern(GrokInstance *self, char *pattern)
 
 void grok_instance_free(GrokInstance *self)
 {
+  g_list_free_full(self->tags, g_free);
   g_free(self->grok_pattern);
   grok_free(self->grok);
   g_free(self->grok);
 };
+
+void
+grok_patterns_import_from_directory(GrokInstance *self, GrokParser *parser)
+{
+  gchar *fname;
+
+  if (parser->grok_pattern_dir == NULL)
+    return;
+
+  GDir *dir = g_dir_open(parser->grok_pattern_dir, 0, NULL);
+  if (!dir)
+    {
+       msg_error("Could not open pattern directory", evt_tag_str("pattern_dir", parser->grok_pattern_dir), NULL);
+       return;
+    }
+ 
+  while ((fname = g_dir_read_name(dir)))
+    {
+       gchar *full_name = g_build_filename(parser->grok_pattern_dir, fname, NULL);
+       grok_patterns_import_from_file(self->grok, full_name);
+       g_free(full_name);
+    }
+  g_dir_close(dir);
+}
 
 gboolean grok_instance_init(GrokInstance *self, GrokParser *parser)
 {
@@ -109,7 +139,7 @@ gboolean grok_instance_init(GrokInstance *self, GrokParser *parser)
   grok_init(self->grok);
   if (parser->debug)
      self->grok->logmask = (~0);
-  //grok_patterns_import_from_file(self->grok, parser->grok_pattern_dir);
+  grok_patterns_import_from_directory(self, parser);
   grok_instance_load_named_subpatterns(self, parser);
   if (grok_compile(self->grok, self->grok_pattern) != GROK_OK)
     {
@@ -195,10 +225,6 @@ gboolean grok_parser_init(LogParser *parser, GlobalConfig *cfg)
 {
   GrokParser *self = (GrokParser *)parser;
 
-  if (!self->grok_pattern_dir)
-    self->grok_pattern_dir = g_strdup("/home/balabit/tmp/grok/grok/patterns/base");
-  //grok_instance_set_pattern(self->instance, "%{SYSLOGBASE}");
-  //self->key_prefix = g_strdup("grok.");
   if (self->key_prefix != NULL)
     self->key_prefix_len = strlen(self->key_prefix);
 

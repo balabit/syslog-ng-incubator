@@ -48,7 +48,9 @@ GrokInstance *last_grok_instance;
 /* INCLUDE_DECLS */
 
 %token KW_GROK
-%token KW_GROK_PATTERN
+%token KW_TAG
+%token KW_GROK_MATCH
+%token KW_GROK_CUSTOM_PATTERN
 %token KW_GROK_PATTERN_DIRECTORY
 
 %type <ptr> grok_pattern
@@ -74,12 +76,22 @@ grok_parser_options
 
 grok_parser_option
         : grok_pattern { grok_parser_add_pattern_instance(last_parser, last_grok_instance); }
+	| KW_GROK_CUSTOM_PATTERN '(' string string ')' { grok_parser_add_named_subpattern(last_parser, $3, $4); free($3); free($4); }
         | KW_GROK_PATTERN_DIRECTORY '(' string ')' { grok_parser_set_pattern_directory(last_parser, $3); free($3); }
         ;
 
 grok_pattern 
-        : KW_GROK_PATTERN { last_grok_instance = grok_instance_new(); }  '(' string ')' { grok_instance_set_pattern(last_grok_instance, $4); free($4); }
+        : KW_GROK_MATCH { last_grok_instance = grok_instance_new(); }  '(' string grok_instance_options ')' { grok_instance_set_pattern(last_grok_instance, $4); free($4); }
         ;
+
+grok_instance_options
+	: grok_instance_option grok_instance_options
+	|
+	;
+
+grok_instance_option
+	: KW_TAG '(' string ')' { grok_instance_add_tag(last_grok_instance, $3); free($3); }
+	;
 
 /* INCLUDE_RULES */
 
