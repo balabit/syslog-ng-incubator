@@ -48,7 +48,6 @@ GrokInstance *last_grok_instance;
 /* INCLUDE_DECLS */
 
 %token KW_GROK
-%token KW_TAG
 %token KW_GROK_MATCH
 %token KW_GROK_CUSTOM_PATTERN
 %token KW_GROK_PATTERN_DIRECTORY
@@ -90,7 +89,7 @@ grok_instance_options
 	;
 
 grok_instance_option
-	: KW_TAG '(' string ')' { grok_instance_add_tag(last_grok_instance, $3); free($3); }
+	: KW_TAGS '(' string_list ')' { grok_instance_add_tags(last_grok_instance, $3); }
 	;
 
 /* INCLUDE_RULES */

@@ -64,6 +64,7 @@ test_grok_pattern_single()
    gchar *value = log_msg_get_value(msg, field, &value_len);
    
    assert_nstring(value, value_len, "value", 5, "Named capture didn't stored");
+   log_pipe_unref(parser);
 }
 
 void
@@ -82,13 +83,34 @@ test_grok_pattern_multiple()
    gchar *value = log_msg_get_value(msg, field, &value_len);
    
    assert_nstring(value, value_len, "123", 3, "Named capture didn't stored");
+   log_pipe_unref(parser);
 } 
+
+void test_grok_parser_clone()
+{
+   LogParser *old_parser = create_simple_parser(); 
+   create_and_add_grok_instance_with_pattern(old_parser, "%{STRING:field}");
+
+   LogParser *parser = log_pipe_clone(&old_parser->super);
+   LogMessage *msg = create_message_with_fields("MESSAGE", "value", NULL);
+    
+   parse_msg_with_defaults(parser, msg);
+
+   NVHandle field = log_msg_get_value_handle("field");
+   gssize value_len;
+   gchar *value = log_msg_get_value(msg, field, &value_len);
+   
+   assert_nstring(value, value_len, "value", 5, "Named capture didn't stored");
+   log_pipe_unref(old_parser);
+   log_pipe_unref(parser);
+};
 
 int main()
 {
   app_startup();
   test_grok_pattern_single();
   test_grok_pattern_multiple();
+  test_grok_parser_clone();
   app_shutdown();
   return 0;
 };
