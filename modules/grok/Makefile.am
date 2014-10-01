@@ -3,6 +3,7 @@ module_LTLIBRARIES					+= modules/grok/libgrok-parser.la
 
 modules_grok_libgrok_parser_la_CFLAGS	 = \
 	$(INCUBATOR_CFLAGS)				   \
+    $(GROK_CFLAGS)                      \
 	-I$(top_srcdir)/modules/grok		   \
 	-I$(top_builddir)/modules/grok
 

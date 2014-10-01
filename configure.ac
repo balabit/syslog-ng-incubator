@@ -222,6 +222,9 @@ dnl grok headers/libraries
 dnl ***************************************************************************
 
 AC_CHECK_LIB(grok, grok_new, [enable_grok="yes"; GROK_LIBS="-lgrok"], [enable_grok="no"])
+if test  "x$enable_grok" = "xno"; then
+  PKG_CHECK_MODULES(GROK, libgrok, enable_grok="yes", enable_grok="no")
+fi
 
 dnl ***************************************************************************
 dnl librdkafka headers/libraries
