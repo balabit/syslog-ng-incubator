@@ -248,13 +248,13 @@ monitor_source_deinit (LogPipe *s)
 
 
 static LogSource *
-monitor_source_new (MonitorSourceDriver *owner, LogSourceOptions *options)
+monitor_source_new (MonitorSourceDriver *owner, LogSourceOptions *options, GlobalConfig *cfg)
 {
   MonitorSource *self = g_new0 (MonitorSource, 1);
 
-  log_source_init_instance (&self->super);
+  log_source_init_instance (&self->super, cfg);
   log_source_set_options (&self->super, options, 0, SCS_MONITOR,
-                          owner->super.super.id, NULL, FALSE);
+                          owner->super.super.id, NULL, FALSE, FALSE);
 
   self->state = luaL_newstate();
   luaL_openlibs(self->state);
@@ -292,10 +292,10 @@ monitor_sd_init (LogPipe *s)
     self->options.monitor_func_name = g_strdup("monitor");
 
   log_source_options_init (&self->source_options, cfg, self->super.super.group);
-  self->source = monitor_source_new (self, &self->source_options);
+  self->source = monitor_source_new (self, &self->source_options, cfg);
 
   log_pipe_append (&self->source->super, s);
-  log_pipe_init (&self->source->super, cfg);
+  log_pipe_init (&self->source->super);
 
   return TRUE;
 }
@@ -353,11 +353,11 @@ monitor_sd_set_monitor_func (LogDriver *s, const gchar *function_name)
 }
 
 LogDriver *
-monitor_sd_new (void)
+monitor_sd_new (GlobalConfig *cfg)
 {
   MonitorSourceDriver *self = g_new0 (MonitorSourceDriver, 1);
 
-  log_src_driver_init_instance ((LogSrcDriver *)&self->super);
+  log_src_driver_init_instance ((LogSrcDriver *)&self->super, cfg);
 
   self->super.super.super.init = monitor_sd_init;
   self->super.super.super.deinit = monitor_sd_deinit;

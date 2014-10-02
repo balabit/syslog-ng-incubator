@@ -271,24 +271,17 @@ _perl_thread_init(LogThrDestDriver *d)
               NULL);
 }
 
-static gboolean
-perl_worker_eval(LogThrDestDriver *d)
+static worker_insert_result_t
+perl_worker_eval(LogThrDestDriver *d, LogMessage *msg)
 {
   PerlDestDriver *self = (PerlDestDriver *)d;
   gboolean success, vp_ok;
-  LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
   PerlInterpreter *my_perl = self->perl;
   int count;
   HV *kvmap;
   gpointer args[3];
   dSP;
-
-  success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
-  if (!success)
-    return TRUE;
-
-  msg_set_context(msg);
 
   ENTER;
   SAVETMPS;
@@ -315,8 +308,6 @@ perl_worker_eval(LogThrDestDriver *d)
   count = call_pv(self->queue_func_name, G_EVAL | G_SCALAR);
 
   SPAGAIN;
-
-  msg_set_context(NULL);
 
   if (SvTRUE(ERRSV))
     {
@@ -355,19 +346,12 @@ perl_worker_eval(LogThrDestDriver *d)
 
   if (success && vp_ok)
     {
-      step_sequence_number(&self->seq_num);
-      log_msg_ack(msg, &path_options);
-      log_msg_unref(msg);
+      return WORKER_INSERT_RESULT_SUCCESS;
     }
   else
     {
-      stats_counter_inc(self->super.dropped_messages);
-      step_sequence_number(&self->seq_num);
-      log_msg_ack(msg, &path_options);
-      log_msg_unref(msg);
+      return WORKER_INSERT_RESULT_DROP;
     }
-
-  return success;
 }
 
 static gboolean

@@ -299,21 +299,14 @@ _py_call_function_with_arguments(PythonDestDriver *self,
   return success;
 }
 
-static gboolean
-python_worker_eval(LogThrDestDriver *d)
+static worker_insert_result_t
+python_worker_eval(LogThrDestDriver *d, LogMessage *msg)
 {
   PythonDestDriver *self = (PythonDestDriver *)d;
   gboolean success, vp_ok;
-  LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
   PyObject *func_args;
   PyGILState_STATE gstate;
-
-  success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
-  if (!success)
-    return TRUE;
-
-  msg_set_context(msg);
 
   gstate = PyGILState_Ensure();
 
@@ -338,23 +331,15 @@ python_worker_eval(LogThrDestDriver *d)
 
   PyGILState_Release(gstate);
 
-  msg_set_context(NULL);
-
   if (success && vp_ok)
     {
-      step_sequence_number(&self->seq_num);
-      log_msg_ack(msg, &path_options);
-      log_msg_unref(msg);
+      return WORKER_INSERT_RESULT_SUCCESS;
     }
   else
     {
-      stats_counter_inc(self->super.dropped_messages);
-      step_sequence_number(&self->seq_num);
-      log_msg_ack(msg, &path_options);
-      log_msg_unref(msg);
+      return WORKER_INSERT_RESULT_DROP;
     }
 
-  return success;
 }
 
 static void

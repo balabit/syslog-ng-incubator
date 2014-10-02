@@ -139,11 +139,14 @@ dnl ***************************************************************************
 INCUBATOR_CHECK_DEP(logmongource,[PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,logmongource_found="no")])
 
 dnl ***************************************************************************
+<<<<<<< HEAD
 dnl riemann-client headers/libraries
 dnl ***************************************************************************
 INCUBATOR_CHECK_DEP(riemann,[PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,riemann_found="no")])
 
 dnl ***************************************************************************
+=======
+>>>>>>> 217adaf... update: Updated modules to be syslog-ng 3.6 compatible
 dnl lua headers/libraries
 dnl ***************************************************************************
 dnl if test "x$enable_lua" != "xno"; then
@@ -276,7 +279,6 @@ AC_SUBST(SYSLOG_NG_LIBDIR)
 AC_DEFINE_UNQUOTED(ENABLE_DEBUG, `enable_value $enable_debug`, [Enable debugging])
 
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
-AM_CONDITIONAL(ENABLE_RIEMANN, [test "$enable_riemann" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
 AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
@@ -291,14 +293,12 @@ echo "syslog-ng Incubator $VERSION configured" | sed -e "s/./-/g"
 echo " Debugging:            ${enable_debug:=no}"
 echo " Modules:"
 echo "  basicfuncs-plus      yes"
-echo "  graphite             yes"
 echo "  kafka                ${enable_kafka:=no}"
 echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  perl:                ${enable_perl:-yes}"
 echo "  python:              ${enable_python:-yes} (${python_version})"
-echo "  riemann:             ${enable_riemann:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
 echo "  tfgetent             yes"

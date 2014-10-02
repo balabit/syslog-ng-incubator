@@ -70,7 +70,7 @@ lua_dd_load_file(LuaDestDriver *self)
 
 static void lua_dd_accept_message(LogMessage *msg, LogPathOptions *path_options)
 {
-   log_msg_ack(msg, path_options);
+   log_msg_ack(msg, path_options, AT_PROCESSED);
    log_msg_unref(msg);
 };
 
@@ -137,21 +137,14 @@ lua_dd_create_parameter_table_for_queue_func(lua_State *state, ValuePairs *param
                       LTZ_SEND, NULL, state);
 }
 
-static gboolean
-lua_dd_queue(LogThrDestDriver *d)
+static worker_insert_result_t
+lua_dd_queue(LogThrDestDriver *d, LogMessage *msg)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
-  LogMessage *msg;
   SBGString *str = sb_gstring_acquire();
   gboolean success;
   int number_of_parameters = 1;
-
-  success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
-  if (!success)
-    return TRUE;
-
-  msg_set_context(msg);
 
   lua_getglobal(self->state, self->queue_func_name);
 
@@ -174,12 +167,11 @@ lua_dd_queue(LogThrDestDriver *d)
 
   success = !lua_pcall(self->state, number_of_parameters, 0, 0);
 
-  msg_set_context(NULL);
   sb_gstring_release(str);
 
   if (success)
    {
-     lua_dd_ack_message(self, msg, &path_options);
+     return WORKER_INSERT_RESULT_SUCCESS;
    }
   else
    {
@@ -191,9 +183,9 @@ lua_dd_queue(LogThrDestDriver *d)
               NULL);
 
      lua_dd_drop_message(self, msg, &path_options);
+     return WORKER_INSERT_RESULT_DROP;
    }  
 
-  return success;
 };
 
 
@@ -264,7 +256,7 @@ lua_dd_set_config_variable(lua_State *state, GlobalConfig *conf)
   lua_setglobal(state, "__conf");
 };
 
-static gboolean
+static void
 lua_dd_inject_global_variable(gpointer data,
                               gpointer user_data)
 {
@@ -274,8 +266,6 @@ lua_dd_inject_global_variable(gpointer data,
   lua_cast_and_push_value_to_stack(state, constant->name, constant->type, constant->value);
 
   lua_setglobal(state, constant->name);
-
-  return FALSE;
 }
 
 static void
@@ -542,14 +532,14 @@ lua_dd_set_params(LogDriver *d, ValuePairs *vp)
 }
 
 LogDriver *
-lua_dd_new()
+lua_dd_new(GlobalConfig *cfg)
 {
   LuaDestDriver *self = g_new0(LuaDestDriver, 1);
 
   self->state = luaL_newstate();
   luaL_openlibs(self->state);
 
-  log_threaded_dest_driver_init_instance(&self->super);
+  log_threaded_dest_driver_init_instance(&self->super, cfg);
   self->super.super.super.super.init = lua_dd_init;
   self->super.super.super.super.deinit = lua_dd_deinit;
   self->super.super.super.super.free_fn = lua_dd_free;
