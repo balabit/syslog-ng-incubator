@@ -1,4 +1,4 @@
-#if ENABLE_GROK
+if ENABLE_GROK
 module_LTLIBRARIES					+= modules/grok/libgrok-parser.la
 
 modules_grok_libgrok_parser_la_CFLAGS	 = \
@@ -26,11 +26,12 @@ BUILT_SOURCES						+= \
 	modules/grok/grok-parser-grammar.c	   \
 	modules/grok/grok-parser-grammar.h
 
+include modules/grok/tests/Makefile.am
 
 modules/grok-parser mod-grok: modules/grok/libgrok-parser.la
-#else
+else
 modules/grok-parser mod-grok:
-#endif
+endif
 
 
 EXTRA_DIST						+= \
@@ -38,5 +39,3 @@ EXTRA_DIST						+= \
 	modules/grok/grok-parser-example.conf
 
 .PHONY: modules/grok mod-grok
-
-include modules/grok/tests/Makefile.am
