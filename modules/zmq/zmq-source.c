@@ -175,7 +175,10 @@ zmq_sd_deinit(LogPipe *s)
   ZMQReaderContext* reader_context = g_new0(ZMQReaderContext, 1);
   reader_context->context = self->context;
   reader_context->reader = self->reader;
-  log_pipe_deinit((LogPipe *) self->reader);
+  if (self->reader)
+  {
+    log_pipe_deinit((LogPipe *) self->reader);
+  }
   self->context = NULL;
   self->reader = NULL;
 
