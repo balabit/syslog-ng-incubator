@@ -2,7 +2,7 @@ if ENABLE_ZMQ
 
 module_LTLIBRARIES += modules/zmq/libzmq.la
 modules_zmq_libzmq_la_CFLAGS = \
-    $(ZMQ_CFLAGS)  \
+    $(ZMQ_CLIENT_CFLAGS)  \
     $(SYSLOG_NG_CFLAGS) \
     $(EVENTLOG_CFLAGS) \
     $(IVYKIS_CFLAGS) \
@@ -22,7 +22,7 @@ modules_zmq_libzmq_la_SOURCES = \
     modules/zmq/zmq-transport.h
 
 modules_zmq_libzmq_la_LIBADD = \
-    $(ZMQ_LIBS) $(EVENTLOG_LIBS) \
+    $(ZMQ_CLIENT_LIBS) $(EVENTLOG_LIBS) \
     $(SYSLOG_NG_LIBS) $(IVYKIS_LIBS)
 
 modules_zmq_libzmq_la_LDFLAGS = \
