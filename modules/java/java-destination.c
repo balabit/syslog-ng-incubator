@@ -205,6 +205,7 @@ java_dd_work_perform(gpointer data)
 			log_queue_ack_backlog(self->log_queue, 1);
 		else
 			log_queue_rewind_backlog(self->log_queue);
+    log_msg_unref(lm);
 		msg_set_context(NULL);
 		log_msg_refcache_stop();
 	}
