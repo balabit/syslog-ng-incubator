@@ -23,7 +23,7 @@
 
 #include "java-destination.h"
 #include "messages.h"
-#include "stats.h"
+#include "stats/stats.h"
 #include "logqueue.h"
 #include "driver.h"
 
@@ -145,6 +145,7 @@ java_dd_init(LogPipe *s)
 	if(!java_dd_load_class(self))
 		return FALSE;
 	self->log_queue = log_dest_driver_acquire_queue(&self->super, "testjava");
+  log_queue_set_use_backlog(self->log_queue, TRUE);
 	java_dd_start_watches(self);
 	return java_dd_init_dest_object(self);
 }
@@ -187,12 +188,13 @@ java_dd_work_perform(gpointer data)
 	gboolean sent = TRUE;
 	JNIEnv *env = NULL;
 	java_machine_attach_thread(self->java_machine, &env);
-	while (sent && !main_loop_io_worker_job_quit())
+	while (sent && !main_loop_worker_job_quit())
 	{
 		LogMessage *lm;
 		LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
 
-		if (!log_queue_pop_head(self->log_queue, &lm, &path_options, TRUE, TRUE))
+    lm = log_queue_pop_head(self->log_queue, &path_options);
+		if (!lm)
 		{
 			/* no more items are available */
 			break;
@@ -204,7 +206,7 @@ java_dd_work_perform(gpointer data)
 		if (sent)
 			log_queue_ack_backlog(self->log_queue, 1);
 		else
-			log_queue_rewind_backlog(self->log_queue);
+			log_queue_rewind_backlog(self->log_queue, 1);
     log_msg_unref(lm);
 		msg_set_context(NULL);
 		log_msg_refcache_stop();
@@ -245,7 +247,7 @@ java_dd_process_output(JavaDestDriver *self)
 		 * conditions of any kind.
 		 */
 
-		if (!main_loop_io_worker_job_quit())
+		if (!main_loop_worker_job_quit())
 		{
 			java_dd_work_perform(self);
 			java_dd_work_finished(self);
@@ -312,7 +314,7 @@ java_dd_new(GlobalConfig *cfg)
 {
   JavaDestDriver *self = g_new0(JavaDestDriver, 1);
 
-  log_dest_driver_init_instance(&self->super);
+  log_dest_driver_init_instance(&self->super, cfg);
   self->super.super.super.free_fn = java_dd_free;
   self->super.super.super.init = java_dd_init;
   self->super.super.super.deinit = java_dd_deinit;
