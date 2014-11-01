@@ -1,7 +1,7 @@
 if ENABLE_JAVA
 
-module_LTLIBRARIES += modules/java/libjava.la
-modules_java_libjava_la_CFLAGS = \
+module_LTLIBRARIES += modules/java/libmod-java.la
+modules_java_libmod_java_la_CFLAGS = \
     $(JNI_CFLAGS)  \
     $(SYSLOG_NG_CFLAGS) \
     $(EVENTLOG_CFLAGS) \
@@ -9,7 +9,7 @@ modules_java_libjava_la_CFLAGS = \
     -I$(top_srcdir)/modules/java    \
     -I$(top_builddir)/modules/java
 
-modules_java_libjava_la_SOURCES = \
+modules_java_libmod_java_la_SOURCES = \
     modules/java/java-grammar.y \
     modules/java/java-plugin.c \
     modules/java/java-destination.c \
@@ -19,17 +19,17 @@ modules_java_libjava_la_SOURCES = \
     modules/java/java_machine.c \
     modules/java/java_machine.h
 
-modules_java_libjava_la_LIBADD = \
+modules_java_libmod_java_la_LIBADD = \
     $(JNI_LIBS) $(EVENTLOG_LIBS) \
     $(SYSLOG_NG_LIBS) $(IVYKIS_LIBS)
 
-modules_java_libjava_la_LDFLAGS = \
+modules_java_libmod_java_la_LDFLAGS = \
     -avoid-version -module -no-undefined
 
-modules_java_libjava_la_DEPENDENCIES  = \
+modules_java_libmod_java_la_DEPENDENCIES  = \
         $(MODULE_DEPS_LIBS)
 
-modules/java modules/java/ mod-java: modules/java/libjava.la
+modules/java modules/java/ mod-java: modules/java/libmod-java.la
 
 else
 modules/java modules/java/ mod-java:
