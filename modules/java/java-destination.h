@@ -30,6 +30,7 @@
 #include "driver.h"
 #include "logqueue.h"
 #include "mainloop.h"
+#include "mainloop-io-worker.h"
 #include "java_machine.h"
 
 
