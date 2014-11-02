@@ -27,6 +27,8 @@
 #include "logqueue.h"
 #include "driver.h"
 
+#include <stdio.h>
+
 void java_dd_start_watches(JavaDestDriver *self);
 
 
@@ -78,6 +80,9 @@ gboolean java_dd_load_class(JavaDestDriver *self) {
                 evt_tag_str("method", "boolean queue(String)"), NULL);
       return FALSE;
   }
+
+  self->mi_flush = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "flush", "()Z");
+
   self->dest_object = CALL_JAVA_FUNCTION(NewObject, self->loaded_class, self->mi_constructor);
   if (!self->dest_object)
     {
@@ -210,6 +215,10 @@ java_dd_work_perform(gpointer data)
       log_msg_unref(lm);
       msg_set_context(NULL);
       log_msg_refcache_stop();
+    }
+  if (self->mi_flush)
+    {
+      CALL_JAVA_FUNCTION_ENV(env, CallBooleanMethod, self->dest_object, self->mi_flush);
     }
   java_machine_detach_thread(self->java_machine);
 }
