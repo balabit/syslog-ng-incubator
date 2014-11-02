@@ -17,8 +17,7 @@ modules_java_libmod_java_la_SOURCES = \
     modules/java/java-parser.c \
     modules/java/java-parser.h \
     modules/java/java_machine.c \
-    modules/java/java_machine.h \
-    modules/java/SyslogNgInterface.c
+    modules/java/java_machine.h
 
 modules_java_libmod_java_la_LIBADD = \
     $(JNI_LIBS) $(EVENTLOG_LIBS) \
@@ -42,13 +41,14 @@ $(top_builddir)/modules/java/SyslogNgInterface.h: $(top_builddir)/modules/java/o
 $(top_builddir)/modules/java/org/balabit/syslogng/SyslogNgInterface.class:
 	mkdir -p $(top_builddir)/modules/java/org/balabit/syslogng
 	$(JAVAC) -d $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgInterface.java
+	jar -cvf $(top_builddir)/modules/java/SyslogNgInterface.jar -C $(top_builddir)/modules/java/ org
 
 clean-java-if:
 	rm -rf $(top_builddir)/modules/java/org
 	rm -rf $(top_builddir)/modules/java/SyslogNgInterface.h
 
 install-exec-local:
-	jar -cvf $(moduledir)/SyslogNgInterface.jar -C modules/java/ org
+	cp $(top_builddir)/modules/java/SyslogNgInterface.jar $(moduledir)/
 
 else
 modules/java modules/java/ mod-java:
