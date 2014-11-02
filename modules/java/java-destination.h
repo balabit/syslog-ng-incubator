@@ -48,6 +48,7 @@ typedef struct
   jmethodID mi_init;
   jmethodID mi_deinit;
   jmethodID mi_queue;
+  jmethodID mi_flush;
   LogQueue *log_queue;
   LogTemplate *template;
   gchar *template_string;
