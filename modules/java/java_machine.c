@@ -1,10 +1,11 @@
 #include "java_machine.h"
+#include "syslog-ng.h"
 #include "atomic.h"
 
 struct _JavaVMSingleton
 {
   GAtomicCounter ref_cnt;
-  JavaVMOption options[1];
+  JavaVMOption options[2];
   JNIEnv *env;
   JavaVM *jvm;
   JavaVMInitArgs vm_args;
@@ -27,6 +28,9 @@ java_machine_ref()
       g_jvm_s = g_new0(JavaVMSingleton, 1);
       g_atomic_counter_set(&g_jvm_s->ref_cnt, 1);
       g_jvm_s->class_path = g_string_sized_new(1024);
+      GString *default_class_path = g_string_new(module_path);
+      g_string_append(default_class_path, "/SyslogNgInterface.jar");
+      java_machine_add_class_path(g_jvm_s, default_class_path);
       return g_jvm_s;
     }
 }
@@ -67,8 +71,11 @@ java_machine_start(JavaVMSingleton* self, JNIEnv **env)
       self->options[0].optionString = g_strdup_printf(
           "-Djava.class.path=%s", self->class_path->str);
 
+      self->options[1].optionString = g_strdup_printf(
+          "-Djava.library.path=%s", module_path);
+
       self->vm_args.version = JNI_VERSION_1_6;
-      self->vm_args.nOptions = 1;
+      self->vm_args.nOptions = 2;
       self->vm_args.options = self->options;
       status = JNI_CreateJavaVM(&self->jvm, (void**) &self->env,
                                 &self->vm_args);
