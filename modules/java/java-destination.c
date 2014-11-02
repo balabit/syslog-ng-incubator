@@ -37,6 +37,35 @@ void java_dd_start_watches(JavaDestDriver *self);
 
 #define CALL_JAVA_FUNCTION(function, ...)  CALL_JAVA_FUNCTION_ENV(self->java_env, function, __VA_ARGS__)
 
+void java_dd_set_custom_option(LogDriver *s, const gchar *key, const gchar *value)
+{
+  JavaDestDriver *self = (JavaDestDriver *)s;
+  g_hash_table_insert(self->custom_options, g_strdup(key), g_strdup(value));
+}
+
+JNIEXPORT jstring JNICALL Java_org_balabit_syslogng_SyslogNgInterface_getOption(JNIEnv *env, jobject obj, jlong s, jstring key)
+{
+  JavaDestDriver *self = (JavaDestDriver *)s;
+  gchar *value;
+  const char *inCStr = (*env)->GetStringUTFChars(env, key, NULL);
+  if (inCStr == NULL)
+    {
+      return NULL;
+    }
+ 
+  value = g_hash_table_lookup(self->custom_options, inCStr);
+  (*env)->ReleaseStringUTFChars(env, key, inCStr);  // release resources
+
+  if (value)
+    {
+      return (*env)->NewStringUTF(env, value);
+    }
+  else
+    {
+      return NULL;
+    }
+}
+
 static void
 java_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
 {
@@ -58,7 +87,7 @@ gboolean java_dd_load_class(JavaDestDriver *self) {
                 evt_tag_str("class_name", self->class_name), NULL);
       return FALSE;
   }
-  self->mi_init = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "init", "()Z");
+  self->mi_init = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "init", "(J)Z");
 
   if (!self->mi_init) {
       msg_error("Can't find method in class",
@@ -95,7 +124,7 @@ gboolean java_dd_load_class(JavaDestDriver *self) {
 gboolean
 java_dd_init_dest_object(JavaDestDriver *self)
 {
-  return CALL_JAVA_FUNCTION(CallBooleanMethod, self->dest_object, self->mi_init);
+  return CALL_JAVA_FUNCTION(CallBooleanMethod, self->dest_object, self->mi_init, self);
 }
 
 void
@@ -315,6 +344,7 @@ java_dd_free(LogPipe *s)
       self->java_machine = NULL;
     }
   g_free(self->class_name);
+  g_hash_table_unref(self->custom_options);
   g_string_free(self->class_path, TRUE);
 }
 
@@ -338,6 +368,7 @@ java_dd_new(GlobalConfig *cfg)
   java_dd_set_template_string(&self->super.super, "$ISODATE $HOST $MSGHDR$MSG");
   self->threaded = cfg->threaded;
   self->formatted_message = g_string_sized_new(1024);
+  self->custom_options = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
   java_dd_init_watches(self);
   return (LogDriver *)self;
 }
