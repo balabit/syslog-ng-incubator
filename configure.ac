@@ -139,14 +139,11 @@ dnl ***************************************************************************
 INCUBATOR_CHECK_DEP(logmongource,[PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,logmongource_found="no")])
 
 dnl ***************************************************************************
-<<<<<<< HEAD
 dnl riemann-client headers/libraries
 dnl ***************************************************************************
 INCUBATOR_CHECK_DEP(riemann,[PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,riemann_found="no")])
 
 dnl ***************************************************************************
-=======
->>>>>>> 217adaf... update: Updated modules to be syslog-ng 3.6 compatible
 dnl lua headers/libraries
 dnl ***************************************************************************
 dnl if test "x$enable_lua" != "xno"; then

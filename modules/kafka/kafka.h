@@ -25,7 +25,7 @@
 
 #include "driver.h"
 
-LogDriver *kafka_dd_new(void);
+LogDriver *kafka_dd_new(GlobalConfig *cfg);
 
 void kafka_dd_set_partition_field(LogDriver *d, LogTemplate *key_field);
 void kafka_dd_set_partition_random(LogDriver *d);

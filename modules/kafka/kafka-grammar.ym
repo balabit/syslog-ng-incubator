@@ -57,7 +57,7 @@ extern GList *last_property;
 start
         : LL_CONTEXT_DESTINATION KW_KAFKA
           {
-            last_driver = *instance = kafka_dd_new();
+            last_driver = *instance = kafka_dd_new(configuration);
             last_property = NULL;
           }
           '(' kafka_options ')' { YYACCEPT; }

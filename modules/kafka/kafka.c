@@ -284,21 +284,15 @@ kafka_calculate_partition_key(KafkaDriver *self, LogMessage *msg)
  * Worker thread
  */
 
-static gboolean
-kafka_worker_insert(LogThrDestDriver *s)
+static worker_insert_result_t
+kafka_worker_insert(LogThrDestDriver *s, LogMessage *msg)
 {
   KafkaDriver *self = (KafkaDriver *)s;
   gboolean success;
-  LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
   GString *field;
   u_int32_t key;
 
-  success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
-  if (!success)
-    return TRUE;
-
-  msg_set_context(msg);
   log_template_format(self->payload, msg, &self->template_options, LTZ_SEND,
                       self->seq_num, NULL, self->payload_str);
 
@@ -334,20 +328,14 @@ kafka_worker_insert(LogThrDestDriver *s)
             NULL);
   success = TRUE;
 
-  msg_set_context(NULL);
-
   if (success)
     {
-      step_sequence_number(&self->seq_num);
-      log_msg_ack(msg, &path_options);
-      log_msg_unref(msg);
+      return WORKER_INSERT_RESULT_SUCCESS;
     }
   else
     {
-      log_queue_push_head(self->super.queue, msg, &path_options);
+      return WORKER_INSERT_RESULT_DROP;
     }
-
-  return success;
 }
 
 static void
@@ -439,11 +427,11 @@ kafka_dd_free(LogPipe *d)
  */
 
 LogDriver *
-kafka_dd_new(void)
+kafka_dd_new(GlobalConfig *cfg)
 {
   KafkaDriver *self = g_new0(KafkaDriver, 1);
 
-  log_threaded_dest_driver_init_instance(&self->super);
+  log_threaded_dest_driver_init_instance(&self->super, cfg);
   self->super.super.super.super.init = kafka_dd_init;
   self->super.super.super.super.free_fn = kafka_dd_free;
 
