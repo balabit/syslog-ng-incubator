@@ -6,8 +6,8 @@ AC_PREREQ([2.68])
 AC_INIT([syslog-ng-incubator], [0.3.3], [tusavik@gmail.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])
 AC_CONFIG_MACRO_DIR([m4])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_HEADERS([config.h])
 
 dnl ***************************************************************************
