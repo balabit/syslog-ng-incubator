@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2014 Laszlo Meszaros <lmesz@balabit.hu>
+ * Copyright (c) 2014 Laszlo Meszaros <lacienator@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -30,7 +30,7 @@
 #include "plugin.h"
 #include "messages.h"
 #include "misc.h"
-#include "stats.h"
+#include "stats/stats.h"
 #include "logqueue.h"
 #include "driver.h"
 #include "plugin-types.h"
@@ -69,7 +69,7 @@ create_reader(LogPipe *s)
   LogProtoServerOptions* proto_options = &self->reader_options.proto_options.super;
   LogProtoServer* proto = log_proto_text_server_new(transport, proto_options);
 
-  self->reader = log_reader_new();
+  self->reader = log_reader_new(cfg);
   log_reader_reopen(self->reader, proto, poll_events);
 }
 
@@ -146,7 +146,7 @@ zmq_sd_init(LogPipe *s)
                              "zmq");
   log_pipe_append((LogPipe *) self->reader, s);
 
-  if (!log_pipe_init((LogPipe *) self->reader, NULL))
+  if (!log_pipe_init((LogPipe *) self->reader))
   {
     msg_error("Error initializing log_reader", NULL);
     log_pipe_unref((LogPipe *) self->reader);
@@ -211,10 +211,11 @@ zmq_sd_free(LogPipe *s)
 }
 
 LogDriver *
-zmq_sd_new()
+zmq_sd_new(GlobalConfig *cfg)
 {
   ZMQSourceDriver *self = g_new0(ZMQSourceDriver, 1);
-  log_src_driver_init_instance(&self->super);
+
+  log_src_driver_init_instance(&self->super, cfg);
 
   self->super.super.super.init = zmq_sd_init;
   self->super.super.super.deinit = zmq_sd_deinit;

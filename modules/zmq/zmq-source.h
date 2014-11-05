@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013 Tihamer Petrovics <tihameri@gmail.com>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Laszlo Meszaros <lacienator@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -44,6 +44,6 @@ typedef struct _ZMQSourceDriver
 
 void zmq_sd_set_address(LogDriver *source, const gchar *address);
 void zmq_sd_set_port(LogDriver *source, gint port);
-LogDriver *zmq_sd_new();
+LogDriver *zmq_sd_new(GlobalConfig *cfg);
 
 #endif

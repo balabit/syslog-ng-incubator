@@ -21,7 +21,7 @@
  * COPYING for details.
  */
 
-#include "logtransport.h"
+#include "transport/logtransport.h"
 #include "zmq-source.h"
 
 LogTransport *log_transport_zmq_new(void* socket);

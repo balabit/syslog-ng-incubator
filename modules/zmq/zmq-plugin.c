@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2014 Laszlo Meszaros <lmesz@balabit.hu>
+ * Copyright (c) 2014 Laszlo Meszaros <lacienator@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -27,7 +27,7 @@
 #include "plugin.h"
 #include "messages.h"
 #include "misc.h"
-#include "stats.h"
+#include "stats/stats.h"
 #include "logqueue.h"
 #include "driver.h"
 #include "plugin-types.h"

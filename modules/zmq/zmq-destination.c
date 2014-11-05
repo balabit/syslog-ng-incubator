@@ -28,7 +28,7 @@
 #include "plugin.h"
 #include "messages.h"
 #include "misc.h"
-#include "stats.h"
+#include "stats/stats.h"
 #include "logqueue.h"
 #include "driver.h"
 #include "plugin-types.h"
@@ -141,45 +141,34 @@ zmq_dd_disconnect(LogThrDestDriver *destination)
  * Worker thread
  */
 
-static gboolean
-zmq_worker_insert(LogThrDestDriver *destination)
+static worker_insert_result_t
+zmq_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
 {
   ZMQDestDriver *self = (ZMQDestDriver *)destination;
   gboolean success = TRUE;
-  LogMessage *msg;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
   GString *result = g_string_new("");
 
-  success = log_queue_pop_head(self->super.queue, &msg, &path_options, FALSE, FALSE);
-
-  if(!success)
-    return TRUE;
-
   if (self->socket == NULL)
-    zmq_dd_connect(self, FALSE);
-
-  log_msg_refcache_start_consumer(msg, &path_options);
-  msg_set_context(msg);
+  {
+    if (!zmq_dd_connect(self, FALSE))
+    {
+      return WORKER_INSERT_RESULT_ERROR;
+    }
+  }
 
   log_template_format(self->template, msg, NULL, LTZ_LOCAL, self->seq_num, NULL, result);
 
   if (zmq_send (self->socket, result->str, result->len, 0) == -1)
   {
     msg_error("Failed to add message to zmq queue!", evt_tag_errno("errno", errno), NULL);
-    success = FALSE;
-    log_queue_rewind_backlog(self->super.queue);
+    g_string_free(result, TRUE);
+    return WORKER_INSERT_RESULT_ERROR;
   }
   else
   {
-    log_queue_ack_backlog(self->super.queue, 1);
+    return WORKER_INSERT_RESULT_SUCCESS;;
   }
-
-  log_msg_unref(msg);
-  msg_set_context(NULL);
-  log_msg_refcache_stop();
-
-  g_string_free(result, TRUE);
-  return success;
 }
 
 static void
@@ -231,7 +220,7 @@ zmq_dd_new(GlobalConfig *cfg)
 {
   ZMQDestDriver *self = g_new0(ZMQDestDriver, 1);
 
-  log_threaded_dest_driver_init_instance(&self->super);
+  log_threaded_dest_driver_init_instance(&self->super, cfg);
   self->super.super.super.super.init = zmq_dd_init;
   self->super.super.super.super.free_fn = zmq_dd_free;
 

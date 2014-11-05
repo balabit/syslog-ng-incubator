@@ -59,7 +59,7 @@ log_transport_zmq_new(void* socket)
   size_t fd_size = sizeof(fd);
 
   zmq_getsockopt(socket, ZMQ_FD, &fd, &fd_size);
-  log_transport_init_method(&self->super, fd);
+  log_transport_init_instance(&self->super, fd);
 
   self->super.read = log_transport_zmq_read_method;
   self->super.write = log_transport_zmq_write_method;
