@@ -50,6 +50,22 @@ java_machine_unref(JavaVMSingleton *self)
     }
 }
 
+static void
+__build_class_path(GList *class_path_list, GString *class_path)
+{
+  GList *element = class_path_list;
+  while (element)
+    {
+      GString *cp = element->data;
+      if (class_path->len > 0)
+        {
+          g_string_append_c(class_path, ':');
+        }
+      g_string_append_len(class_path, cp->str, cp->len);
+      element = element->next;
+    }
+}
+
 gboolean
 java_machine_start(JavaVMSingleton* self, JNIEnv **env)
 {
@@ -57,17 +73,7 @@ java_machine_start(JavaVMSingleton* self, JNIEnv **env)
   if (!self->jvm)
     {
       long status;
-      GList *element = self->class_path_list;
-      while (element)
-        {
-          GString *cp = element->data;
-          if (self->class_path->len > 0)
-            {
-              g_string_append_c(self->class_path, ':');
-            }
-          g_string_append_len(self->class_path, cp->str, cp->len);
-          element = element->next;
-        }
+      __build_class_path(self->class_path_list, self->class_path);
       self->options[0].optionString = g_strdup_printf(
           "-Djava.class.path=%s", self->class_path->str);
 

@@ -31,30 +31,24 @@
 
 void java_dd_start_watches(JavaDestDriver *self);
 
-
-#define CALL_JAVA_FUNCTION_ENV(env, function, ...) \
-    (*(env))->function(env, __VA_ARGS__)
-
-#define CALL_JAVA_FUNCTION(function, ...)  CALL_JAVA_FUNCTION_ENV(self->java_env, function, __VA_ARGS__)
-
-void java_dd_set_custom_option(LogDriver *s, const gchar *key, const gchar *value)
+void java_dd_set_option(LogDriver *s, const gchar *key, const gchar *value)
 {
   JavaDestDriver *self = (JavaDestDriver *)s;
-  g_hash_table_insert(self->custom_options, g_strdup(key), g_strdup(value));
+  g_hash_table_insert(self->options, g_strdup(key), g_strdup(value));
 }
 
 JNIEXPORT jstring JNICALL Java_org_balabit_syslogng_SyslogNgInterface_getOption(JNIEnv *env, jobject obj, jlong s, jstring key)
 {
   JavaDestDriver *self = (JavaDestDriver *)s;
   gchar *value;
-  const char *inCStr = (*env)->GetStringUTFChars(env, key, NULL);
-  if (inCStr == NULL)
+  const char *key_str = (*env)->GetStringUTFChars(env, key, NULL);
+  if (key_str == NULL)
     {
       return NULL;
     }
- 
-  value = g_hash_table_lookup(self->custom_options, inCStr);
-  (*env)->ReleaseStringUTFChars(env, key, inCStr);  // release resources
+
+  value = g_hash_table_lookup(self->options, key_str);
+  (*env)->ReleaseStringUTFChars(env, key, key_str);  // release resources
 
   if (value)
     {
@@ -71,66 +65,6 @@ java_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, g
 {
   JavaDestDriver *self = (JavaDestDriver *)s;
   log_queue_push_tail(self->log_queue, msg, path_options);
-}
-
-gboolean java_dd_load_class(JavaDestDriver *self) {
-  self->loaded_class = CALL_JAVA_FUNCTION(FindClass, self->class_name);
-  if (!self->loaded_class) {
-      msg_error("Can't find class",
-                evt_tag_str("class_name", self->class_name),
-                evt_tag_str("class_path", self->class_path->str), NULL);
-      return FALSE;
-  }
-  self->mi_constructor = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "<init>", "()V");
-  if (!self->mi_constructor) {
-      msg_error("Can't find default constructor for class",
-                evt_tag_str("class_name", self->class_name), NULL);
-      return FALSE;
-  }
-  self->mi_init = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "init", "(J)Z");
-
-  if (!self->mi_init) {
-      msg_error("Can't find method in class",
-                evt_tag_str("class_name", self->class_name),
-                evt_tag_str("method", "boolean init()"), NULL);
-      return FALSE;
-  }
-  self->mi_deinit = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "deinit", "()V");
-  if (!self->mi_deinit) {
-      msg_error("Can't find method in class",
-                evt_tag_str("class_name", self->class_name),
-                evt_tag_str("method", "void deinit()"), NULL);
-      return FALSE;
-  }
-  self->mi_queue = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "queue", "(Ljava/lang/String;)Z");
-  if (!self->mi_queue) {
-      msg_error("Can't find method in class",
-                evt_tag_str("class_name", self->class_name),
-                evt_tag_str("method", "boolean queue(String)"), NULL);
-      return FALSE;
-  }
-
-  self->mi_flush = CALL_JAVA_FUNCTION(GetMethodID, self->loaded_class, "flush", "()Z");
-
-  self->dest_object = CALL_JAVA_FUNCTION(NewObject, self->loaded_class, self->mi_constructor);
-  if (!self->dest_object)
-    {
-      msg_error("Failed to create object", NULL);
-      return FALSE;
-    }
-  return TRUE;
-}
-
-gboolean
-java_dd_init_dest_object(JavaDestDriver *self)
-{
-  return CALL_JAVA_FUNCTION(CallBooleanMethod, self->dest_object, self->mi_init, self);
-}
-
-void
-java_dd_deinit_dest_object(JavaDestDriver *self)
-{
-  CALL_JAVA_FUNCTION(CallVoidMethod, self->dest_object, self->mi_deinit);
 }
 
 void
@@ -176,19 +110,20 @@ java_dd_init(LogPipe *s)
   if (!java_machine_start(self->java_machine, &self->java_env))
     return FALSE;
 
-  if (!java_dd_load_class(self))
+  self->proxy = java_destination_proxy_new(self->java_env, self->class_name, self->class_path->str);
+  if (!self->proxy)
     return FALSE;
   self->log_queue = log_dest_driver_acquire_queue(&self->super, "testjava");
   log_queue_set_use_backlog(self->log_queue, TRUE);
   java_dd_start_watches(self);
-  return java_dd_init_dest_object(self);
+  return java_destination_proxy_init(self->proxy, self->java_env, self);
 }
 
 gboolean
 java_dd_deinit(LogPipe *s)
 {
   JavaDestDriver *self = (JavaDestDriver *)s;
-  java_dd_deinit_dest_object(self);
+  java_destination_proxy_deinit(self->proxy, self->java_env);
   return TRUE;
 }
 
@@ -209,10 +144,7 @@ gboolean
 java_dd_send_to_object(JavaDestDriver *self, LogMessage *msg, JNIEnv *env)
 {
   log_template_format(self->template, msg, NULL, LTZ_LOCAL, 0, NULL, self->formatted_message);
-  jstring message = CALL_JAVA_FUNCTION_ENV(env, NewStringUTF, self->formatted_message->str);
-  jboolean res = CALL_JAVA_FUNCTION_ENV(env, CallBooleanMethod, self->dest_object, self->mi_queue, message);
-  CALL_JAVA_FUNCTION_ENV(env, DeleteLocalRef, message);
-  return !!(res);
+  return java_destination_proxy_queue(self->proxy, env, self->formatted_message);
 }
 
 void
@@ -245,10 +177,7 @@ java_dd_work_perform(gpointer data)
       msg_set_context(NULL);
       log_msg_refcache_stop();
     }
-  if (self->mi_flush)
-    {
-      CALL_JAVA_FUNCTION_ENV(env, CallBooleanMethod, self->dest_object, self->mi_flush);
-    }
+  java_destination_proxy_flush(self->proxy, env);
   java_machine_detach_thread(self->java_machine);
 }
 
@@ -329,14 +258,7 @@ java_dd_free(LogPipe *s)
 {
   JavaDestDriver *self = (JavaDestDriver *)s;
   log_template_unref(self->template);
-  if (self->dest_object)
-    {
-      CALL_JAVA_FUNCTION(DeleteLocalRef, self->dest_object);
-    }
-  if (self->loaded_class)
-    {
-      CALL_JAVA_FUNCTION(DeleteLocalRef, self->loaded_class);
-    }
+  java_destination_proxy_free(self->proxy, self->java_env);
 
   if (self->java_machine)
     {
@@ -344,7 +266,7 @@ java_dd_free(LogPipe *s)
       self->java_machine = NULL;
     }
   g_free(self->class_name);
-  g_hash_table_unref(self->custom_options);
+  g_hash_table_unref(self->options);
   g_string_free(self->class_path, TRUE);
 }
 
@@ -368,7 +290,7 @@ java_dd_new(GlobalConfig *cfg)
   java_dd_set_template_string(&self->super.super, "$ISODATE $HOST $MSGHDR$MSG");
   self->threaded = cfg->threaded;
   self->formatted_message = g_string_sized_new(1024);
-  self->custom_options = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+  self->options = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
   java_dd_init_watches(self);
   return (LogDriver *)self;
 }
