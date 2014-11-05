@@ -32,6 +32,7 @@
 #include "mainloop.h"
 #include "mainloop-io-worker.h"
 #include "java_machine.h"
+#include "java-destination-proxy.h"
 
 
 
@@ -40,15 +41,9 @@ typedef struct
   LogDestDriver super;
   JavaVMSingleton *java_machine;
   JNIEnv *java_env;
-  jclass loaded_class;
+  JavaDestinationProxy *proxy;
   GString *class_path;
   gchar *class_name;
-  jobject dest_object;
-  jmethodID mi_constructor;
-  jmethodID mi_init;
-  jmethodID mi_deinit;
-  jmethodID mi_queue;
-  jmethodID mi_flush;
   LogQueue *log_queue;
   LogTemplate *template;
   gchar *template_string;
@@ -56,13 +51,13 @@ typedef struct
   GString *formatted_message;
   MainLoopIOWorkerJob io_job;
   struct iv_event wake_up_event;
-  GHashTable *custom_options;
+  GHashTable *options;
 } JavaDestDriver;
 
 LogDriver *java_dd_new(GlobalConfig *cfg);
 void java_dd_set_class_path(LogDriver *s, const gchar *class_path);
 void java_dd_set_class_name(LogDriver *s, const gchar *class_name);
 void java_dd_set_template_string(LogDriver *s, const gchar *template_string);
-void java_dd_set_custom_option(LogDriver *s, const gchar *key, const gchar *value);
+void java_dd_set_option(LogDriver *s, const gchar *key, const gchar *value);
 
 #endif

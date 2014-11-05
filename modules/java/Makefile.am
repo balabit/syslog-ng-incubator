@@ -14,6 +14,8 @@ modules_java_libmod_java_la_SOURCES = \
     modules/java/java-plugin.c \
     modules/java/java-destination.c \
     modules/java/java-destination.h \
+    modules/java/java-destination-proxy.c \
+    modules/java/java-destination-proxy.h \
     modules/java/java-parser.c \
     modules/java/java-parser.h \
     modules/java/java_machine.c \
