@@ -27,16 +27,7 @@
 #include <jni.h>
 #include <syslog-ng.h>
 
-typedef struct _JavaDestinationProxy
-{
-  jclass loaded_class;
-  jobject dest_object;
-  jmethodID mi_constructor;
-  jmethodID mi_init;
-  jmethodID mi_deinit;
-  jmethodID mi_queue;
-  jmethodID mi_flush;
-} JavaDestinationProxy;
+typedef struct _JavaDestinationProxy JavaDestinationProxy;
 
 JavaDestinationProxy *java_destination_proxy_new(JNIEnv *java_env, const gchar *class_name, const gchar *class_path);
 

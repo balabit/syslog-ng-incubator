@@ -1,9 +1,15 @@
-public class TestClass {
+import org.syslog_ng.*;
 
-  public boolean init()
+public class TestClass implements SyslogNgDestination {
+
+  SyslogNg proxy;
+
+  public boolean init(SyslogNg proxy)
   {
+    System.out.println("START");
+    this.proxy = proxy;
     System.out.println("Initialize test destination");
-    return true;
+    return false;
   }
 
   public void deinit()
@@ -14,6 +20,11 @@ public class TestClass {
   public boolean queue(String message)
   {
     System.out.println("This is queue!" + message);
+    return true;
+  }
+
+  public boolean flush()
+  {
     return true;
   }
 }
