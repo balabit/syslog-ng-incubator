@@ -35,22 +35,22 @@ modules/java modules/java/ mod-java: modules/java/libmod-java.la
 
 clean-local: clean-java-if
 
-$(top_builddir)/modules/java/SyslogNgInterface.h: $(top_builddir)/modules/java/org/balabit/syslogng/SyslogNgInterface.class
-	echo $(moduledir)
-	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/SyslogNgInterface.h  org.balabit.syslogng.SyslogNgInterface
+$(top_builddir)/modules/java/SyslogNg.h: $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class
+	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/SyslogNg.h  org.syslog_ng.SyslogNg
 
 
-$(top_builddir)/modules/java/org/balabit/syslogng/SyslogNgInterface.class:
-	mkdir -p $(top_builddir)/modules/java/org/balabit/syslogng
-	$(JAVAC) -d $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgInterface.java
-	jar -cvf $(top_builddir)/modules/java/SyslogNgInterface.jar -C $(top_builddir)/modules/java/ org
+$(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class:
+	$(JAVAC) -d $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgClassLoader.java
+	$(JAVAC) -d $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNg.java
+	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgDestination.java
+	jar -cvf $(top_builddir)/modules/java/SyslogNg.jar -C $(top_builddir)/modules/java/ org
 
 clean-java-if:
 	rm -rf $(top_builddir)/modules/java/org
-	rm -rf $(top_builddir)/modules/java/SyslogNgInterface.h
+	rm -rf $(top_builddir)/modules/java/SyslogNg.h
 
 install-exec-local:
-	cp $(top_builddir)/modules/java/SyslogNgInterface.jar $(moduledir)/
+	cp $(top_builddir)/modules/java/SyslogNg.jar $(moduledir)/
 
 else
 modules/java modules/java/ mod-java:
@@ -60,7 +60,7 @@ BUILT_SOURCES += \
     modules/java/java-grammar.y \
     modules/java/java-grammar.c \
     modules/java/java-grammar.h \
-    modules/java/SyslogNgInterface.h
+    modules/java/SyslogNg.h
 
 EXTRA_DIST += \
     modules/java/java-grammar.ym

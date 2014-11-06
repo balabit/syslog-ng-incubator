@@ -36,8 +36,7 @@ void java_dd_set_option(LogDriver *s, const gchar *key, const gchar *value)
   JavaDestDriver *self = (JavaDestDriver *)s;
   g_hash_table_insert(self->options, g_strdup(key), g_strdup(value));
 }
-
-JNIEXPORT jstring JNICALL Java_org_balabit_syslogng_SyslogNgInterface_getOption(JNIEnv *env, jobject obj, jlong s, jstring key)
+JNIEXPORT jstring JNICALL Java_org_syslog_1ng_SyslogNg_getOption(JNIEnv *env, jobject obj, jlong s, jstring key)
 {
   JavaDestDriver *self = (JavaDestDriver *)s;
   gchar *value;
@@ -205,15 +204,6 @@ java_dd_process_output(JavaDestDriver *self)
     }
   else
     {
-      /* Checking main_loop_io_worker_job_quit() helps to speed up the
-       * reload process.  If reload/shutdown is requested we shouldn't do
-       * anything here, a final flush will be attempted in
-       * log_writer_deinit().
-       *
-       * Our current understanding is that it doesn't prevent race
-       * conditions of any kind.
-       */
-
       if (!main_loop_worker_job_quit())
         {
           java_dd_work_perform(self);
@@ -284,9 +274,7 @@ java_dd_new(GlobalConfig *cfg)
   self->template = log_template_new(cfg, "java_dd_template");
   self->class_path = g_string_new(".");
   self->java_machine = java_machine_ref();
-  java_machine_add_class_path(self->java_machine, self->class_path);
 
-  java_dd_set_class_name(&self->super.super, "TestClass");
   java_dd_set_template_string(&self->super.super, "$ISODATE $HOST $MSGHDR$MSG");
   self->threaded = cfg->threaded;
   self->formatted_message = g_string_sized_new(1024);
