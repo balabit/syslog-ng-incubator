@@ -10,17 +10,9 @@ also an example of a third party syslog-ng module.
 
  [sng]: https://github.com/balabit/syslog-ng
 
-**NOTE**: The Incubator requires syslog-ng 3.5.5 or newer, but does
-  not work with 3.6!
-
+**NOTE**: The Incubator requires syslog-ng 3.6.1 or newer.
 Contents
 --------
-
- * [Riemann destination][sng:riemann]: A simple, work in progress
-   destination that allows syslog-ng to send events to the
-   [Riemann](http://riemann.io/) network monitoring system.
-
-   [sng:riemann]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/riemann/
 
  * [Lua destination][sng:lua]: This destination is really just a
    wrapper, that allows one to write destination drivers in Lua, with
@@ -72,11 +64,6 @@ Contents
    allows one to offer log messages as an RSS feed.
 
    [sng:rss]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/rss/
-
- * [Graphite output template][sng:graphite]: Template function, which renders a log message into
-   graphite plaintext protocol format.
-
-   [sng:graphite]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/graphite/
 
  * [logmongource][sng:mongource]: A log visualisation tool that
    extracts messages from a MongoDB collection, and visualises them
