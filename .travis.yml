@@ -2,9 +2,9 @@ language: c
 install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq curl
-  - wget http://packages.madhouse-project.org/debian/add-release.sh
-  - chmod +x add-release.sh
-  - sudo ./add-release.sh syslog-ng-3.5
+  - wget http://download.opensuse.org/repositories/home:/tusavik/xUbuntu_12.04/Release.key
+  - sudo apt-key add Release.key
+  - sudo sh -c 'echo "deb http://download.opensuse.org/repositories/home:/tusavik/xUbuntu_12.04/ ./" >> /etc/apt/sources.list'
   - sudo apt-get update -qq
   - sudo apt-get install -qq aptitude
   - sudo aptitude install -q -y pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-dev libperl-dev python-dev python3-dev libriemann-client-dev
