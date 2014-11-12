@@ -31,7 +31,7 @@
 #include "plugin.h"
 #include "messages.h"
 #include "misc.h"
-#include "stats.h"
+#include "stats/stats.h"
 #include "logqueue.h"
 #include "driver.h"
 #include "plugin-types.h"
