@@ -28,7 +28,7 @@
 
 typedef struct _GrokInstance GrokInstance;
 
-LogParser *grok_parser_new(void);
+LogParser *grok_parser_new(GlobalConfig *cfg);
 
 void grok_instance_set_pattern (GrokInstance *s, gchar *pattern);
 void grok_instance_add_tags (GrokInstance *s, GList *tags);

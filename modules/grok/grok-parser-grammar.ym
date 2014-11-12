@@ -63,7 +63,7 @@ start
 grok_parser 
         : KW_GROK '('
           {
-            last_parser = *instance = grok_parser_new ();
+            last_parser = *instance = grok_parser_new (configuration);
           }
           grok_parser_options ')'
         ;

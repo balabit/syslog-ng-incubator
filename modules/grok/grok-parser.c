@@ -105,8 +105,9 @@ grok_instance_set_pattern(GrokInstance *self, char *pattern)
 };
 
 static void 
-grok_instance_free(GrokInstance *self)
+grok_instance_free(gpointer obj)
 {
+  GrokInstance *self = (GrokInstance *) obj;
   string_list_free(self->tags);
   g_free(self->grok_pattern);
   if (self->grok)
@@ -119,7 +120,7 @@ grok_instance_free(GrokInstance *self)
 static void
 grok_patterns_import_from_directory(GrokInstance *self, GrokParser *parser)
 {
-  gchar *fname;
+  const gchar *fname;
 
   if (parser->grok_pattern_dir == NULL)
     return;
@@ -196,7 +197,7 @@ grok_instance_add_matched_values_to_msg(GrokInstance *self, grok_match_t *match,
   char key_buffer[KEY_BUFFER_LENGTH];
 
   grok_match_walk_init(match);
-  while (grok_match_walk_next(match, &key, &key_len, &value, &value_len) == 0)
+  while (grok_match_walk_next(match, &key, &key_len, (const char**) &value, &value_len) == 0)
     {
       _split_and_add_key_prefix(self, key_buffer, key, key_len);
 
@@ -246,9 +247,10 @@ grok_instance_match(GrokInstance *self, char* text, LogMessage *msg)
 };
 
 static gboolean 
-grok_parser_init(LogParser *parser, GlobalConfig *cfg)
+grok_parser_init(LogPipe *parser)
 {
   GrokParser *self = (GrokParser *)parser;
+  GlobalConfig *cfg = log_pipe_get_config(&self->super.super); 
 
   if (self->key_prefix != NULL)
     self->key_prefix_len = strlen(self->key_prefix);
@@ -259,7 +261,7 @@ grok_parser_init(LogParser *parser, GlobalConfig *cfg)
     log_template_compile(self->template, "$MESSAGE", NULL);
   }
 
-  g_list_foreach(self->instances, grok_instance_init, self);
+  g_list_foreach(self->instances, (GFunc) grok_instance_init, self);
   return TRUE;
 };
 
@@ -308,24 +310,26 @@ grok_parser_process(LogParser *s, LogMessage **pmsg, const LogPathOptions *path_
 
 static GList* _clone_list(GList* list, gpointer(*item_cloner)(gpointer));
 
-static GrokPattern *
-grok_custom_pattern_clone(GrokPattern* pattern)
+static gpointer
+grok_custom_pattern_clone(gpointer obj)
 {
-  GrokPattern *grok_pattern = g_new0(GrokPattern, 1);
-  grok_pattern->name = g_strdup(pattern->name);
-  grok_pattern->pattern = g_strdup(pattern->pattern);
+  GrokPattern *pattern = (GrokPattern *) obj;
+  GrokPattern *cloned_pattern = g_new0(GrokPattern, 1);
+  cloned_pattern->name = g_strdup(pattern->name);
+  cloned_pattern->pattern = g_strdup(pattern->pattern);
  
-  return grok_pattern;
+  return (gpointer) cloned_pattern;
 };
 
-static GrokInstance *
-grok_instance_clone(GrokInstance *instance)
+static gpointer
+grok_instance_clone(gpointer obj)
 {
+  GrokInstance *instance = (GrokInstance *) obj;
   GrokInstance *cloned = g_new0(GrokInstance, 1);
   
   cloned->grok_pattern = g_strdup(instance->grok_pattern);
   cloned->tags = _clone_list(instance->tags, g_strdup);
-  return cloned;
+  return (gpointer) cloned;
 };
 
 static GList*
@@ -360,7 +364,7 @@ grok_parser_clone(LogPipe *s)
 {
   GrokParser *self = (GrokParser *)s;
 
-  GrokParser *cloned = grok_parser_new();
+  GrokParser *cloned = grok_parser_new ( log_pipe_get_config(&self->super.super) );
   cloned->instances = grok_parser_clone_instances(self);
   cloned->custom_patterns = grok_parser_clone_custom_patterns(self);
   
@@ -374,15 +378,16 @@ grok_parser_clone(LogPipe *s)
 };
 
 static void 
-grok_pattern_free(GrokPattern *self)
+grok_pattern_free(gpointer obj)
 {
+  GrokPattern *self = (GrokPattern *) obj;
   g_free(self->name);
   g_free(self->pattern);
   g_free(self);
 };
 
 static void 
-grok_parser_free(LogParser *s)
+grok_parser_free(LogPipe *s)
 {
   GrokParser *self = (GrokParser *)s;
 
@@ -397,10 +402,10 @@ grok_parser_free(LogParser *s)
   log_parser_free_method(s);
 };
 
-LogParser *grok_parser_new()
+LogParser *grok_parser_new(GlobalConfig *cfg)
 {
   GrokParser *self = g_new0(GrokParser, 1);
-  log_parser_init_instance(&self->super);
+  log_parser_init_instance(&self->super, cfg);
   self->super.super.init = grok_parser_init;
   self->super.process = grok_parser_process;
   self->super.super.clone = grok_parser_clone;
