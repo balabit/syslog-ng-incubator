@@ -50,7 +50,7 @@ clean-java-if:
 	rm -rf $(top_builddir)/modules/java/SyslogNg.h
 
 install-exec-local:
-	cp $(top_builddir)/modules/java/SyslogNg.jar $(moduledir)/
+	cp $(top_builddir)/modules/java/SyslogNg.jar $(DESTDIR)$(moduledir)/
 
 else
 modules/java modules/java/ mod-java:
