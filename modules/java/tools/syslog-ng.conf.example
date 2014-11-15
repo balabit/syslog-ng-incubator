@@ -15,7 +15,7 @@ destination d_java{
   java(
     class_name("TestClass")
     class_path("/tmp")
-    options(key(value))
+    option("key", "value")
   );
 };
 
