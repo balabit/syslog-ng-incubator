@@ -48,6 +48,7 @@
 %token KW_JAVA
 %token KW_CLASS_PATH
 %token KW_CLASS_NAME
+%token KW_OPTION
 %%
 
 start
@@ -75,7 +76,7 @@ java_dest_option
             free($3);
           }
 		| KW_TEMPLATE '(' string ')' { java_dd_set_template_string(last_driver, $3); free($3); }
-    | KW_OPTIONS '(' java_dest_custom_options ')'
+    | KW_OPTION '(' java_dest_custom_options ')'
         | dest_driver_option
         ;
 
@@ -85,7 +86,7 @@ java_dest_custom_options
   ;
 
 java_dest_custom_option
-  : LL_IDENTIFIER '(' LL_IDENTIFIER ')' { java_dd_set_option(last_driver, $1, $3); free($1); free($3); }
+  : LL_STRING LL_STRING { java_dd_set_option(last_driver, $1, $2); free($1); free($2); }
 
 /* INCLUDE_RULES */
 
