@@ -63,6 +63,9 @@ BUILT_SOURCES += \
     modules/java/SyslogNg.h
 
 EXTRA_DIST += \
-    modules/java/java-grammar.ym
+    modules/java/java-grammar.ym \
+    modules/java/SyslogNgClassLoader.java \
+    modules/java/SyslogNg.java \
+    modules/java/SyslogNgDestination.java
 
 .PHONY: modules/java/ mod-java
