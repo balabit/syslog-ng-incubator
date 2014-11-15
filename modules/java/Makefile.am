@@ -48,9 +48,14 @@ $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class:
 clean-java-if:
 	rm -rf $(top_builddir)/modules/java/org
 	rm -rf $(top_builddir)/modules/java/SyslogNg.h
+	rm -rf $(top_builddir)/modules/java/SyslogNg.jar
 
 install-exec-local:
+	$(mkinstalldirs) $(DESTDIR)$(moduledir)
 	cp $(top_builddir)/modules/java/SyslogNg.jar $(DESTDIR)$(moduledir)/
+
+uninstall-local:
+	rm -rf $(DESTDIR)$(moduledir)/SyslogNg.jar
 
 else
 modules/java modules/java/ mod-java:
