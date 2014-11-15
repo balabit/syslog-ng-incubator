@@ -36,6 +36,7 @@ void java_dd_set_option(LogDriver *s, const gchar *key, const gchar *value)
   JavaDestDriver *self = (JavaDestDriver *)s;
   g_hash_table_insert(self->options, g_strdup(key), g_strdup(value));
 }
+
 JNIEXPORT jstring JNICALL Java_org_syslog_1ng_SyslogNg_getOption(JNIEnv *env, jobject obj, jlong s, jstring key)
 {
   JavaDestDriver *self = (JavaDestDriver *)s;

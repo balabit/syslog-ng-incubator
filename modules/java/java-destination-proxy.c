@@ -52,12 +52,15 @@ typedef struct _JavaDestinationProxy
   jmethodID mi_syslogng_constructor;
 
   jclass syslogng_class_loader;
+  jobject loader_object;
+  jmethodID loader_constructor;
   jmethodID mi_loadclass;
+
 } JavaDestinationProxy;
 
 
 static gboolean
-__load_class_loader(JavaDestinationProxy *self, JNIEnv *java_env, const gchar *class_loader_name)
+__load_class_loader(JavaDestinationProxy *self, JNIEnv *java_env, const gchar *class_loader_name, const gchar *class_path)
 {
   self->syslogng_class_loader = CALL_JAVA_FUNCTION(java_env, FindClass, class_loader_name);
   if (!self->syslogng_class_loader)
@@ -67,24 +70,22 @@ __load_class_loader(JavaDestinationProxy *self, JNIEnv *java_env, const gchar *c
                 NULL);
       return FALSE;
     }
+  self->loader_constructor = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->syslogng_class_loader, "<init>", "(Ljava/lang/String;)V");
+  if (!self->loader_constructor)
+    {
+      msg_error("Can't find constructor for SyslogNgClassLoader", NULL);
+    }
 
-  self->mi_loadclass = CALL_JAVA_FUNCTION(java_env, GetStaticMethodID, self->syslogng_class_loader, "loadClassFromPathList", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Class;");
+  self->mi_loadclass = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->syslogng_class_loader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+//  self->mi_loadclass = CALL_JAVA_FUNCTION(java_env, GetStaticMethodID, self->syslogng_class_loader, "loadClassFromPathList", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Class;");
   if (!self->mi_loadclass)
     {
       msg_error("Can't find static method in class",
                 evt_tag_str("class_name", class_loader_name),
-                evt_tag_str("method", "Class loadClassFromPathList(String pathList, String className)"),
+                evt_tag_str("method", "Class loadClass(String className)"),
                 NULL);
       return FALSE;
     }
-  return TRUE;
-}
-
-static jclass
-syslog_ng_class_loader_load_class(JavaDestinationProxy *self, JNIEnv *java_env, const gchar *class_name, const gchar *class_path)
-{
-  jclass result;
-
   GString *g_class_path = g_string_new(module_path);
   g_string_append(g_class_path, "/" SYSLOG_NG_JAR);
   if (class_path && (strlen(class_path) > 0))
@@ -93,23 +94,37 @@ syslog_ng_class_loader_load_class(JavaDestinationProxy *self, JNIEnv *java_env, 
       g_string_append(g_class_path, class_path);
     }
   jstring str_class_path = CALL_JAVA_FUNCTION(java_env, NewStringUTF, g_class_path->str);
-  jstring str_class_name = CALL_JAVA_FUNCTION(java_env, NewStringUTF, class_name);
-  result = CALL_JAVA_FUNCTION(java_env, CallStaticObjectMethod, self->syslogng_class_loader, self->mi_loadclass, str_class_path, str_class_name);
-
-  g_string_free(g_class_path, TRUE);
+  self->loader_object = CALL_JAVA_FUNCTION(java_env, NewObject, self->syslogng_class_loader, self->loader_constructor, str_class_path);
+  if (!self->loader_object)
+    {
+      msg_error("Can't create SyslogNgClassLoader", NULL);
+      return FALSE;
+    }
   CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, str_class_path);
+  g_string_free(g_class_path, TRUE);
+  return TRUE;
+}
+
+static jclass
+syslog_ng_class_loader_load_class(JavaDestinationProxy *self, JNIEnv *java_env, const gchar *class_name)
+{
+  jclass result;
+
+  jstring str_class_name = CALL_JAVA_FUNCTION(java_env, NewStringUTF, class_name);
+  result = CALL_JAVA_FUNCTION(java_env, CallObjectMethod, self->loader_object, self->mi_loadclass, str_class_name);
+
   CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, str_class_name);
   return result;
 }
 
 static gboolean
-__load_destination_object(JavaDestinationProxy *self, JNIEnv *java_env, const gchar *class_name, const gchar *class_path)
+__load_destination_object(JavaDestinationProxy *self, JNIEnv *java_env, const gchar *class_name)
 {
-  self->loaded_class = syslog_ng_class_loader_load_class(self, java_env, class_name, class_path);
+  self->loaded_class = syslog_ng_class_loader_load_class(self, java_env, class_name);
   if (!self->loaded_class) {
       msg_error("Can't find class",
                 evt_tag_str("class_name", class_name),
-                evt_tag_str("class_path", class_path), NULL);
+                NULL);
       return FALSE;
   }
 
@@ -167,7 +182,7 @@ __load_destination_object(JavaDestinationProxy *self, JNIEnv *java_env, const gc
 static gboolean
 __load_syslog_ng_class(JavaDestinationProxy *self, JNIEnv *java_env)
 {
-  self->syslogng_class = CALL_JAVA_FUNCTION(java_env, FindClass, SYSLOG_NG_CLASS);
+  self->syslogng_class = syslog_ng_class_loader_load_class(self, java_env, "org.syslog_ng.SyslogNg");
   if (!self->syslogng_class)
     {
       (*java_env)->ExceptionDescribe(java_env);
@@ -218,12 +233,12 @@ java_destination_proxy_new(JNIEnv *java_env, const gchar *class_name, const gcha
 {
   JavaDestinationProxy *self = g_new0(JavaDestinationProxy, 1);
 
-  if (!__load_class_loader(self, java_env, SYSLOG_NG_CLASS_LOADER))
+  if (!__load_class_loader(self, java_env, SYSLOG_NG_CLASS_LOADER, class_path))
     {
       goto error;
     }
   
-  if (!__load_destination_object(self, java_env, class_name, class_path))
+  if (!__load_destination_object(self, java_env, class_name))
     {
       goto error;
     }
