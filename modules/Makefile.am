@@ -7,3 +7,4 @@ include modules/getent/Makefile.am
 include modules/perl/Makefile.am
 include modules/python/Makefile.am
 include modules/kafka/Makefile.am
+include modules/java/Makefile.am
