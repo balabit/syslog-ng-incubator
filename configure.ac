@@ -34,6 +34,7 @@ IVYKIS_MIN_VERSION="0.30.0"
 LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
 LUA_MIN_VERSION="5.1.4"
+ZMQ_MIN_VERSION="3.1.1"
 
 dnl ***************************************************************************
 dnl Initial setup
@@ -84,6 +85,9 @@ AC_ARG_WITH(librdkafka,
              AC_HELP_STRING([--with-librdkafka=DIR],
                             [use librdkafka library from (prefix) directory DIR]),,)
 
+AC_ARG_ENABLE(zmq,
+   [  --enable-zmq        Enable zmq destination ],
+   ,enable_zmq="auto")
 
 dnl ***************************************************************************
 dnl Checks for programs.
@@ -247,6 +251,12 @@ if test "x$enable_kafka" != "xno" && test "x$with_kafka" != "xno"; then
 fi
 
 dnl ***************************************************************************
+dnl zmq headers/libraries
+dnl ***************************************************************************
+
+INCUBATOR_CHECK_DEP(zmq,[PKG_CHECK_MODULES(ZMQ_CLIENT, libzmq >= $ZMQ_MIN_VERSION, zmq_found="yes", zmq_found="no")])
+
+dnl ***************************************************************************
 dnl create common cflags/libs for incubator modules.
 dnl ***************************************************************************
 
@@ -280,6 +290,7 @@ AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
 AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
 AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
+AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -299,4 +310,5 @@ echo "  python:              ${enable_python:-yes} (${python_version})"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
 echo "  tfgetent             yes"
+echo "  zmq                  ${enable_zmq:=no}"
 echo
