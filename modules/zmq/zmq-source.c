@@ -37,6 +37,7 @@
 #include "poll-fd-events.h"
 #include "logproto/logproto-text-server.h"
 
+
 typedef struct _ZMQReaderContext
 {
   LogReader* reader;
@@ -70,6 +71,9 @@ create_reader(LogPipe *s)
   LogProtoServer* proto = log_proto_text_server_new(transport, proto_options);
 
   self->reader = log_reader_new(cfg);
+
+  self->reader_options.parse_options.flags |= LP_NOPARSE;
+
   log_reader_reopen(self->reader, proto, poll_events);
 }
 
