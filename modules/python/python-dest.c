@@ -153,6 +153,22 @@ python_dd_format_persist_name(LogThrDestDriver *d)
   return persist_name;
 }
 
+static void
+_py_log_current_exception()
+{
+  PyObject *ptype, *pvalue, *ptraceback, *pystr;
+  gchar *error_message ;
+
+  PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+  if (pvalue)
+    {
+      pystr = PyObject_Str(pvalue);
+      error_message = PyString_AsString(pystr);
+      msg_error("Exception happened in Python", evt_tag_str("error", error_message), NULL);
+      Py_DECREF(pystr);
+    }
+}
+
 /** Python calling helpers **/
 static gboolean
 _py_function_return_value_as_bool(PythonDestDriver *self,
@@ -161,6 +177,7 @@ _py_function_return_value_as_bool(PythonDestDriver *self,
 {
   if (!ret)
     {
+      _py_log_current_exception();
       msg_error("Python function returned NULL",
                 evt_tag_str("driver", self->super.super.super.id),
                 evt_tag_str("script", self->filename),
@@ -293,7 +310,7 @@ _py_call_function_with_arguments(PythonDestDriver *self,
   success = _py_function_return_value_as_bool(self, func_name, ret);
 
   Py_DECREF(func_args);
-  if (ret != Py_None)
+  if ((ret != Py_None) && (ret != NULL))
     Py_DECREF(ret);
 
   return success;
