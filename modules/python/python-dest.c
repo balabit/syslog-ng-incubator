@@ -153,6 +153,22 @@ python_dd_format_persist_name(LogThrDestDriver *d)
   return persist_name;
 }
 
+static void
+_py_log_current_exception()
+{
+  PyObject *ptype, *pvalue, *ptraceback, *pystr;
+  gchar *error_message ;
+
+  PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+  if (pvalue)
+    {
+      pystr = PyObject_Str(pvalue);
+      error_message = PyString_AsString(pystr);
+      msg_error("Exception happened in Python", evt_tag_str("error", error_message), NULL);
+      Py_DECREF(pystr);
+    }
+}
+
 /** Python calling helpers **/
 static gboolean
 _py_function_return_value_as_bool(PythonDestDriver *self,
@@ -161,6 +177,7 @@ _py_function_return_value_as_bool(PythonDestDriver *self,
 {
   if (!ret)
     {
+      _py_log_current_exception();
       msg_error("Python function returned NULL",
                 evt_tag_str("driver", self->super.super.super.id),
                 evt_tag_str("script", self->filename),
@@ -216,6 +233,22 @@ _call_python_function_with_no_args_and_bool_return_value(PythonDestDriver *self,
 
 /** Value pairs **/
 
+static void
+_add_string_to_dict_safely(PythonDestDriver *self, PyObject *dict, const gchar *name, const gchar *value)
+{
+   PyObject *str = PyUnicode_FromString(value);
+   if (!str)
+     {
+        msg_debug("Conversion to UTF-8 failed for message field in Python driver, falling back to non-UTF-8",
+                   evt_tag_str("driver", self->super.super.super.id),
+                   evt_tag_str("script", self->filename),
+                   evt_tag_str("field", name),
+                   evt_tag_str("value", value), NULL);
+        str = PyString_FromString(value);
+     }
+   PyDict_SetItemString(dict, name, str);
+};
+
 static gboolean
 python_worker_vp_add_one(const gchar *name,
                        TypeHint type, const gchar *value,
@@ -241,12 +274,12 @@ python_worker_vp_add_one(const gchar *name,
                                               value, "int");
 
             if (fallback)
-              PyDict_SetItemString(dict, name, PyUnicode_FromString(value));
+	      _add_string_to_dict_safely(self, dict, name, value);
           }
         break;
       }
     case TYPE_HINT_STRING:
-      PyDict_SetItemString(dict, name, PyUnicode_FromString(value));
+      _add_string_to_dict_safely(self, dict, name, value);
       break;
     default:
       need_drop = type_cast_drop_helper(self->template_options.on_error,
@@ -293,7 +326,7 @@ _py_call_function_with_arguments(PythonDestDriver *self,
   success = _py_function_return_value_as_bool(self, func_name, ret);
 
   Py_DECREF(func_args);
-  if (ret != Py_None)
+  if ((ret != Py_None) && (ret != NULL))
     Py_DECREF(ret);
 
   return success;
