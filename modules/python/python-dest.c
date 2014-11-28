@@ -233,6 +233,22 @@ _call_python_function_with_no_args_and_bool_return_value(PythonDestDriver *self,
 
 /** Value pairs **/
 
+static void
+_add_string_to_dict_safely(PythonDestDriver *self, PyObject *dict, const gchar *name, const gchar *value)
+{
+   PyObject *str = PyUnicode_FromString(value);
+   if (!str)
+     {
+        msg_debug("Conversion to UTF-8 failed for message field in Python driver, falling back to non-UTF-8",
+                   evt_tag_str("driver", self->super.super.super.id),
+                   evt_tag_str("script", self->filename),
+                   evt_tag_str("field", name),
+                   evt_tag_str("value", value), NULL);
+        str = PyString_FromString(value);
+     }
+   PyDict_SetItemString(dict, name, str);
+};
+
 static gboolean
 python_worker_vp_add_one(const gchar *name,
                        TypeHint type, const gchar *value,
@@ -258,12 +274,12 @@ python_worker_vp_add_one(const gchar *name,
                                               value, "int");
 
             if (fallback)
-              PyDict_SetItemString(dict, name, PyUnicode_FromString(value));
+	      _add_string_to_dict_safely(self, dict, name, value);
           }
         break;
       }
     case TYPE_HINT_STRING:
-      PyDict_SetItemString(dict, name, PyUnicode_FromString(value));
+      _add_string_to_dict_safely(self, dict, name, value);
       break;
     default:
       need_drop = type_cast_drop_helper(self->template_options.on_error,
