@@ -34,6 +34,9 @@
 #include "plugin-types.h"
 #include "logthrdestdrv.h"
 
+#ifndef SCS_ZMQ
+#define SCS_ZMQ 0
+#endif
 
 void zmq_dd_set_port(LogDriver *destination, gint port);
 gboolean zmq_dd_set_socket_type(LogDriver *destination, gchar *socket_type);
@@ -146,7 +149,6 @@ zmq_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
 {
   ZMQDestDriver *self = (ZMQDestDriver *)destination;
   gboolean success = TRUE;
-  LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
   GString *result = g_string_new("");
 
   if (self->socket == NULL)
@@ -230,7 +232,7 @@ zmq_dd_new(GlobalConfig *cfg)
 
   self->super.format.stats_instance = zmq_dd_format_stats_instance;
   self->super.format.persist_name = zmq_dd_format_persist_name;
-  self->super.stats_source = 200;
+  self->super.stats_source = SCS_ZMQ;
 
   zmq_dd_set_port((LogDriver *) self, 5556);
   zmq_dd_set_socket_type((LogDriver *) self, "push");
