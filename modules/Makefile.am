@@ -8,3 +8,4 @@ include modules/perl/Makefile.am
 include modules/python/Makefile.am
 include modules/kafka/Makefile.am
 include modules/zmq/Makefile.am
+include modules/grok/Makefile.am

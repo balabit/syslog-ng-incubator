@@ -7,7 +7,7 @@ install:
   - sudo sh -c 'echo "deb http://download.opensuse.org/repositories/home:/tusavik/xUbuntu_12.04/ ./" >> /etc/apt/sources.list'
   - sudo apt-get update -qq
   - sudo apt-get install -qq aptitude
-  - sudo aptitude install -q -y pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-dev libperl-dev python-dev python3-dev libriemann-client-dev libzmq3-dev
+  - sudo aptitude install -q -y pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-dev libperl-dev python-dev python3-dev libriemann-client-dev libgrok-dev libtokyocabinet-dev libzmq3-dev
 before_script:
   - autoreconf -i
 script:
