@@ -153,7 +153,14 @@ java_dd_work_perform(gpointer data)
   JavaDestDriver *self = (JavaDestDriver *)data;
   gboolean sent = TRUE;
   JNIEnv *env = NULL;
-  java_machine_attach_thread(self->java_machine, &env);
+  if (!main_loop_is_main_thread())
+    {
+      java_machine_attach_thread(self->java_machine, &env);
+    }
+  else
+    {
+      env = self->java_env;
+    }
   while (sent && !main_loop_worker_job_quit())
     {
       LogMessage *lm;
@@ -178,7 +185,10 @@ java_dd_work_perform(gpointer data)
       log_msg_refcache_stop();
     }
   java_destination_proxy_flush(self->proxy, env);
-  java_machine_detach_thread(self->java_machine);
+  if (!main_loop_is_main_thread())
+    {
+      java_machine_detach_thread(self->java_machine);
+    }
 }
 
 void
