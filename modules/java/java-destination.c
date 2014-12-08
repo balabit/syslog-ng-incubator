@@ -249,7 +249,8 @@ java_dd_free(LogPipe *s)
 {
   JavaDestDriver *self = (JavaDestDriver *)s;
   log_template_unref(self->template);
-  java_destination_proxy_free(self->proxy, self->java_env);
+  if (self->proxy)
+    java_destination_proxy_free(self->proxy, self->java_env);
 
   if (self->java_machine)
     {

@@ -38,9 +38,12 @@ java_machine_unref(JavaVMSingleton *self)
   g_assert(self == g_jvm_s);
   if (g_atomic_counter_dec_and_test(&self->ref_cnt))
     {
-      JavaVM jvm = *(self->jvm);
       g_string_free(self->class_path, TRUE);
-      jvm->DestroyJavaVM(self->jvm);
+      if (self->jvm)
+        {
+          JavaVM jvm = *(self->jvm);
+          jvm->DestroyJavaVM(self->jvm);
+        }
       g_free(self);
       g_jvm_s = NULL;
     }
