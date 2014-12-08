@@ -9,7 +9,7 @@ public class TestClass implements SyslogNgDestination {
     System.out.println("START");
     this.proxy = proxy;
     System.out.println("Initialize test destination");
-    return false;
+    return true;
   }
 
   public void deinit()
