@@ -32,7 +32,7 @@ AC_DEFUN([AX_CHECK_JAVA_VERSION],
     JNI_INCLUDE_DIR=`find $JNI_HOME -name "jni.h" |  sed "s/\(.*\)jni.h/\1/"`
     JNI_CFLAGS="-I$JNI_INCLUDE_DIR"
      
-    JNI_MD_INCLUDE_DIR=`find $JNI_HOME -name "jni_md.h" |  sed "s/\(.*\)jni_md.h/\1/"`
+    JNI_MD_INCLUDE_DIR=`find $JNI_HOME -name "jni_md.h" |  sed "s/\(.*\)jni_md.h/\1/" | head -n 1`
     JNI_CFLAGS="$JNI_CFLAGS -I$JNI_MD_INCLUDE_DIR"
     AC_SUBST(JNI_CFLAGS, "$JNI_CFLAGS")
     AC_SUBST(JNI_LIBS, "$JNI_LIBS")
