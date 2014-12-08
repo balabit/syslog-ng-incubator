@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef ZMQ_PARSER_H_INCLUDED
-#define ZMQ_PARSER_H_INCLUDED
+#ifndef MODJAVA_PARSER_H_INCLUDED
+#define MODJAVA_PARSER_H_INCLUDED
 
 #include "cfg-parser.h"
 #include "cfg-lexer.h"

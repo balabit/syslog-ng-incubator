@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef ZMQ_H_INCLUDED
-#define ZMQ_H_INCLUDED
+#ifndef MODJAVA_H_INCLUDED
+#define MODJAVA_H_INCLUDED
 
 #include <jni.h>
 #include <iv.h>
