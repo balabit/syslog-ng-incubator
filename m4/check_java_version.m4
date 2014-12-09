@@ -27,9 +27,9 @@ AC_DEFUN([AX_CHECK_JAVA_VERSION],
     fi
 
     JNI_HOME=`echo $JAVAC_BIN | sed "s/\(.*\)[[/]]bin[[/]]java.*/\1/"`
-    JNI_LIBDIR=`find $JNI_HOME -name "libjvm.so" | sed "s/\(.*\)libjvm.so/\1/"`
+    JNI_LIBDIR=`find $JNI_HOME -name "libjvm.so" | sed "s/\(.*\)libjvm.so/\1/" | head -n 1`
     JNI_LIBS="-L$JNI_LIBDIR -ljvm"
-    JNI_INCLUDE_DIR=`find $JNI_HOME -name "jni.h" |  sed "s/\(.*\)jni.h/\1/"`
+    JNI_INCLUDE_DIR=`find $JNI_HOME -name "jni.h" |  sed "s/\(.*\)jni.h/\1/" | head -n 1`
     JNI_CFLAGS="-I$JNI_INCLUDE_DIR"
      
     JNI_MD_INCLUDE_DIR=`find $JNI_HOME -name "jni_md.h" |  sed "s/\(.*\)jni_md.h/\1/" | head -n 1`
