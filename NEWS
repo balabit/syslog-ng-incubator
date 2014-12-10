@@ -1,5 +1,41 @@
 #+STARTUP: indent showall                       -*- org -*-
 
+* 0.4.0 - <2014-12-10 Wed>
+
+This release contains a wide variety of new features as well as several
+bugfixes, too. This is the first version with support for syslog-ng 3.6.
+Support for older versions of syslog-ng is dropped.
+
+** Feature: syslog-ng 3.6 support.
+This release adds support for syslog-ng 3.6, but older versions are not supported anymore.
+
+** Feature: Kafka destination.
+This destination enables sending logs to Apache Kafka messaging system.
+
+** Feature: grok parser.
+Grok is an advanced pattern format (like PatternDB) used primarily by LogStash, 
+which allows users to parse unstructured data into a structured format. This module 
+allows syslog-ng users to use Grok patterns, too.
+
+** Feature: ZMQ source/destination.
+ZeroMQ is a simple, high-speed messaging protocol. These drivers allows 
+syslog-ng to send/receive logs from ZeroMQ message brokers.
+
+** Feature: Java destination.
+Java destination drivers enables the users to write destinations
+in Java or in any JVM compatible language.
+
+** Bugfix: Fixed counting inserted/sent messages as stored ones.
+
+** Bugfix: Fixed two python destination segfaults.
+Python exceptions and messages not conforming to UTF-8 do not crash the destination anymore.
+
+We would like to thank the following people for their contribution:
+
+Balazs Scheidler, Brandon Smith, Fabian Wernli, Gergely Nagy, Laszlo Meszaros, 
+Pierre-Yves Ritschard, Robert Fekete, Sandor Irhazi, Viktor Juhasz, 
+Viktor Tusa
+
 * 0.3.3 - <2014-07-25 Fri>
 
 ** Bugfix: Compatibility with syslog-ng 3.5.5
