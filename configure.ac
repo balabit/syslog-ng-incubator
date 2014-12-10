@@ -3,7 +3,7 @@ dnl
 
 AC_PREREQ([2.68])
 
-AC_INIT([syslog-ng-incubator], [0.3.3], [tusavik@gmail.com])
+AC_INIT([syslog-ng-incubator], [0.4.0], [tusavik@gmail.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
 AC_CONFIG_MACRO_DIR([m4])
