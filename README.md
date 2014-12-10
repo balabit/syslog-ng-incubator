@@ -77,6 +77,26 @@ Contents
 
    [sng:kafka]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/kafka/
 
+ * [Grok parser][sng:grok]: Grok is an advanced pattern format (like PatternDB) used primarily by LogStash, 
+   which allows users to parse unstructured data into a structured format. This module 
+   allows syslog-ng users to use Grok patterns, too.
+
+   [Grok](https://github.com/jordansissel/grok/) C parser for grok.
+
+   [sng:grok]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/grok/
+
+ * [0MQ source/destination][sng:zmq]: ZeroMQ is a simple, high-speed messaging protocol.
+   These drivers allows syslog-ng to send/receive logs from ZeroMQ message brokers.
+
+   [0MQ](http://zeromq.org/) message protocol.
+
+   [sng:zmq]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/zmq/
+
+ * [Java destination][sng:java]: Java destination drivers enables the users to write destinations
+   in Java or in any JVM compatible language.
+  
+   [sng:java]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/java/
+
 Installation
 ------------
 
