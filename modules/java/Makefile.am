@@ -1,5 +1,7 @@
 if ENABLE_JAVA
 
+BUILT_SOURCES	+= modules/java/SyslogNg.h
+
 module_LTLIBRARIES += modules/java/libmod-java.la
 modules_java_libmod_java_la_CFLAGS = \
     $(JNI_CFLAGS)  \
@@ -61,8 +63,7 @@ endif
 BUILT_SOURCES += \
     modules/java/java-grammar.y \
     modules/java/java-grammar.c \
-    modules/java/java-grammar.h \
-    modules/java/SyslogNg.h
+    modules/java/java-grammar.h
 
 EXTRA_DIST += \
     modules/java/java-grammar.ym \
