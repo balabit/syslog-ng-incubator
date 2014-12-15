@@ -130,7 +130,8 @@ License
 -------
 
 Copyright (C) 2011-2014 BalaBit IT Security Ltd., Gergely Nagy
-<algernon@balabit.hu>, Viktor Tusa <tusa@balabit.hu>, and other
+<algernon@balabit.hu>, Viktor Tusa <tusa@balabit.hu>,
+Viktor Juhasz <viktor.juhasz@balabit.com>, and other
 contributors; released under the terms of the
 [GNU General Public License][gpl], version 2 (or later).
 
