@@ -90,7 +90,7 @@ AC_ARG_ENABLE(zmq,
    [  --enable-zmq        Enable zmq destination ],
    ,enable_zmq="auto")
 
-AC_ARG_ENABLE(java, [ --enable-java  Enable java destination (default: yes)],, enable_java="yes")
+AC_ARG_ENABLE(java, [ --enable-java  Enable java destination (default: auto)],, enable_java="auto")
 
 dnl ***************************************************************************
 dnl Checks for programs.
@@ -282,8 +282,12 @@ INCUBATOR_TEST_LDADD="$SYSLOG_NG_LIBDIR/syslog-ng/libtest/libsyslog-ng-test.a -r
 dnl java headers/libraries
 dnl ***************************************************************************
 
-if test "$xenable_java" != "xno"; then
-    AC_CHECK_JAVA_VERSION([$JAVA_MIN_VERSION])
+if test "x$enable_java" = "xauto" || test "x$enable_java" = "xyes"; then
+    if test "x$enable_java" = "xauto"; then
+      AC_CHECK_JAVA_VERSION([$JAVA_MIN_VERSION], [enable_java=yes], [enable_java=no])
+    else
+      AC_CHECK_JAVA_VERSION([$JAVA_MIN_VERSION], [enable_java=yes], [AC_MSG_ERROR([Java not found])])
+    fi
 fi
 
 dnl ***************************************************************************
