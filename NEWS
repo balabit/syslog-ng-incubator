@@ -1,3 +1,17 @@
+# 0.4.1 - <2014-12-16 Tue>
+
+## Bugfix: Make it possible to disable java destination
+
+And the detection of java environment is refined
+
+## Bugfix: Purge the last traces of graphite
+
+Because graphite was feature merged into syslog-ng 3.6
+
+We would like to thank the following people for their contribution:
+
+Peter Czanik, Gergely Nagy, Viktor Juhasz, Laszlo Budai
+
 # 0.4.0 - <2014-12-10 Wed>
 
 This release contains a wide variety of new features as well as several
