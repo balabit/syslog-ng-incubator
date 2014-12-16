@@ -1,33 +1,31 @@
-#+STARTUP: indent showall                       -*- org -*-
-
-* 0.4.0 - <2014-12-10 Wed>
+# 0.4.0 - <2014-12-10 Wed>
 
 This release contains a wide variety of new features as well as several
 bugfixes, too. This is the first version with support for syslog-ng 3.6.
 Support for older versions of syslog-ng is dropped.
 
-** Feature: syslog-ng 3.6 support.
+## Feature: syslog-ng 3.6 support.
 This release adds support for syslog-ng 3.6, but older versions are not supported anymore.
 
-** Feature: Kafka destination.
+## Feature: Kafka destination.
 This destination enables sending logs to Apache Kafka messaging system.
 
-** Feature: grok parser.
+## Feature: grok parser.
 Grok is an advanced pattern format (like PatternDB) used primarily by LogStash, 
 which allows users to parse unstructured data into a structured format. This module 
 allows syslog-ng users to use Grok patterns, too.
 
-** Feature: ZMQ source/destination.
+## Feature: ZMQ source/destination.
 ZeroMQ is a simple, high-speed messaging protocol. These drivers allows 
 syslog-ng to send/receive logs from ZeroMQ message brokers.
 
-** Feature: Java destination.
+## Feature: Java destination.
 Java destination drivers enables the users to write destinations
 in Java or in any JVM compatible language.
 
-** Bugfix: Fixed counting inserted/sent messages as stored ones.
+## Bugfix: Fixed counting inserted/sent messages as stored ones.
 
-** Bugfix: Fixed two python destination segfaults.
+## Bugfix: Fixed two python destination segfaults.
 Python exceptions and messages not conforming to UTF-8 do not crash the destination anymore.
 
 We would like to thank the following people for their contribution:
@@ -36,34 +34,34 @@ Balazs Scheidler, Brandon Smith, Fabian Wernli, Gergely Nagy, Laszlo Meszaros,
 Pierre-Yves Ritschard, Robert Fekete, Sandor Irhazi, Viktor Juhasz, 
 Viktor Tusa
 
-* 0.3.3 - <2014-07-25 Fri>
+# 0.3.3 - <2014-07-25 Fri>
 
-** Bugfix: Compatibility with syslog-ng 3.5.5
+## Bugfix: Compatibility with syslog-ng 3.5.5
 
 The newest syslog-ng release, syslog-ng 3.5.5 introduced a breaking
 API change. The Incubator has been updated, and now works with - and
 requires - at least syslog-ng 3.5.5.
 
-** Bugfix: Fix for the ElasticSearch SCL plugin
+## Bugfix: Fix for the ElasticSearch SCL plugin
 
 The ElasticSearch SCL plugin has been fixed, and will now work out of
 the box.
 
-* 0.3.2 - <2014-07-15 Tue>
+# 0.3.2 - <2014-07-15 Tue>
 
 Larger bugfix release with several small features.
 
-** Bugfix: Fixed getent template function compilation on FreeBSD. 
+## Bugfix: Fixed getent template function compilation on FreeBSD. 
 There was an unnecessary header file, which isn't present on FreeBSD.
 
-** Feature: Added support for protocols in getent template function.
+## Feature: Added support for protocols in getent template function.
 Getent template function can now resolve protocol names.
 
-** Bugfix: Lua destination became a so-called threaded destination.
+## Bugfix: Lua destination became a so-called threaded destination.
 It has now a separate thread, and it prevents race conditions in multi-threaded
 mode.
 
-** Feature: Lua destination init parameters and queue parameters are reworked.
+## Feature: Lua destination init parameters and queue parameters are reworked.
 Globals are now constants as they should ever be. There is a new feature
 with the params() option, which works exactly as the old globals(), eg.
 uses value pairs, and templates can be used. The result is manifested as a lua
@@ -71,149 +69,149 @@ table as the second parameter of the queue func. Although the same result
 can be achieved by using raw mode and Template class in Lua, using params
 is more comfortable in some cases (eg: SCL).
 
-** Bugfix: Perl destination driver has a separate thread.
+## Bugfix: Perl destination driver has a separate thread.
 This prevents reace conditions like in Lua.
 
-** Feature: Graphite SCL is added.
+## Feature: Graphite SCL is added.
 This allows a brand new graphite destination on top of tcp() driver
 and graphite-output template function.
 
-** Bugfix: Consolidated --enable-* configure parameters.
+## Bugfix: Consolidated --enable-# configure parameters.
 They are now working similarly, yes means that if configure doesn't find
 the depending lib, it fails, auto means, that if configure doesn't find the
 depending lib, it disables the feature, and no means configure simply disables the 
 feature. The only exception is python.
 
-** Feature: Python version autodetection.
+## Feature: Python version autodetection.
 --with-python switch has now the following options: no: disables python 
 related modules; auto: autodetects python version, disables python modules 
 if not found; force: autodetects python version, fails if not found;
 python-<version>: forces specified version, fails if not found.
 
-* 0.3.1 - <2014-06-02 Mon>
+# 0.3.1 - <2014-06-02 Mon>
  
-** Bugfix: Fixed linkage of modules 
+## Bugfix: Fixed linkage of modules 
 All modules were accidentally linked to libperl, now only 
 perl destination module is linked to libperl.
 
-** Bugfix: Fixed rss module linkage. 
+## Bugfix: Fixed rss module linkage. 
 It wasn't linked to libsyslog-ng.so.
 
-* 0.3.0 - <2014-05-28 Wed>
+# 0.3.0 - <2014-05-28 Wed>
 
 New scripted destinations are introduced by algernon 
 <algernon@madhouse-project.org>: Python and Perl. Additionally
 several bugfixes, small features and the getent template function are
 introduced.
 
-** Feature: Python and Perl destination
+## Feature: Python and Perl destination
 
 These destinations are very similar to the current Lua destination,
 except that their queue method get a dict (or hash in Perl) as a parameter.
 
-** Feature: getent template function.
+## Feature: getent template function.
 
 Getent template function can query information from the system user databases.
 For example it can convert uid to username and can get other fields from
 user databases.
 
-** Feature: Graphite output timestamp now configurable as a template.
+## Feature: Graphite output timestamp now configurable as a template.
 
-** Feature: Padding template function allows user to pad a string to a specified width.
+## Feature: Padding template function allows user to pad a string to a specified width.
 
-** Bugfix: Fixed float casting in Riemann destination
+## Bugfix: Fixed float casting in Riemann destination
 
-** Bugfix: Fixed an error messsage in + template function.
+## Bugfix: Fixed an error messsage in + template function.
 
-* 0.2.1 - <2014-03-12 Wed>
+# 0.2.1 - <2014-03-12 Wed>
 
 This is a bug fix only release over the previous 0.2.0 version, with
 the following changes:
 
-** Bugfix: FreeBSD portability
+## Bugfix: FreeBSD portability
 
 The Incubator can now be compiled on FreeBSD!
 
-** Bugfix: Improved Lua detection
+## Bugfix: Improved Lua detection
 
 On some systems, the Lua pkg-config file is called lua-5.1, or
 lua-5.2, not lua5.1/lua5.2. The configure script was taught to
 recognise all of these.
 
-** Bugfix: Fixed a crash in the Lua destination
+## Bugfix: Fixed a crash in the Lua destination
 
 When using the Lua destination without globals() being present does
 not crash the module anymore.
 
-* 0.2.0 - <2014-02-26 Wed>
+# 0.2.0 - <2014-02-26 Wed>
 
 Most of the features of this release are contributed by Viktor Tusa
 <tusa@balabit.hu>, many thanks for them!
 
-** Feature: LuaJIT support
+## Feature: LuaJIT support
 When configured with --enable-luajit, and LuaJIT is available, it is
 now possible to build the Lua destination against that version of Lua.
 
-** Feature: monitor source
+## Feature: monitor source
 This new source is somewhere between the trigger() source and the
 lua() destination, in that it allows one to write a Lua function that
 gets periodically executed, and can produce a log message.
 
-** Feature: Templating support for the Lua destination
+## Feature: Templating support for the Lua destination
 Destinations written in Lua can now use Templates, from within the
 Lua code itself. Most useful for raw mode.
 
-** Feature: Lua destinations have easy access to the timestamps
+## Feature: Lua destinations have easy access to the timestamps
 The Lua destination now makes another function available:
 Message.get_timestamp(), that gets one the UNIX timestamp in integer
 format, without having to format it first with a template, and then
 converting it back.
 
-** Feature: The Lua modules now have a deinit hook
+## Feature: The Lua modules now have a deinit hook
 In case the destination needs to do something at deinit time, there
 is now a deinit hook.
 
-** Feature: The Lua modules has access to logging functions
+## Feature: The Lua modules has access to logging functions
 It is now possible to use syslogng.debug, syslogng.error,
 syslogng.info and syslogng.verbose functions from within Lua, to
 construct internal log messages.
 
-** Feature: The Lua destination can have global variables set
+## Feature: The Lua destination can have global variables set
 It is now possible to set global variables (strings and ints) from
 within the syslog-ng configuration file, that get passed down to the
 Lua destination.
 
-** Feature: graphite output template function
+## Feature: graphite output template function
 This template function, with syntax much like that of $(format-json)
 allows one to easily forward data to a Graphite server, when combined
 with the tcp() destination.
 
-** Feature: An ElasticSearch SCL
+## Feature: An ElasticSearch SCL
 The Incubator now ships with an SCL file, and a helper program that
 makes it possible to easily send events to ElasticSearch, in a
 Kibana-compatible format.
 
-** Bugfix: RSS destination does not require newer glib
+## Bugfix: RSS destination does not require newer glib
 The RSS destination used features not available in the glib version
 targeted by the Incubator. It was fixed to work with the older
 version we target.
 
-* 0.1.1 - <2014-01-24 Fri>
+# 0.1.1 - <2014-01-24 Fri>
 
-** Bugfix: Grammar files are not shipped in the tarball anymore
+## Bugfix: Grammar files are not shipped in the tarball anymore
 When generating a tarball with "make dist", the built grammar files
 are not shipped anymore. They're built against a specific syslog-ng
 version, and as such, are not portable to another version of it. The
 grammars need to be rebuilt, and shipping them prevents that.
 
-** Bugfix: Don't depend on recent glib
+## Bugfix: Don't depend on recent glib
 When glib is too old, the $(state) template function gets disabled
 now, instead of the build failing.
 
-** Feature: Lua destination
+## Feature: Lua destination
 This new feature allows one to write destination driver scripts in
 Lua. Example scripts are provided in modules/lua/.
 
-* 0.1.0 - <2013-12-28 Sat>
+# 0.1.0 - <2013-12-28 Sat>
 
 Initial public release.
