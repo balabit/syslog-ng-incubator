@@ -1,0 +1,121 @@
+/*
+ * Copyright (c) 2010-2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2010-2014 Viktor Juhasz <viktor.juhasz@balabit.com>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
+ */
+#include <string.h>
+
+#include "java-class-loader.h"
+
+#define SYSLOG_NG_CLASS_LOADER  "org/syslog_ng/SyslogNgClassLoader"
+#define SYSLOG_NG_JAR           "SyslogNg.jar"
+
+#define CALL_JAVA_FUNCTION(env, function, ...) (*(env))->function(env, __VA_ARGS__)
+
+ClassLoader *
+class_loader_new(JNIEnv *java_env, const gchar *class_path)
+{
+  ClassLoader *self = g_new0(ClassLoader, 1);
+  GString *g_class_path = g_string_new(module_path);
+  jstring str_class_path = NULL;
+
+  self->syslogng_class_loader = CALL_JAVA_FUNCTION(java_env, FindClass, SYSLOG_NG_CLASS_LOADER);
+  if (!self->syslogng_class_loader)
+    {
+      msg_error("Can't find class",
+                evt_tag_str("class_name", SYSLOG_NG_CLASS_LOADER),
+                NULL);
+      goto error;
+    }
+  self->loader_constructor = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->syslogng_class_loader, "<init>", "(Ljava/lang/String;)V");
+  if (!self->loader_constructor)
+    {
+      msg_error("Can't find constructor for SyslogNgClassLoader", NULL);
+      goto error;
+    }
+
+  self->mi_loadclass = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->syslogng_class_loader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+  //  self->mi_loadclass = CALL_JAVA_FUNCTION(java_env, GetStaticMethodID, self->syslogng_class_loader, "loadClassFromPathList", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Class;");
+  if (!self->mi_loadclass)
+    {
+      msg_error("Can't find static method in class",
+                evt_tag_str("class_name", SYSLOG_NG_CLASS_LOADER),
+                evt_tag_str("method", "Class loadClass(String className)"),
+                NULL);
+      goto error;
+    }
+
+  g_string_append(g_class_path, "/" SYSLOG_NG_JAR);
+  if (class_path && (strlen(class_path) > 0))
+    {
+      g_string_append_c(g_class_path, ':');
+      g_string_append(g_class_path, class_path);
+    }
+  str_class_path = CALL_JAVA_FUNCTION(java_env, NewStringUTF, g_class_path->str);
+  self->loader_object = CALL_JAVA_FUNCTION(java_env, NewObject, self->syslogng_class_loader, self->loader_constructor, str_class_path);
+  if (!self->loader_object)
+    {
+      msg_error("Can't create SyslogNgClassLoader", NULL);
+      goto error;
+    }
+  goto exit;
+error:
+  class_loader_free(self, java_env);
+  self = NULL;
+
+exit:
+  if (str_class_path)
+    {
+      CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, str_class_path);
+    }
+  g_string_free(g_class_path, TRUE);
+  return self;
+}
+
+void class_loader_free(ClassLoader *self, JNIEnv *java_env)
+{
+  if (!self)
+    {
+      return;
+    }
+  if (self->loader_object)
+    {
+      CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, self->loader_object);
+    }
+  if (self->syslogng_class_loader)
+    {
+      CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, self->syslogng_class_loader);
+    }
+  g_free(self);
+  return;
+}
+
+jclass
+class_loader_load_class(ClassLoader *self, JNIEnv *java_env, const gchar *class_name)
+{
+  jclass result;
+
+  jstring str_class_name = CALL_JAVA_FUNCTION(java_env, NewStringUTF, class_name);
+  result = CALL_JAVA_FUNCTION(java_env, CallObjectMethod, self->loader_object, self->mi_loadclass, str_class_name);
+
+  CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, str_class_name);
+  return result;
+}
+
