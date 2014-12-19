@@ -8,7 +8,10 @@ public class TestClass implements SyslogNgDestination {
   {
     System.out.println("START");
     this.proxy = proxy;
-    System.out.println("Initialize test destination");
+    
+    String opt1 = this.proxy.getOption("name");
+    System.out.println("Initialize test destination: " + opt1);
+    
     return true;
   }
 
