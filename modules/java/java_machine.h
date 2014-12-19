@@ -26,6 +26,7 @@
 
 #include <jni.h>
 #include <glib.h>
+#include "java-class-loader.h"
 
 typedef struct _JavaVMSingleton JavaVMSingleton;
 
@@ -33,7 +34,10 @@ JavaVMSingleton *java_machine_ref();
 void java_machine_unref(JavaVMSingleton *self);
 gboolean java_machine_start(JavaVMSingleton* self, JNIEnv **env);
 
-void java_machine_attach_thread(JavaVMSingleton* self, JNIEnv **penv);
 void java_machine_detach_thread(JavaVMSingleton* self);
+
+JNIEnv *java_machine_get_env(JavaVMSingleton *self, JNIEnv **penv);
+
+jclass java_machine_load_class(JavaVMSingleton *self, const gchar *class_name, const gchar *class_path);
 
 #endif

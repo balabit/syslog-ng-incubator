@@ -36,9 +36,9 @@ typedef struct _ClassLoader {
 } ClassLoader;
 
 
-ClassLoader *class_loader_new(JNIEnv *java_env, const gchar *class_path);
+ClassLoader *class_loader_new(JNIEnv *java_env);
 void class_loader_free(ClassLoader *self, JNIEnv *java_env);
-jclass class_loader_load_class(ClassLoader *self, JNIEnv *java_env, const gchar *class_name);
+jclass class_loader_load_class(ClassLoader *self, JNIEnv *java_env, const gchar *class_name, const gchar *class_path);
 
 
 #endif /* JAVA_CLASS_LOADER_H_ */

@@ -110,7 +110,7 @@ java_dd_init(LogPipe *s)
   if (!java_machine_start(self->java_machine, &self->java_env))
     return FALSE;
 
-  self->proxy = java_destination_proxy_new(self->java_env, self->class_name, self->class_path->str);
+  self->proxy = java_destination_proxy_new(self->class_name, self->class_path->str);
   if (!self->proxy)
     return FALSE;
   self->log_queue = log_dest_driver_acquire_queue(&self->super, "testjava");
@@ -153,14 +153,8 @@ java_dd_work_perform(gpointer data)
   JavaDestDriver *self = (JavaDestDriver *)data;
   gboolean sent = TRUE;
   JNIEnv *env = NULL;
-  if (!main_loop_is_main_thread())
-    {
-      java_machine_attach_thread(self->java_machine, &env);
-    }
-  else
-    {
-      env = self->java_env;
-    }
+
+  env = java_machine_get_env(self->java_machine, &env);
   while (sent && !main_loop_worker_job_quit())
     {
       LogMessage *lm;
@@ -184,11 +178,15 @@ java_dd_work_perform(gpointer data)
       msg_set_context(NULL);
       log_msg_refcache_stop();
     }
+
   java_destination_proxy_flush(self->proxy, env);
+
   if (!main_loop_is_main_thread())
     {
       java_machine_detach_thread(self->java_machine);
     }
+
+
 }
 
 void
@@ -260,7 +258,7 @@ java_dd_free(LogPipe *s)
   JavaDestDriver *self = (JavaDestDriver *)s;
   log_template_unref(self->template);
   if (self->proxy)
-    java_destination_proxy_free(self->proxy, self->java_env);
+    java_destination_proxy_free(self->proxy);
 
   if (self->java_machine)
     {

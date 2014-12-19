@@ -26,16 +26,17 @@
 
 #include <jni.h>
 #include <syslog-ng.h>
+#include "java_machine.h"
 
 typedef struct _JavaDestinationProxy JavaDestinationProxy;
 
-JavaDestinationProxy *java_destination_proxy_new(JNIEnv *java_env, const gchar *class_name, const gchar *class_path);
+JavaDestinationProxy *java_destination_proxy_new(const gchar *class_name, const gchar *class_path);
 
 gboolean java_destination_proxy_init(JavaDestinationProxy *self, JNIEnv *env, void *ptr);
 void java_destination_proxy_deinit(JavaDestinationProxy *self, JNIEnv *env);
 gboolean java_destination_proxy_flush(JavaDestinationProxy *self, JNIEnv *env);
 gboolean java_destination_proxy_queue(JavaDestinationProxy *self, JNIEnv *env, GString *formatted_message);
 
-void java_destination_proxy_free(JavaDestinationProxy *self, JNIEnv *env);
+void java_destination_proxy_free(JavaDestinationProxy *self);
 
 #endif /* JAVA_DESTINATION_PROXY_H_ */

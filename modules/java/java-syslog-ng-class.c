@@ -29,11 +29,14 @@
 #define CALL_JAVA_FUNCTION(env, function, ...) (*(env))->function(env, __VA_ARGS__)
 
 SyslogNgClass *
-syslog_ng_class_new(JNIEnv *java_env, ClassLoader *loader, gpointer ptr)
+syslog_ng_class_new(gpointer ptr)
 {
   SyslogNgClass *self = g_new0(SyslogNgClass, 1);
+  JNIEnv *java_env;
+  self->java_machine = java_machine_ref();
+  java_env = java_machine_get_env(self->java_machine, &java_env);
 
-  self->syslogng_class = class_loader_load_class(loader, java_env, SYSLOG_NG_CLASS);
+  self->syslogng_class = java_machine_load_class(self->java_machine, SYSLOG_NG_CLASS, NULL);
   if (!self->syslogng_class)
     {
       (*java_env)->ExceptionDescribe(java_env);
@@ -62,17 +65,19 @@ syslog_ng_class_new(JNIEnv *java_env, ClassLoader *loader, gpointer ptr)
     }
   return self;
 error:
-  syslog_ng_class_free(self, java_env);
+  syslog_ng_class_free(self);
   return NULL;
 }
 
 void
-syslog_ng_class_free(SyslogNgClass *self, JNIEnv *java_env)
+syslog_ng_class_free(SyslogNgClass *self)
 {
   if (!self)
     {
       return;
     }
+  JNIEnv *java_env;
+  java_env = java_machine_get_env(self->java_machine, &java_env);
   if (self->syslogng_object)
     {
       CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, self->syslogng_object);
@@ -81,5 +86,6 @@ syslog_ng_class_free(SyslogNgClass *self, JNIEnv *java_env)
     {
       CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, self->syslogng_class);
     }
+  java_machine_unref(self->java_machine);
   g_free(self);
 }

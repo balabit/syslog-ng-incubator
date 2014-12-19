@@ -29,12 +29,26 @@
 
 #define CALL_JAVA_FUNCTION(env, function, ...) (*(env))->function(env, __VA_ARGS__)
 
-ClassLoader *
-class_loader_new(JNIEnv *java_env, const gchar *class_path)
+jstring
+__create_class_path(ClassLoader *self, JNIEnv *java_env, const gchar *class_path)
 {
-  ClassLoader *self = g_new0(ClassLoader, 1);
   GString *g_class_path = g_string_new(module_path);
   jstring str_class_path = NULL;
+  g_string_append(g_class_path, "/" SYSLOG_NG_JAR);
+  if (class_path && (strlen(class_path) > 0))
+    {
+      g_string_append_c(g_class_path, ':');
+      g_string_append(g_class_path, class_path);
+    }
+  str_class_path = CALL_JAVA_FUNCTION(java_env, NewStringUTF, g_class_path->str);
+  g_string_free(g_class_path, TRUE);
+  return str_class_path;
+}
+
+ClassLoader *
+class_loader_new(JNIEnv *java_env)
+{
+  ClassLoader *self = g_new0(ClassLoader, 1);
 
   self->syslogng_class_loader = CALL_JAVA_FUNCTION(java_env, FindClass, SYSLOG_NG_CLASS_LOADER);
   if (!self->syslogng_class_loader)
@@ -44,15 +58,14 @@ class_loader_new(JNIEnv *java_env, const gchar *class_path)
                 NULL);
       goto error;
     }
-  self->loader_constructor = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->syslogng_class_loader, "<init>", "(Ljava/lang/String;)V");
+  self->loader_constructor = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->syslogng_class_loader, "<init>", "()V");
   if (!self->loader_constructor)
     {
       msg_error("Can't find constructor for SyslogNgClassLoader", NULL);
       goto error;
     }
 
-  self->mi_loadclass = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->syslogng_class_loader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-  //  self->mi_loadclass = CALL_JAVA_FUNCTION(java_env, GetStaticMethodID, self->syslogng_class_loader, "loadClassFromPathList", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Class;");
+  self->mi_loadclass = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->syslogng_class_loader, "loadClass", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Class;");
   if (!self->mi_loadclass)
     {
       msg_error("Can't find static method in class",
@@ -62,31 +75,17 @@ class_loader_new(JNIEnv *java_env, const gchar *class_path)
       goto error;
     }
 
-  g_string_append(g_class_path, "/" SYSLOG_NG_JAR);
-  if (class_path && (strlen(class_path) > 0))
-    {
-      g_string_append_c(g_class_path, ':');
-      g_string_append(g_class_path, class_path);
-    }
-  str_class_path = CALL_JAVA_FUNCTION(java_env, NewStringUTF, g_class_path->str);
-  self->loader_object = CALL_JAVA_FUNCTION(java_env, NewObject, self->syslogng_class_loader, self->loader_constructor, str_class_path);
+
+  self->loader_object = CALL_JAVA_FUNCTION(java_env, NewObject, self->syslogng_class_loader, self->loader_constructor);
   if (!self->loader_object)
     {
       msg_error("Can't create SyslogNgClassLoader", NULL);
       goto error;
     }
-  goto exit;
+  return self;
 error:
   class_loader_free(self, java_env);
-  self = NULL;
-
-exit:
-  if (str_class_path)
-    {
-      CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, str_class_path);
-    }
-  g_string_free(g_class_path, TRUE);
-  return self;
+  return NULL;
 }
 
 void class_loader_free(ClassLoader *self, JNIEnv *java_env)
@@ -108,14 +107,17 @@ void class_loader_free(ClassLoader *self, JNIEnv *java_env)
 }
 
 jclass
-class_loader_load_class(ClassLoader *self, JNIEnv *java_env, const gchar *class_name)
+class_loader_load_class(ClassLoader *self, JNIEnv *java_env, const gchar *class_name, const gchar *class_path)
 {
   jclass result;
-
   jstring str_class_name = CALL_JAVA_FUNCTION(java_env, NewStringUTF, class_name);
-  result = CALL_JAVA_FUNCTION(java_env, CallObjectMethod, self->loader_object, self->mi_loadclass, str_class_name);
+  jstring str_class_path = __create_class_path(self, java_env, class_path);
+
+
+  result = CALL_JAVA_FUNCTION(java_env, CallObjectMethod, self->loader_object, self->mi_loadclass, str_class_name, str_class_path);
 
   CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, str_class_name);
+  CALL_JAVA_FUNCTION(java_env, DeleteLocalRef, str_class_path);
   return result;
 }
 

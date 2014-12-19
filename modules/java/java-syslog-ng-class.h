@@ -27,15 +27,17 @@
 
 #include <jni.h>
 #include <syslog-ng.h>
-#include "java-class-loader.h"
+#include "java_machine.h"
+
 
 typedef struct _SyslogNgClass {
+  JavaVMSingleton *java_machine;
   jclass syslogng_class;
   jobject syslogng_object;
   jmethodID syslogng_constructor_id;
 } SyslogNgClass;
 
-SyslogNgClass *syslog_ng_class_new(JNIEnv *java_env, ClassLoader *loader, gpointer ptr);
-void syslog_ng_class_free(SyslogNgClass *self, JNIEnv *java_env);
+SyslogNgClass *syslog_ng_class_new(gpointer ptr);
+void syslog_ng_class_free(SyslogNgClass *self);
 
 #endif /* JAVA_SYSLOG_NG_CLASS_H_ */
