@@ -16,6 +16,8 @@ modules_java_libmod_java_la_SOURCES = \
     modules/java/java-destination-proxy.h \
     modules/java/java-class-loader.c \
     modules/java/java-class-loader.h \
+    modules/java/java-syslog-ng-class.c \
+    modules/java/java-syslog-ng-class.h \
     modules/java/java-parser.c \
     modules/java/java-parser.h \
     modules/java/java_machine.c \

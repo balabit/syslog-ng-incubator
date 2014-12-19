@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2014 Viktor Juhasz <viktor.juhasz@balabit.com>
+ * Copyright (c) 2010-2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2010-2014 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,27 +21,21 @@
  *
  */
 
-package org.syslog_ng;
 
-public class SyslogNg {
-  static {
-    try {
-      System.loadLibrary("mod-java");
-    }
-    catch (UnsatisfiedLinkError e) {
-      System.out.println("FAILED: " + e);
-    }
-  }
+#ifndef JAVA_SYSLOG_NG_CLASS_H_
+#define JAVA_SYSLOG_NG_CLASS_H_
 
-  public SyslogNg(long ptr) {
-    proxy_address = ptr;
-  }
+#include <jni.h>
+#include <syslog-ng.h>
+#include "java-class-loader.h"
 
-  public String getOption(String key) {
-    return getOption(proxy_address, key);
-  }
+typedef struct _SyslogNgClass {
+  jclass syslogng_class;
+  jobject syslogng_object;
+  jmethodID syslogng_constructor_id;
+} SyslogNgClass;
 
-  private native String getOption(long ptr, String key);
+SyslogNgClass *syslog_ng_class_new(JNIEnv *java_env, ClassLoader *loader, gpointer ptr);
+void syslog_ng_class_free(SyslogNgClass *self, JNIEnv *java_env);
 
-  private long proxy_address;
-}
+#endif /* JAVA_SYSLOG_NG_CLASS_H_ */
