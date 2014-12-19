@@ -25,12 +25,7 @@ package org.syslog_ng;
 
 public class SyslogNg {
   static {
-    try {
-      System.loadLibrary("mod-java");
-    }
-    catch (UnsatisfiedLinkError e) {
-      System.out.println("FAILED: " + e);
-    }
+    System.loadLibrary("mod-java");
   }
 
   public SyslogNg(long ptr) {

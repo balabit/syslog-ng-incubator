@@ -27,10 +27,13 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.lang.reflect.Method;
 
 
 public class SyslogNgClassLoader {
+
   private ClassLoader classLoader;
+
   private URL[] createUrls(String pathList) {
     String[] pathes = pathList.split(":");
     URL[] urls = new URL[pathes.length];
@@ -46,9 +49,23 @@ public class SyslogNgClassLoader {
     return urls;
   }
 
+  private void addSoftwareLibrary(URL[] urls) throws Exception {
+      Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
+      method.setAccessible(true);
+      for (URL url:urls) {
+          method.invoke(classLoader, new Object[]{url});
+      }
+  }
+
   public SyslogNgClassLoader(String pathList) {
+    classLoader = ClassLoader.getSystemClassLoader();
     URL[] urls = createUrls(pathList);
-    classLoader = new URLClassLoader(urls, System.class.getClassLoader());
+    try {
+      addSoftwareLibrary(urls);
+    }
+    catch (Exception e) {
+      System.out.println("Error while expanding path list: " + e);
+    }
   }
 
   public Class loadClass(String className) {
