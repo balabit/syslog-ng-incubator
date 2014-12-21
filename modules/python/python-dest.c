@@ -337,7 +337,6 @@ python_worker_eval(LogThrDestDriver *d, LogMessage *msg)
 {
   PythonDestDriver *self = (PythonDestDriver *)d;
   gboolean success, vp_ok;
-  LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
   PyObject *func_args;
   PyGILState_STATE gstate;
 
