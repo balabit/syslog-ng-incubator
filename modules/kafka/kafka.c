@@ -113,8 +113,13 @@ int32_t kafka_partition(const rd_kafka_topic_t *rkt,
                         void *msgp)
 {
   u_int32_t key = *((u_int32_t *)keydata);
+  u_int32_t target = key % partition_cnt;
+  int32_t i = partition_cnt;
 
-  return key % partition_cnt;
+  while (--i > 0 && !rd_kafka_topic_partition_available(rkt, target)) {
+    target = (target + 1) % partition_cnt;
+  }
+  return target;
 }
 
 /*
