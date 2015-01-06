@@ -1,33 +1,35 @@
-import org.syslog_ng.*;
+import org.syslog_ng.SyslogNgDestination;
 
-public class TestClass implements SyslogNgDestination {
 
-  SyslogNg proxy;
+public class TestClass extends SyslogNgDestination {
 
-  public boolean init(SyslogNg proxy)
-  {
-    System.out.println("START");
-    this.proxy = proxy;
-    
-    String opt1 = this.proxy.getOption("name");
-    System.out.println("Initialize test destination: " + opt1);
-    
-    return true;
-  }
+	private String name;
 
-  public void deinit()
-  {
-    System.out.println("Deinitialize object");
-  }
+	public TestClass(long arg0) {
+		super(arg0);
+	}
 
-  public boolean queue(String message)
-  {
-    System.out.println("This is queue!" + message);
-    return true;
-  }
+	public void deinit() {
+		System.out.println("Deinit");
+	}
 
-  public boolean flush()
-  {
-    return true;
-  }
+	public boolean flush() {
+		System.out.println("Flush");
+		return true;
+	}
+
+	public boolean init() {
+		name = getOption("name");
+		if (name == null) {
+			System.err.println("Name is a required option for this destination");
+			return false;
+		}
+		System.out.println("Init " + name);
+		return true;
+	}
+
+	public boolean queue(String arg0) {
+		System.out.println("Incoming message: " + arg0);
+		return true;
+	}
 }

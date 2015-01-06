@@ -32,6 +32,10 @@ import java.lang.reflect.Method;
 
 public class SyslogNgClassLoader {
 
+  static {
+    System.loadLibrary("mod-java");
+  }
+
   private ClassLoader classLoader;
 
   public SyslogNgClassLoader() {

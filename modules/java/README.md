@@ -1,9 +1,9 @@
 java destination
 ================
 
-java destination gives an interface to implement destinations based on Java
+java destination gives an abstract class to implement destinations based on Java
 
-If you want to implement a java destination, you should implement SyslogNgDestination interface
+If you want to implement a java destination, you should extend SyslogNgDestination abstract class
 which is contained by the SyslogNg.jar which jar file will be in the moduledir after make install
 
 Example implementation of a dummy destination
@@ -11,14 +11,15 @@ Example implementation of a dummy destination
 ```
 import org.syslog_ng.*;
 
-public class TestClass implements SyslogNgDestination {
+public class TestClass extends SyslogNgDestination {
 
-  SyslogNg proxy;
+  public TestClass(long arg0) {
+    super(arg0);
+  }
 
-  public boolean init(SyslogNg proxy)
+  public boolean init()
   {
     System.out.println("START");
-    this.proxy = proxy;
     System.out.println("Initialize test destination");
     return true;
   }
@@ -77,7 +78,7 @@ log{
 };
 
 ```
-Example configuration using jar files in the class_path (the path inside the jar file has to been set using .):
+Example configuration using jar files in the class_path (the path inside the jar file has to been set using '.'):
 ```
 @version: 3.6
 

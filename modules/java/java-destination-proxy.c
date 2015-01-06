@@ -45,13 +45,11 @@ struct _JavaDestinationProxy
   JavaVMSingleton *java_machine;
   jclass loaded_class;
   JavaDestinationImpl dest_impl;
-
-  SyslogNgClass *syslog_ng_class;
 };
 
 
 static gboolean
-__load_destination_object(JavaDestinationProxy *self, const gchar *class_name, const gchar *class_path)
+__load_destination_object(JavaDestinationProxy *self, const gchar *class_name, const gchar *class_path, gpointer impl)
 {
   JNIEnv *java_env = NULL;
   java_env = java_machine_get_env(self->java_machine, &java_env);
@@ -63,14 +61,14 @@ __load_destination_object(JavaDestinationProxy *self, const gchar *class_name, c
       return FALSE;
   }
 
-  self->dest_impl.mi_constructor = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "<init>", "()V");
+  self->dest_impl.mi_constructor = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "<init>", "(J)V");
   if (!self->dest_impl.mi_constructor) {
       msg_error("Can't find default constructor for class",
                 evt_tag_str("class_name", class_name), NULL);
       return FALSE;
   }
 
-  self->dest_impl.mi_init = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "init", "(Lorg/syslog_ng/SyslogNg;)Z");
+  self->dest_impl.mi_init = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "init", "()Z");
   if (!self->dest_impl.mi_init) {
       msg_error("Can't find method in class",
                 evt_tag_str("class_name", class_name),
@@ -103,7 +101,7 @@ __load_destination_object(JavaDestinationProxy *self, const gchar *class_name, c
       return FALSE;
     }
 
-  self->dest_impl.dest_object = CALL_JAVA_FUNCTION(java_env, NewObject, self->loaded_class, self->dest_impl.mi_constructor, NULL);
+  self->dest_impl.dest_object = CALL_JAVA_FUNCTION(java_env, NewObject, self->loaded_class, self->dest_impl.mi_constructor, impl);
   if (!self->dest_impl.dest_object)
     {
       msg_error("Can't create object",
@@ -134,12 +132,12 @@ java_destination_proxy_free(JavaDestinationProxy *self)
 }
 
 JavaDestinationProxy *
-java_destination_proxy_new(const gchar *class_name, const gchar *class_path)
+java_destination_proxy_new(const gchar *class_name, const gchar *class_path, gpointer impl)
 {
   JavaDestinationProxy *self = g_new0(JavaDestinationProxy, 1);
   self->java_machine = java_machine_ref();
   
-  if (!__load_destination_object(self, class_name, class_path))
+  if (!__load_destination_object(self, class_name, class_path, impl))
     {
       goto error;
     }
@@ -164,13 +162,7 @@ java_destination_proxy_init(JavaDestinationProxy *self, JNIEnv *env, void *ptr)
 {
   gboolean result;
 
-  self->syslog_ng_class = syslog_ng_class_new(ptr);
-  if (!self->syslog_ng_class)
-    {
-      msg_error("Failed to create SyslogNg object", NULL);
-      goto error;
-    }
-  result = CALL_JAVA_FUNCTION(env, CallBooleanMethod, self->dest_impl.dest_object, self->dest_impl.mi_init, self->syslog_ng_class->syslogng_object);
+  result = CALL_JAVA_FUNCTION(env, CallBooleanMethod, self->dest_impl.dest_object, self->dest_impl.mi_init);
   if (!result)
     {
       goto error;
@@ -185,7 +177,6 @@ void
 java_destination_proxy_deinit(JavaDestinationProxy *self, JNIEnv *env)
 {
   CALL_JAVA_FUNCTION(env, CallVoidMethod, self->dest_impl.dest_object, self->dest_impl.mi_deinit);
-  syslog_ng_class_free(self->syslog_ng_class);
 }
 
 gboolean

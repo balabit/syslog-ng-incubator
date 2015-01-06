@@ -37,12 +37,11 @@ modules/java modules/java/ mod-java: modules/java/libmod-java.la
 clean-local: clean-java-if
 
 $(top_builddir)/modules/java/SyslogNg.h: $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class
-	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/SyslogNg.h  org.syslog_ng.SyslogNg
+	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/SyslogNgDestination.h  org.syslog_ng.SyslogNgDestination
 
 
 $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class:
 	$(JAVAC) -d $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgClassLoader.java
-	$(JAVAC) -d $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNg.java
 	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgDestination.java
 	jar -cvf $(top_builddir)/modules/java/SyslogNg.jar -C $(top_builddir)/modules/java/ org
 

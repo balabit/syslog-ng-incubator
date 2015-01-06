@@ -23,11 +23,22 @@
 
 package org.syslog_ng;
 
-public interface SyslogNgDestination {
+public abstract class SyslogNgDestination {
+  private long ptr;
 
-  public boolean init(SyslogNg proxy);
-  public void deinit();
+  public SyslogNgDestination(long ptr) {
+	this.ptr = ptr;
+  }
 
-  public boolean queue(String message);
-  public boolean flush();
+  public String getOption(String key) {
+     return getOption(ptr, key);
+  }
+
+  private native String getOption(long ptr, String key);
+
+  public abstract boolean init();
+  public abstract void deinit();
+
+  public abstract boolean queue(String message);
+  public abstract boolean flush();
 }
