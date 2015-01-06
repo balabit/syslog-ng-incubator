@@ -42,7 +42,7 @@ struct _JavaLogMessageProxy
 };
 
 JNIEXPORT void JNICALL
-Java_org_syslog_1ng_LogMessage_dispose(JNIEnv *env, jobject obj, jlong handle)
+Java_org_syslog_1ng_LogMessage_unref(JNIEnv *env, jobject obj, jlong handle)
 {
   LogMessage *msg = (LogMessage *)handle;
   log_msg_unref(msg);

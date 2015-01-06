@@ -12,10 +12,12 @@ modules_java_libmod_java_la_SOURCES = \
     modules/java/java-plugin.c \
     modules/java/java-destination.c \
     modules/java/java-destination.h \
-    modules/java/java-destination-proxy.c \
-    modules/java/java-destination-proxy.h \
-    modules/java/java-logmsg-proxy.c \
-    modules/java/java-logmsg-proxy.h \
+    modules/java/proxies/java-destination-proxy.c \
+    modules/java/proxies/java-destination-proxy.h \
+    modules/java/proxies/java-logmsg-proxy.c \
+    modules/java/proxies/java-logmsg-proxy.h \
+    modules/java/proxies/java-template-proxy.c \
+    modules/java/proxies/java-template-proxy.h \
     modules/java/java-class-loader.c \
     modules/java/java-class-loader.h \
     modules/java/java-syslog-ng-class.c \
@@ -41,18 +43,21 @@ clean-local: clean-java-if
 $(top_builddir)/modules/java/SyslogNgDestination.h: $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class
 	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/SyslogNgDestination.h  org.syslog_ng.SyslogNgDestination
 	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/LogMessage.h  org.syslog_ng.LogMessage
+	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/LogTemplate.h  org.syslog_ng.LogTemplate
 
 
 $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class:
 	$(JAVAC) -d $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgClassLoader.java
 	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgDestination.java
 	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/LogMessage.java
+	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/LogTemplate.java
 	jar -cvf $(top_builddir)/modules/java/SyslogNg.jar -C $(top_builddir)/modules/java/ org
 
 clean-java-if:
 	rm -rf $(top_builddir)/modules/java/org
 	rm -rf $(top_builddir)/modules/java/SyslogNgDestination.h
 	rm -rf $(top_builddir)/modules/java/LogMessage.h
+	rm -rf $(top_builddir)/modules/java/LogTemplate.h
 	rm -rf $(top_builddir)/modules/java/SyslogNg.jar
 
 install-exec-local:
@@ -73,13 +78,15 @@ BUILT_SOURCES += \
 
 if ENABLE_JAVA
 BUILT_SOURCES += modules/java/SyslogNgDestination.h \
-                 modules/java/LogMessage.h
+                 modules/java/LogMessage.h \
+                 modules/java/LogTemplate.h
 endif
 
 EXTRA_DIST += \
     modules/java/java-grammar.ym \
     modules/java/SyslogNgClassLoader.java \
     modules/java/SyslogNgDestination.java \
-    modules/java/LogMessage.java
+    modules/java/LogMessage.java \
+    modules/java/LogTemplate.java
 
 .PHONY: modules/java/ mod-java

@@ -11,11 +11,15 @@ public class LogMessage {
     return getValue(handle, name);
   }
 
-  public void dispose() {
-    dispose(handle);
+  public void release() {
+    unref(handle);
     handle = 0;
   }
 
-  private native void dispose(long handle);
+  protected long getHandle() {
+    return handle;
+  }
+
+  private native void unref(long handle);
   private native String getValue(long ptr, String name);
 }

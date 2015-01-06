@@ -32,7 +32,7 @@
 #include "mainloop.h"
 #include "mainloop-io-worker.h"
 #include "java_machine.h"
-#include "java-destination-proxy.h"
+#include "proxies/java-destination-proxy.h"
 
 
 

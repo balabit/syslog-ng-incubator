@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2014 Viktor Juhasz <viktor.juhasz@balabit.com>
+ * Copyright (c) 2010-2015 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2010-2015 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,29 +21,12 @@
  *
  */
 
-package org.syslog_ng;
 
-public abstract class SyslogNgDestination {
-  private long ptr;
+#ifndef JAVA_TEMPLATE_PROXY_H_
+#define JAVA_TEMPLATE_PROXY_H_
 
-  public SyslogNgDestination(long ptr) {
-	this.ptr = ptr;
-  }
+#include "LogTemplate.h"
+#include "template/templates.h"
 
-  public String getOption(String key) {
-     return getOption(ptr, key);
-  }
 
-  public long getConfigHandle() {
-	 return getConfigHandle(ptr);
-  }
-
-  private native String getOption(long ptr, String key);
-  private native long getConfigHandle(long ptr);
-
-  public abstract boolean init();
-  public abstract void deinit();
-
-  public abstract boolean queue(String message);
-  public abstract boolean flush();
-}
+#endif /* JAVA_TEMPLATE_PROXY_H_ */

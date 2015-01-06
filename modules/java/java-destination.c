@@ -60,6 +60,13 @@ JNIEXPORT jstring JNICALL Java_org_syslog_1ng_SyslogNgDestination_getOption(JNIE
     }
 }
 
+JNIEXPORT jlong JNICALL
+Java_org_syslog_1ng_SyslogNgDestination_getConfigHandle(JNIEnv *env, jobject obj, jlong handle)
+{
+  JavaDestDriver *self = (JavaDestDriver *)handle;
+  return (jlong)log_pipe_get_config(&self->super.super.super);
+}
+
 static void
 java_dd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
 {

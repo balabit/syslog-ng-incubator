@@ -208,7 +208,7 @@ java_destination_proxy_init(JavaDestinationProxy *self, JNIEnv *env, void *ptr)
   return TRUE;
 error:
    (*env)->ExceptionDescribe(env);
-   return FALSE; 
+   return FALSE;
 }
 
 void
