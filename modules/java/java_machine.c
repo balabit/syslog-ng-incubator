@@ -38,8 +38,6 @@ struct _JavaVMSingleton
   ClassLoader *loader;
 };
 
-#define CALL_JAVA_FUNCTION(env, function, ...) (*(env))->function(env, __VA_ARGS__)
-
 static JavaVMSingleton *g_jvm_s;
 
 JavaVMSingleton *

@@ -28,7 +28,6 @@
 #include "messages.h"
 #include <string.h>
 
-#define CALL_JAVA_FUNCTION(env, function, ...) (*(env))->function(env, __VA_ARGS__)
 
 typedef struct _JavaDestinationImpl
 {
