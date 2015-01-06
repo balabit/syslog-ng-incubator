@@ -36,7 +36,7 @@ modules/java modules/java/ mod-java: modules/java/libmod-java.la
 
 clean-local: clean-java-if
 
-$(top_builddir)/modules/java/SyslogNg.h: $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class
+$(top_builddir)/modules/java/SyslogNgDestination.h: $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class
 	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/SyslogNgDestination.h  org.syslog_ng.SyslogNgDestination
 
 
@@ -47,7 +47,7 @@ $(top_builddir)/modules/java/org/syslog_ng/SyslogNgDestination.class:
 
 clean-java-if:
 	rm -rf $(top_builddir)/modules/java/org
-	rm -rf $(top_builddir)/modules/java/SyslogNg.h
+	rm -rf $(top_builddir)/modules/java/SyslogNgDestination.h
 	rm -rf $(top_builddir)/modules/java/SyslogNg.jar
 
 install-exec-local:
@@ -67,13 +67,12 @@ BUILT_SOURCES += \
     modules/java/java-grammar.h
 
 if ENABLE_JAVA
-BUILT_SOURCES += modules/java/SyslogNg.h
+BUILT_SOURCES += modules/java/SyslogNgDestination.h
 endif
 
 EXTRA_DIST += \
     modules/java/java-grammar.ym \
     modules/java/SyslogNgClassLoader.java \
-    modules/java/SyslogNg.java \
     modules/java/SyslogNgDestination.java
 
 .PHONY: modules/java/ mod-java
