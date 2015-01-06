@@ -110,7 +110,7 @@ java_dd_init(LogPipe *s)
   if (!java_machine_start(self->java_machine, &self->java_env))
     return FALSE;
 
-  self->proxy = java_destination_proxy_new(self->class_name, self->class_path->str, self);
+  self->proxy = java_destination_proxy_new(self->class_name, self->class_path->str, self, self->template);
   if (!self->proxy)
     return FALSE;
   self->log_queue = log_dest_driver_acquire_queue(&self->super, "testjava");
@@ -143,8 +143,7 @@ java_dd_stop_watches(JavaDestDriver *self)
 gboolean
 java_dd_send_to_object(JavaDestDriver *self, LogMessage *msg, JNIEnv *env)
 {
-  log_template_format(self->template, msg, NULL, LTZ_LOCAL, 0, NULL, self->formatted_message);
-  return java_destination_proxy_queue(self->proxy, env, self->formatted_message);
+  return java_destination_proxy_queue(self->proxy, env, msg);
 }
 
 void

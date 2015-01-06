@@ -23,6 +23,7 @@
 
 
 #include "java-destination-proxy.h"
+#include "java-logmsg-proxy.h"
 #include "java-class-loader.h"
 #include "java-syslog-ng-class.h"
 #include "messages.h"
@@ -36,6 +37,7 @@ typedef struct _JavaDestinationImpl
   jmethodID mi_init;
   jmethodID mi_deinit;
   jmethodID mi_queue;
+  jmethodID mi_queue_msg;
   jmethodID mi_flush;
 } JavaDestinationImpl;
 
@@ -44,6 +46,8 @@ struct _JavaDestinationProxy
   JavaVMSingleton *java_machine;
   jclass loaded_class;
   JavaDestinationImpl dest_impl;
+  LogTemplate *template;
+  GString *formatted_message;
 };
 
 
@@ -91,6 +95,8 @@ __load_destination_object(JavaDestinationProxy *self, const gchar *class_name, c
       return FALSE;
   }
 
+  self->dest_impl.mi_queue_msg = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "queue", "(Lorg/syslog_ng/LogMessage;)Z");
+
   self->dest_impl.mi_flush = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "flush", "()Z");
   if (!self->dest_impl.mi_flush)
     {
@@ -127,15 +133,19 @@ java_destination_proxy_free(JavaDestinationProxy *self)
       CALL_JAVA_FUNCTION(env, DeleteLocalRef, self->loaded_class);
     }
   java_machine_unref(self->java_machine);
+  g_string_free(self->formatted_message, TRUE);
+  log_template_unref(self->template);
   g_free(self);
 }
 
 JavaDestinationProxy *
-java_destination_proxy_new(const gchar *class_name, const gchar *class_path, gpointer impl)
+java_destination_proxy_new(const gchar *class_name, const gchar *class_path, gpointer impl, LogTemplate *template)
 {
   JavaDestinationProxy *self = g_new0(JavaDestinationProxy, 1);
   self->java_machine = java_machine_ref();
-  
+  self->formatted_message = g_string_sized_new(1024);
+  self->template = log_template_ref(template);
+
   if (!__load_destination_object(self, class_name, class_path, impl))
     {
       goto error;
@@ -147,13 +157,42 @@ error:
   return NULL;
 }
 
-gboolean
-java_destination_proxy_queue(JavaDestinationProxy *self, JNIEnv *env, GString *formatted_message)
+static gboolean
+__queue_native_message(JavaDestinationProxy *self, JNIEnv *env, LogMessage *msg)
 {
-  jstring message = CALL_JAVA_FUNCTION(env, NewStringUTF, formatted_message->str);
+  JavaLogMessageProxy *jmsg = java_log_message_proxy_new(msg);
+  if (!jmsg)
+    {
+      return FALSE;
+    }
+  jobject obj = java_log_message_proxy_get_java_object(jmsg);
+  jboolean res = CALL_JAVA_FUNCTION(env,
+                                    CallBooleanMethod,
+                                    self->dest_impl.dest_object,
+                                    self->dest_impl.mi_queue_msg,
+                                    java_log_message_proxy_get_java_object(jmsg));
+  java_log_message_proxy_free(jmsg);
+  return !!(res);
+}
+
+static gboolean
+__queue_formatted_message(JavaDestinationProxy *self, JNIEnv *env, LogMessage *msg)
+{
+  log_template_format(self->template, msg, NULL, LTZ_LOCAL, 0, NULL, self->formatted_message);
+  jstring message = CALL_JAVA_FUNCTION(env, NewStringUTF, self->formatted_message->str);
   jboolean res = CALL_JAVA_FUNCTION(env, CallBooleanMethod, self->dest_impl.dest_object, self->dest_impl.mi_queue, message);
   CALL_JAVA_FUNCTION(env, DeleteLocalRef, message);
   return !!(res);
+}
+
+gboolean
+java_destination_proxy_queue(JavaDestinationProxy *self, JNIEnv *env, LogMessage *msg)
+{
+  if (self->dest_impl.mi_queue_msg != 0)
+    {
+      return __queue_native_message(self, env, msg);
+    }
+  return __queue_formatted_message(self, env, msg);
 }
 
 gboolean

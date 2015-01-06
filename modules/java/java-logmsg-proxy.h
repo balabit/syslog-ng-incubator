@@ -33,4 +33,6 @@ typedef struct _JavaLogMessageProxy JavaLogMessageProxy;
 JavaLogMessageProxy *java_log_message_proxy_new(LogMessage *msg);
 void java_log_message_proxy_free(JavaLogMessageProxy *self);
 
+jobject java_log_message_proxy_get_java_object(JavaLogMessageProxy *self);
+
 #endif /* JAVA_LOGMSG_PROXY_H_ */

@@ -23,8 +23,10 @@
 
 #include "java-logmsg-proxy.h"
 #include "java_machine.h"
+#include "messages.h"
 
-#define LOG_MESSAGE "LogMessage"
+
+#define LOG_MESSAGE "org.syslog_ng.LogMessage"
 
 typedef struct _JavaLogMessageImpl
 {
@@ -102,6 +104,12 @@ __load_object(JavaLogMessageProxy *self, gpointer impl)
       return FALSE;
     }
   return TRUE;
+}
+
+jobject
+java_log_message_proxy_get_java_object(JavaLogMessageProxy *self)
+{
+  return self->msg.msg_object;
 }
 
 void
