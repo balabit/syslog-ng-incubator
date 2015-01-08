@@ -85,7 +85,7 @@ typedef struct
 } KafkaDriver;
 
 void
-kafka_log(rd_kafka_t *rkt, int level,
+kafka_log(const rd_kafka_t *rkt, int level,
           const char *fac, const char *msg)
 {
   msg_event_suppress_recursions_and_send(
