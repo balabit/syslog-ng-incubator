@@ -25,7 +25,6 @@
 #include "java-destination-proxy.h"
 #include "java-logmsg-proxy.h"
 #include "java-class-loader.h"
-#include "java-syslog-ng-class.h"
 #include "messages.h"
 #include <string.h>
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2010-2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2010-2014 Viktor Juhasz <viktor.juhasz@balabit.com>
+ * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2014 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,23 +21,12 @@
  *
  */
 
+package org.syslog_ng;
 
-#ifndef JAVA_SYSLOG_NG_CLASS_H_
-#define JAVA_SYSLOG_NG_CLASS_H_
+public abstract class StructuredLogDestination extends LogDestination {
+	public StructuredLogDestination(long handle) {
+		super(handle);
+	}
 
-#include <jni.h>
-#include <syslog-ng.h>
-#include "java_machine.h"
-
-
-typedef struct _SyslogNgClass {
-  JavaVMSingleton *java_machine;
-  jclass syslogng_class;
-  jobject syslogng_object;
-  jmethodID syslogng_constructor_id;
-} SyslogNgClass;
-
-SyslogNgClass *syslog_ng_class_new(gpointer ptr);
-void syslog_ng_class_free(SyslogNgClass *self);
-
-#endif /* JAVA_SYSLOG_NG_CLASS_H_ */
+	public abstract boolean queue(LogMessage msg);
+}

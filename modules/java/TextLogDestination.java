@@ -23,27 +23,10 @@
 
 package org.syslog_ng;
 
-public abstract class SyslogNgDestination {
-  private long ptr;
+public abstract class TextLogDestination extends LogDestination {
+	public TextLogDestination(long handle) {
+		super(handle);
+	}
 
-  public SyslogNgDestination(long ptr) {
-	this.ptr = ptr;
-  }
-
-  public String getOption(String key) {
-     return getOption(ptr, key);
-  }
-
-  public long getConfigHandle() {
-	 return getConfigHandle(ptr);
-  }
-
-  private native String getOption(long ptr, String key);
-  private native long getConfigHandle(long ptr);
-
-  public abstract boolean init();
-  public abstract void deinit();
-
-  public abstract boolean queue(String message);
-  public abstract boolean flush();
+	public abstract boolean queue(String formattedMessage);
 }

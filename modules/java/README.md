@@ -11,7 +11,7 @@ Example implementation of a dummy destination
 ```
 import org.syslog_ng.*;
 
-public class TestClass extends SyslogNgDestination {
+public class TestClass extends TextLogDestination {
 
   public TestClass(long arg0) {
     super(arg0);
@@ -108,8 +108,8 @@ destination d_local {
 };
 
 log {
-        source(s_network);
-        destination(d_local);
+  source(s_network);
+  destination(d_local);
   flags(flow-control);
 };
 
