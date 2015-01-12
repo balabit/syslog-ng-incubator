@@ -42,7 +42,7 @@ typedef struct _JavaDestinationImpl
   jmethodID mi_flush;
 } JavaDestinationImpl;
 
-typedef struct _JavaDestinationProxy
+struct _JavaDestinationProxy
 {
   jclass loaded_class;
   JavaDestinationImpl dest_impl;
@@ -56,7 +56,7 @@ typedef struct _JavaDestinationProxy
   jmethodID loader_constructor;
   jmethodID mi_loadclass;
 
-} JavaDestinationProxy;
+};
 
 
 static gboolean
