@@ -53,6 +53,7 @@ $(top_builddir)/modules/java/org/syslog_ng/LogDestination.class:
 	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/LogDestination.java
 	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/TextLogDestination.java
 	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/StructuredLogDestination.java
+	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/DummyTextDestination.java
 	jar -cvf $(top_builddir)/modules/java/SyslogNg.jar -C $(top_builddir)/modules/java/ org
 
 clean-java-if:
@@ -91,6 +92,7 @@ EXTRA_DIST += \
     modules/java/TextLogDestination.java \
     modules/java/StructuredLogDestination.java \
     modules/java/LogMessage.java \
-    modules/java/LogTemplate.java
+    modules/java/LogTemplate.java \
+    modules/java/DummyTextDestination.java
 
 .PHONY: modules/java/ mod-java
