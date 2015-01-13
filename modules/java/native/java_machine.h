@@ -21,43 +21,25 @@
  *
  */
 
-#ifndef MODJAVA_H_INCLUDED
-#define MODJAVA_H_INCLUDED
+#ifndef JAVA_MACHINE_H
+#define JAVA_MACHINE_H 1
 
 #include <jni.h>
-#include <iv.h>
-#include <iv_event.h>
-#include "driver.h"
-#include "logqueue.h"
-#include "mainloop.h"
-#include "mainloop-io-worker.h"
-#include "java_machine.h"
-#include "java-destination-proxy.h"
+#include <glib.h>
+#include "java-class-loader.h"
 
+#define CALL_JAVA_FUNCTION(env, function, ...) (*(env))->function(env, __VA_ARGS__)
 
+typedef struct _JavaVMSingleton JavaVMSingleton;
 
-typedef struct
-{
-  LogDestDriver super;
-  JavaVMSingleton *java_machine;
-  JNIEnv *java_env;
-  JavaDestinationProxy *proxy;
-  GString *class_path;
-  gchar *class_name;
-  LogQueue *log_queue;
-  LogTemplate *template;
-  gchar *template_string;
-  gboolean threaded;
-  GString *formatted_message;
-  MainLoopIOWorkerJob io_job;
-  struct iv_event wake_up_event;
-  GHashTable *options;
-} JavaDestDriver;
+JavaVMSingleton *java_machine_ref();
+void java_machine_unref(JavaVMSingleton *self);
+gboolean java_machine_start(JavaVMSingleton* self, JNIEnv **env);
 
-LogDriver *java_dd_new(GlobalConfig *cfg);
-void java_dd_set_class_path(LogDriver *s, const gchar *class_path);
-void java_dd_set_class_name(LogDriver *s, const gchar *class_name);
-void java_dd_set_template_string(LogDriver *s, const gchar *template_string);
-void java_dd_set_option(LogDriver *s, const gchar *key, const gchar *value);
+void java_machine_detach_thread(JavaVMSingleton* self);
+
+JNIEnv *java_machine_get_env(JavaVMSingleton *self, JNIEnv **penv);
+
+jclass java_machine_load_class(JavaVMSingleton *self, const gchar *class_name, const gchar *class_path);
 
 #endif

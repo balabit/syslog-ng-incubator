@@ -20,14 +20,37 @@
  * COPYING for details.
  *
  */
-
 package org.syslog_ng;
 
-public interface SyslogNgDestination {
+public class DummyTextDestination extends TextLogDestination {
 
-  public boolean init(SyslogNg proxy);
-  public void deinit();
+	private String name;
 
-  public boolean queue(String message);
-  public boolean flush();
+	public DummyTextDestination(long arg0) {
+		super(arg0);
+	}
+
+	public void deinit() {
+		System.out.println("Deinit");
+	}
+
+	public boolean flush() {
+		System.out.println("Flush");
+		return true;
+	}
+
+	public boolean init() {
+		name = getOption("name");
+		if (name == null) {
+			System.err.println("Name is a required option for this destination");
+			return false;
+		}
+		System.out.println("Init " + name);
+		return true;
+	}
+
+	public boolean queue(String arg0) {
+		System.out.println("Incoming message: " + arg0);
+		return true;
+	}
 }

@@ -21,21 +21,24 @@
  *
  */
 
-#ifndef JAVA_DESTINATION_PROXY_H_
-#define JAVA_DESTINATION_PROXY_H_
+
+#ifndef JAVA_CLASS_LOADER_H_
+#define JAVA_CLASS_LOADER_H_
 
 #include <jni.h>
 #include <syslog-ng.h>
 
-typedef struct _JavaDestinationProxy JavaDestinationProxy;
+typedef struct _ClassLoader {
+  jclass syslogng_class_loader;
+  jobject loader_object;
+  jmethodID loader_constructor;
+  jmethodID mi_loadclass;
+} ClassLoader;
 
-JavaDestinationProxy *java_destination_proxy_new(JNIEnv *java_env, const gchar *class_name, const gchar *class_path);
 
-gboolean java_destination_proxy_init(JavaDestinationProxy *self, JNIEnv *env, void *ptr);
-void java_destination_proxy_deinit(JavaDestinationProxy *self, JNIEnv *env);
-gboolean java_destination_proxy_flush(JavaDestinationProxy *self, JNIEnv *env);
-gboolean java_destination_proxy_queue(JavaDestinationProxy *self, JNIEnv *env, GString *formatted_message);
+ClassLoader *class_loader_new(JNIEnv *java_env);
+void class_loader_free(ClassLoader *self, JNIEnv *java_env);
+jclass class_loader_load_class(ClassLoader *self, JNIEnv *java_env, const gchar *class_name, const gchar *class_path);
 
-void java_destination_proxy_free(JavaDestinationProxy *self, JNIEnv *env);
 
-#endif /* JAVA_DESTINATION_PROXY_H_ */
+#endif /* JAVA_CLASS_LOADER_H_ */

@@ -21,19 +21,30 @@
  *
  */
 
-#ifndef JAVA_MACHINE_H
-#define JAVA_MACHINE_H 1
+package org.syslog_ng;
 
-#include <jni.h>
-#include <glib.h>
+public abstract class LogPipe {
+  private long pipeHandle;
+  private long configHandle;
 
-typedef struct _JavaVMSingleton JavaVMSingleton;
+  public LogPipe(long pipeHandle) {
+    this.pipeHandle = pipeHandle;
+    configHandle = 0;
+  }
 
-JavaVMSingleton *java_machine_ref();
-void java_machine_unref(JavaVMSingleton *self);
-gboolean java_machine_start(JavaVMSingleton* self, JNIEnv **env);
+  public String getOption(String key) {
+    return getOption(pipeHandle, key);
+  }
 
-void java_machine_attach_thread(JavaVMSingleton* self, JNIEnv **penv);
-void java_machine_detach_thread(JavaVMSingleton* self);
+  public long getConfigHandle() {
+    if (configHandle != 0) {
+      return configHandle;
+    }
+    else {
+      return getConfigHandle(pipeHandle);
+    }
+  }
 
-#endif
+  private native String getOption(long ptr, String key);
+  private native long getConfigHandle(long ptr);
+}

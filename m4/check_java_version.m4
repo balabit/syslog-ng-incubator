@@ -5,9 +5,11 @@ AC_DEFUN([AX_CHECK_JAVA_VERSION],
   JAVA_VERSION=[$1]
   JAVAC_BIN=`which javac`
   JAVAH_BIN=`which javah`
+  JAR_BIN=`which jar`
   if test "x$JAVAC_BIN" != "x"; then
     JAVAC_BIN=`readlink -f $JAVAC_BIN`
     JAVAH_BIN=`readlink -f $JAVAH_BIN`
+    JAR_BIN=`readlink -f $JAR_BIN`
     JAVAC_VERSION=`$JAVAC_BIN -version 2>&1 | sed "s/.*\ \(.*\)/\1/"`
     SHORT_VERSION=${JAVAC_VERSION%.*}
     MAJOR_VERSION=${SHORT_VERSION%.*}
@@ -38,6 +40,7 @@ AC_DEFUN([AX_CHECK_JAVA_VERSION],
     AC_SUBST(JNI_LIBS, "$JNI_LIBS")
     AC_SUBST(JAVAC, "$JAVAC_BIN")
     AC_SUBST(JAVAH, "$JAVAH_BIN")
+    AC_SUBST(JAR, "$JAR_BIN")
     $2
     AC_MSG_RESULT([$SHORT_VERSION])
   else
