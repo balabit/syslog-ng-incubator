@@ -23,12 +23,28 @@
 
 package org.syslog_ng;
 
-public abstract class LogDestination extends LogPipe {
-  public LogDestination(long pipeHandle) {
-	  super(pipeHandle);
+public abstract class LogPipe {
+  private long pipeHandle;
+  private long configHandle;
+
+  public LogPipe(long pipeHandle) {
+    this.pipeHandle = pipeHandle;
+    configHandle = 0;
   }
 
-  public boolean flush() {
-	  return true;
+  public String getOption(String key) {
+    return getOption(pipeHandle, key);
   }
+
+  public long getConfigHandle() {
+    if (configHandle != 0) {
+      return configHandle;
+    }
+    else {
+      return getConfigHandle(pipeHandle);
+    }
+  }
+
+  private native String getOption(long ptr, String key);
+  private native long getConfigHandle(long ptr);
 }
