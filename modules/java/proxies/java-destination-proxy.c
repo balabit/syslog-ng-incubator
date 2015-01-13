@@ -87,14 +87,15 @@ __load_destination_object(JavaDestinationProxy *self, const gchar *class_name, c
   }
 
   self->dest_impl.mi_queue = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "queue", "(Ljava/lang/String;)Z");
-  if (!self->dest_impl.mi_queue) {
-      msg_error("Can't find method in class",
-                evt_tag_str("class_name", class_name),
-                evt_tag_str("method", "boolean queue(String)"), NULL);
-      return FALSE;
-  }
-
   self->dest_impl.mi_queue_msg = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "queue", "(Lorg/syslog_ng/LogMessage;)Z");
+
+  if (!self->dest_impl.mi_queue_msg && !self->dest_impl.mi_queue)
+    {
+      msg_error("Can't find any queue method in class",
+                evt_tag_str("class_name", class_name),
+                evt_tag_str("method", "boolean queue(String) or boolean queue(LogMessage)"),
+                NULL);
+    }
 
   self->dest_impl.mi_flush = CALL_JAVA_FUNCTION(java_env, GetMethodID, self->loaded_class, "flush", "()Z");
   if (!self->dest_impl.mi_flush)
@@ -191,7 +192,10 @@ java_destination_proxy_queue(JavaDestinationProxy *self, JNIEnv *env, LogMessage
     {
       return __queue_native_message(self, env, msg);
     }
-  return __queue_formatted_message(self, env, msg);
+  else
+    {
+      return __queue_formatted_message(self, env, msg);
+    }
 }
 
 gboolean
