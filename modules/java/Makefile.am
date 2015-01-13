@@ -36,36 +36,51 @@ modules_java_libmod_java_la_LDFLAGS = \
 modules_java_libmod_java_la_DEPENDENCIES  = \
         $(MODULE_DEPS_LIBS)
 
+JAVA_PKG_NAME = org.syslog_ng
+
+JAVA_CLASS_DIR = org/syslog_ng
+
+JAVA_CLASS_PATH = $(top_builddir)/modules/java/$(JAVA_CLASS_DIR)
+JAVA_SRC_DIR = $(top_srcdir)/modules/java
+
+JAVA_CLASS_FILES = \
+    $(JAVA_CLASS_PATH)/SyslogNgClassLoader.class \
+    $(JAVA_CLASS_PATH)/LogMessage.class \
+    $(JAVA_CLASS_PATH)/LogTemplate.class \
+    $(JAVA_CLASS_PATH)/LogDestination.class \
+    $(JAVA_CLASS_PATH)/TextLogDestination.class \
+    $(JAVA_CLASS_PATH)/StructuredLogDestination.class \
+    $(JAVA_CLASS_PATH)/DummyTextDestination.class
+
+JAVA_FILES = \
+    $(JAVA_SRC_DIR)/SyslogNgClassLoader.java \
+    $(JAVA_SRC_DIR)/LogMessage.java \
+    $(JAVA_SRC_DIR)/LogTemplate.java \
+    $(JAVA_SRC_DIR)/LogDestination.java \
+    $(JAVA_SRC_DIR)/TextLogDestination.java \
+    $(JAVA_SRC_DIR)/StructuredLogDestination.java \
+    $(JAVA_SRC_DIR)/DummyTextDestination.java
+
+JAVA_HEADER_FILES = \
+   $(top_builddir)/modules/java/LogDestination.h \
+   $(top_builddir)/modules/java/LogMessage.h \
+   $(top_builddir)/modules/java/LogTemplate.h
+
+
 modules/java modules/java/ mod-java: modules/java/libmod-java.la
 
-clean-local: clean-java-if
+modules/java/SyslogNg.jar: $(JAVA_CLASS_FILES) $(JAVA_HEADER_FILES)
+	$(AM_V_GEN) $(JAR) -cvf $@ -C $(top_builddir)/modules/java/ org
 
-$(top_builddir)/modules/java/LogDestination.h: $(top_builddir)/modules/java/org/syslog_ng/LogDestination.class
-	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/LogDestination.h  org.syslog_ng.LogDestination
-	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/LogMessage.h  org.syslog_ng.LogMessage
-	$(JAVAH) -cp $(top_builddir)/modules/java -o $(top_builddir)/modules/java/LogTemplate.h  org.syslog_ng.LogTemplate
+$(top_builddir)/modules/java/%.h: $(JAVA_CLASS_FILES)
+	$(AM_V_GEN) $(JAVAH) -cp $(top_builddir)/modules/java -o $@ $(JAVA_PKG_NAME).$(notdir $(basename $@))
 
-
-$(top_builddir)/modules/java/org/syslog_ng/LogDestination.class:
-	$(JAVAC) -d $(top_builddir)/modules/java $(top_srcdir)/modules/java/SyslogNgClassLoader.java
-	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/LogMessage.java
-	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/LogTemplate.java
-	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/LogDestination.java
-	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/TextLogDestination.java
-	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/StructuredLogDestination.java
-	$(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $(top_srcdir)/modules/java/DummyTextDestination.java
-	jar -cvf $(top_builddir)/modules/java/SyslogNg.jar -C $(top_builddir)/modules/java/ org
-
-clean-java-if:
-	rm -rf $(top_builddir)/modules/java/org
-	rm -rf $(top_builddir)/modules/java/LogDestination.h
-	rm -rf $(top_builddir)/modules/java/LogMessage.h
-	rm -rf $(top_builddir)/modules/java/LogTemplate.h
-	rm -rf $(top_builddir)/modules/java/SyslogNg.jar
+$(JAVA_CLASS_PATH)/%.class: $(top_srcdir)/modules/java/%.java $(JAVA_FILES)
+	$(AM_V_GEN) $(JAVAC) -d $(top_builddir)/modules/java -cp $(top_builddir)/modules/java $<
 
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(moduledir)
-	cp $(top_builddir)/modules/java/SyslogNg.jar $(DESTDIR)$(moduledir)/
+	cp modules/java/SyslogNg.jar $(DESTDIR)$(moduledir)/
 
 uninstall-local:
 	rm -rf $(DESTDIR)$(moduledir)/SyslogNg.jar
@@ -80,19 +95,16 @@ BUILT_SOURCES += \
     modules/java/native/java-grammar.h
 
 if ENABLE_JAVA
-BUILT_SOURCES += modules/java/LogDestination.h \
-                 modules/java/LogMessage.h \
-                 modules/java/LogTemplate.h
+BUILT_SOURCES += $(JAVA_HEADER_FILES) \
+                 modules/java/SyslogNg.jar
+
+CLEANFILES = $(JAVA_CLASS_FILES) \
+             $(JAVA_HEADER_FILES) \
+             modules/java/SyslogNg.jar
 endif
 
 EXTRA_DIST += \
     modules/java/native/java-grammar.ym \
-    modules/java/SyslogNgClassLoader.java \
-    modules/java/LogDestination.java \
-    modules/java/TextLogDestination.java \
-    modules/java/StructuredLogDestination.java \
-    modules/java/LogMessage.java \
-    modules/java/LogTemplate.java \
-    modules/java/DummyTextDestination.java
+    $(JAVA_FILES)
 
 .PHONY: modules/java/ mod-java

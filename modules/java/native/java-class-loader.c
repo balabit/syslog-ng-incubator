@@ -24,6 +24,7 @@
 
 #include "java-class-loader.h"
 #include "java_machine.h"
+#include "messages.h"
 
 #define SYSLOG_NG_CLASS_LOADER  "org/syslog_ng/SyslogNgClassLoader"
 #define SYSLOG_NG_JAR           "SyslogNg.jar"

@@ -13,9 +13,8 @@ source s_tcp{
 
 destination d_java{
   java(
-    class_name("TestClass")
-    class_path("/tmp")
-    option("key", "value")
+    class_name("org.syslog_ng.TextDummyDestination")
+    option("name", "d_java")
   );
 };
 
