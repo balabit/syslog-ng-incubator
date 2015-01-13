@@ -74,7 +74,7 @@ modules/java modules/java/ mod-java: modules/java/libmod-java.la
 modules/java/SyslogNg.jar: $(JAVA_CLASS_FILES) $(JAVA_HEADER_FILES)
 	$(AM_V_GEN) $(JAR) -cvf $@ -C $(top_builddir)/modules/java/ org
 
-$(top_builddir)/modules/java/%.h: $(JAVA_CLASS_FILES)
+$(JAVA_HEADER_FILES): $(JAVA_CLASS_FILES)
 	$(AM_V_GEN) $(JAVAH) -cp $(top_builddir)/modules/java -o $@ $(JAVA_PKG_NAME).$(notdir $(basename $@))
 
 $(JAVA_CLASS_PATH)/%.class: $(top_srcdir)/modules/java/%.java $(JAVA_FILES)
