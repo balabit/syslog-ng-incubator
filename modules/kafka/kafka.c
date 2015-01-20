@@ -60,6 +60,9 @@
 
 GList *last_property = NULL;
 
+#define KAFKA_FLAG_NONE 0
+#define KAFKA_FLAG_SYNC 0x0001
+
 typedef struct
 {
   LogThrDestDriver super;
@@ -74,6 +77,7 @@ typedef struct
   GString *payload_str;
   LogTemplate *payload;
 
+  gint32 flags;
   gint32 seq_num;
   rd_kafka_topic_t *topic;
   rd_kafka_t *kafka;
@@ -162,7 +166,14 @@ kafka_dd_set_props(LogDriver *d, GList *props)
 #ifdef HAVE_LIBRDKAFKA_LOG_CB
   rd_kafka_conf_set_log_cb(conf, kafka_log);
 #endif
-  rd_kafka_conf_set_dr_cb(conf, kafka_worker_sync_produce_dr_cb);
+  if (self->flags & KAFKA_FLAG_SYNC)
+    {
+      msg_info("synchronous insertion into kafka, "
+               "lower the value of queue.buffering.max.ms to increase performance",
+               evt_tag_str("driver", self->super.super.super.id),
+               NULL);
+      rd_kafka_conf_set_dr_cb(conf, kafka_worker_sync_produce_dr_cb);
+    }
 
   self->kafka = rd_kafka_new(RD_KAFKA_PRODUCER, conf,
                              errbuf, sizeof(errbuf));
@@ -190,6 +201,18 @@ kafka_dd_set_partition_field(LogDriver *d, LogTemplate *field)
   self->partition_type = PARTITION_FIELD;
   log_template_unref(self->field);
   self->field = log_template_ref(field);
+}
+
+void
+kafka_dd_set_flag_sync(LogDriver *d)
+{
+  KafkaDriver *self = (KafkaDriver *)d;
+  if (self->kafka != NULL)
+    {
+      msg_error("kafka flags must be set before kafka properties", NULL);
+      return;
+    }
+  self->flags |= KAFKA_FLAG_SYNC;
 }
 
 void
@@ -348,25 +371,28 @@ kafka_worker_insert(LogThrDestDriver *s, LogMessage *msg)
             NULL);
 
   /* Wait for completion. */
-  while (err == KAFKA_INITIAL_ERROR_CODE)
+  if (self->flags & KAFKA_FLAG_SYNC)
     {
-      rd_kafka_poll(self->kafka, 5000);
-      if (err == -12345)
+      while (err == KAFKA_INITIAL_ERROR_CODE)
         {
-          msg_debug("Kafka producer is freezed",
+          rd_kafka_poll(self->kafka, 5000);
+          if (err == KAFKA_INITIAL_ERROR_CODE)
+            {
+              msg_debug("Kafka producer is freezed",
+                        evt_tag_str("driver", self->super.super.super.id),
+                        evt_tag_str("topic", self->topic_name),
+                        NULL);
+            }
+        }
+      if (err != RD_KAFKA_RESP_ERR_NO_ERROR)
+        {
+          msg_error("Failed to add message to Kafka topic!",
                     evt_tag_str("driver", self->super.super.super.id),
                     evt_tag_str("topic", self->topic_name),
+                    evt_tag_str("error", rd_kafka_err2str(err)),
                     NULL);
+          return WORKER_INSERT_RESULT_ERROR;
         }
-    }
-  if (err != RD_KAFKA_RESP_ERR_NO_ERROR)
-    {
-      msg_error("Failed to add message to Kafka topic!",
-                evt_tag_str("driver", self->super.super.super.id),
-                evt_tag_str("topic", self->topic_name),
-                evt_tag_str("error", rd_kafka_err2str(err)),
-                NULL);
-      return WORKER_INSERT_RESULT_ERROR;
     }
 
   msg_debug("Kafka event sent",
@@ -482,6 +508,8 @@ kafka_dd_new(GlobalConfig *cfg)
   self->super.format.stats_instance = kafka_dd_format_stats_instance;
   self->super.format.persist_name = kafka_dd_format_persist_name;
   self->super.stats_source = SCS_KAFKA;
+
+  self->flags = KAFKA_FLAG_NONE;
 
   init_sequence_number(&self->seq_num);
   log_template_options_defaults(&self->template_options);

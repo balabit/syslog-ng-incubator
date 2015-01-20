@@ -51,6 +51,8 @@ extern GList *last_property;
 %token KW_PARTITION
 %token KW_RANDOM
 %token KW_FIELD
+%token KW_FLAGS
+%token KW_SYNC
 
 %%
 
@@ -88,6 +90,7 @@ kafka_option
             kafka_dd_set_props(last_driver, last_property);
             last_property = NULL;
         }
+        | KW_FLAGS '(' kafka_flags ')'
         | KW_PAYLOAD '(' template_content ')'
         {
             kafka_dd_set_payload(last_driver, $3);
@@ -111,6 +114,18 @@ kafka_property
             last_property = g_list_append(last_property, prop);
             free($1);
             free($3);
+        }
+        ;
+
+kafka_flags
+        : kafka_flag kafka_flags
+        |
+        ;
+
+kafka_flag
+        : KW_SYNC
+        {
+            kafka_dd_set_flag_sync(last_driver);
         }
         ;
 
