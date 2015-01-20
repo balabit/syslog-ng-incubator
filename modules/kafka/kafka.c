@@ -122,6 +122,17 @@ int32_t kafka_partition(const rd_kafka_topic_t *rkt,
   return target;
 }
 
+static void
+kafka_worker_sync_produce_dr_cb(rd_kafka_t *rk,
+                                void *payload, size_t len,
+                                rd_kafka_resp_err_t err,
+                                void *opaque, void *msg_opaque)
+{
+  /* When done, just copy error code */
+  rd_kafka_resp_err_t *errp = (rd_kafka_resp_err_t *)msg_opaque;
+  *errp = err;
+}
+
 /*
  * Configuration
  */
@@ -151,6 +162,7 @@ kafka_dd_set_props(LogDriver *d, GList *props)
 #ifdef HAVE_LIBRDKAFKA_LOG_CB
   rd_kafka_conf_set_log_cb(conf, kafka_log);
 #endif
+  rd_kafka_conf_set_dr_cb(conf, kafka_worker_sync_produce_dr_cb);
 
   self->kafka = rd_kafka_new(RD_KAFKA_PRODUCER, conf,
                              errbuf, sizeof(errbuf));
@@ -191,7 +203,7 @@ kafka_dd_set_topic(LogDriver *d, const gchar *topic, GList *props)
 
   if (self->kafka == NULL)
     {
-      msg_error("kafka topic must set after kafka properties.", NULL);
+      msg_error("kafka topic must be set after kafka properties", NULL);
       return;
     }
 
@@ -313,34 +325,57 @@ kafka_worker_insert(LogThrDestDriver *s, LogMessage *msg)
       key = 0;
     }
 
-  rd_kafka_produce(self->topic,
-                   RD_KAFKA_PARTITION_UA,
-                   RD_KAFKA_MSG_F_COPY,
-                   self->payload_str->str,
-                   self->payload_str->len,
-                   &key, sizeof(key),
-                   NULL);
-  msg_debug("Kafka produce done", 
+#define KAFKA_INITIAL_ERROR_CODE -12345
+  rd_kafka_resp_err_t err = KAFKA_INITIAL_ERROR_CODE;
+  if (rd_kafka_produce(self->topic,
+                       RD_KAFKA_PARTITION_UA,
+                       RD_KAFKA_MSG_F_COPY,
+                       self->payload_str->str,
+                       self->payload_str->len,
+                       &key, sizeof(key),
+                       &err) == -1)
+    {
+      msg_error("Failed to add message to Kafka topic!",
+                evt_tag_str("driver", self->super.super.super.id),
+                evt_tag_str("topic", self->topic_name),
+                evt_tag_str("error", rd_kafka_err2str(rd_kafka_errno2err(errno))),
+                NULL);
+      return WORKER_INSERT_RESULT_ERROR;
+    }
+
+  msg_debug("Kafka produce done",
             evt_tag_str("driver", self->super.super.super.id),
             NULL);
 
-  rd_kafka_poll(self->kafka, 0);
+  /* Wait for completion. */
+  while (err == KAFKA_INITIAL_ERROR_CODE)
+    {
+      rd_kafka_poll(self->kafka, 5000);
+      if (err == -12345)
+        {
+          msg_debug("Kafka producer is freezed",
+                    evt_tag_str("driver", self->super.super.super.id),
+                    evt_tag_str("topic", self->topic_name),
+                    NULL);
+        }
+    }
+  if (err != RD_KAFKA_RESP_ERR_NO_ERROR)
+    {
+      msg_error("Failed to add message to Kafka topic!",
+                evt_tag_str("driver", self->super.super.super.id),
+                evt_tag_str("topic", self->topic_name),
+                evt_tag_str("error", rd_kafka_err2str(err)),
+                NULL);
+      return WORKER_INSERT_RESULT_ERROR;
+    }
 
   msg_debug("Kafka event sent",
             evt_tag_str("driver", self->super.super.super.id),
             evt_tag_str("topic", self->topic_name),
             evt_tag_str("payload", self->payload_str->str),
             NULL);
-  success = TRUE;
 
-  if (success)
-    {
-      return WORKER_INSERT_RESULT_SUCCESS;
-    }
-  else
-    {
-      return WORKER_INSERT_RESULT_DROP;
-    }
+  return WORKER_INSERT_RESULT_SUCCESS;
 }
 
 static void
