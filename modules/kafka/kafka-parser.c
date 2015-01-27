@@ -35,7 +35,8 @@ static CfgLexerKeyword kafka_keywords[] = {
     { "payload",        KW_PAYLOAD },
     { "properties",     KW_PROP },
     { "random",         KW_RANDOM },
-    { "topic",			KW_TOPIC },
+    { "topic",          KW_TOPIC },
+    { "sync",           KW_SYNC },
     { NULL }
 };
 

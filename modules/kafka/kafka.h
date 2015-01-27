@@ -32,6 +32,7 @@ void kafka_dd_set_partition_random(LogDriver *d);
 void kafka_dd_set_props(LogDriver *d, GList *props);
 void kafka_dd_set_topic(LogDriver *d, const gchar *topic, GList *props);
 void kafka_dd_set_payload(LogDriver *d, LogTemplate *payload);
+void kafka_dd_set_flag_sync(LogDriver *d);
 LogTemplateOptions *kafka_dd_get_template_options(LogDriver *d);
 void kafka_property_free(void *p);
 
