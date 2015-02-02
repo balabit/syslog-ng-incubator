@@ -17,6 +17,9 @@ modules_kafka_libkafka_la_SOURCES	=	\
 modules_kafka_libkafka_la_LIBADD	=	\
 	$(RDKAFKA_LIBS) $(INCUBATOR_LIBS)
 
+modules_kafka_libkafka_la_LDFLAGS	=	\
+	-avoid-version -module -no-undefined
+
 modules/kafka modules/kafka/ mod-kafka: \
 	modules/kafka/libkafka.la
 else
