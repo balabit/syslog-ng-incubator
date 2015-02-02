@@ -1,0 +1,5 @@
+@PACKAGE@ (@VERSION@-0~dev) unstable; urgency=low
+
+  * New upstream version.
+
+ -- BalaBit Development Team <devel@balabit.hu>  @CURRDATE@

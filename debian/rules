@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+#-*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+ifneq (,$(filter debug,$(DEB_BUILD_OPTIONS)))
+EXTRA_CONFIGURE_OPTS += --enable-debug
+endif
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/tmp
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--sysconfdir=/etc/syslog-ng \
+		--mandir=/usr/share/man \
+		--datadir=/usr/share/syslog-ng \
+		--localstatedir=/var/lib/syslog-ng \
+		$(EXTRA_CONFIGURE_OPTS)

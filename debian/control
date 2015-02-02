@@ -1,0 +1,34 @@
+Source: syslog-ng-incubator
+Section: admin
+Priority: extra
+Maintainer: BalaBit Development Team <devel@balabit.hu>
+Build-Depends: debhelper (>= 7.0.50~),
+               libevtlog-dev,
+               libglib2.0-dev (>= 2.4),
+               syslog-ng-dev,
+               pkg-config, flex, bison
+Standards-Version: 3.9.5
+Homepage: https://github.com/balabit/syslog-ng-incubator
+
+Package: syslog-ng-incubator-mods
+Architecture: any
+Multi-Arch: foreign
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Enhanced system logging daemon (incubator modules)
+ syslog-ng is an enhanced log daemon, supporting a wide range of input
+ and output methods: syslog, unstructured text, message queues,
+ databases (SQL and NoSQL alike) and more.
+ .
+ Key features:
+ .
+  * receive and send RFC3164 and RFC5424 style syslog messages
+  * work with any kind of unstructured data
+  * receive and send JSON formatted messages
+  * classify and structure logs with builtin parsers (csv-parser(),
+    db-parser(), etc.)
+  * normalize, crunch and process logs as they flow through the system
+  * hand on messages for further processing using message queues (like
+    AMQP), files or databases (like PostgreSQL or MongoDB).
+ .
+ This package provides modules from the incubator (modules that are
+ not part of the official repository).
