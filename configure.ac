@@ -57,10 +57,6 @@ AC_ARG_ENABLE(luajit,
 AC_ARG_WITH(python,
    [  --with-python=VERSION    Build with a specific version of python],,with_python="auto")
 
-AC_ARG_ENABLE(riemann,
-   [  --disable-riemann	       Disable riemann destination],
-   ,enable_riemann="auto")
-
 AC_ARG_ENABLE(lua,
    [  --disable-lua	       Disable lua based modules (lua-dest, monitoring source)],
    ,enable_lua="auto")
@@ -144,11 +140,6 @@ dnl ***************************************************************************
 dnl libmongo-client headers/libraries
 dnl ***************************************************************************
 INCUBATOR_CHECK_DEP(logmongource,[PKG_CHECK_MODULES(LIBMONGO, libmongo-client >= $LMC_MIN_VERSION,,logmongource_found="no")])
-
-dnl ***************************************************************************
-dnl riemann-client headers/libraries
-dnl ***************************************************************************
-INCUBATOR_CHECK_DEP(riemann,[PKG_CHECK_MODULES(RIEMANN_CLIENT, riemann-client >= $LRC_MIN_VERSION,,riemann_found="no")])
 
 dnl ***************************************************************************
 dnl lua headers/libraries

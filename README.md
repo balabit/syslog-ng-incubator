@@ -108,11 +108,10 @@ Installing the modules and tools follows the usual autotools way:
     $ ./configure && make && make install
 
 Of course, one will need all the dependencies ([syslog-ng][sng],
-bison, flex, [riemann-c-client][lrc], [libmongo-client][lmc],
-[lua][lua], [perl][perl], [python][python], [rdkafka][kafka];
-of which the latter six are optional) installed too.
+bison, flex, [libmongo-client][lmc], [lua][lua], [perl][perl],
+[python][python], [rdkafka][kafka]; of which the latter six are
+optional) installed too.
 
- [lrc]: https://github.com/algernon/riemann-c-client
  [lmc]: https://github.com/algernon/libmongo-client
  [lua]: http://www.lua.org/
  [perl]: http://www.perl.org/
