@@ -14,6 +14,8 @@ dnl ***************************************************************************
 dnl definitions
 
 moduledir='${exec_prefix}/lib/syslog-ng'
+rustmoduledir='${exec_prefix}/lib/syslog-ng/rust-modules'
+rustmoduledepsdir='${exec_prefix}/lib/syslog-ng/rust-modules/deps'
 
 enable_value()
 {
@@ -89,6 +91,10 @@ AC_ARG_ENABLE(zmq,
    ,enable_zmq="auto")
 
 AC_ARG_ENABLE(date, [ --enable-date  Enable date parser (default: yes)],, enable_date="yes")
+
+AC_ARG_ENABLE(rust,
+              [  --enable-rust        Enable Rust bindings (default: auto)]
+              ,,enable_rust="auto")
 
 dnl ***************************************************************************
 dnl Checks for programs.
@@ -246,6 +252,34 @@ dnl ***************************************************************************
 
 INCUBATOR_CHECK_DEP(zmq,[PKG_CHECK_MODULES(ZMQ_CLIENT, libzmq >= $ZMQ_MIN_VERSION, zmq_found="yes", zmq_found="no")])
 
+if test "x$enable_rust" = "xyes" -o "x$enable_rust" = "xauto"; then
+    AC_CHECK_PROG(HAVE_RUSTC, rustc, 1, 0)
+    AC_CHECK_PROG(HAVE_CARGO, rustc, 1, 0)
+    if test ${HAVE_RUSTC} = 0; then
+        AC_MSG_WARN([Was about to enable Rust bindings, which need rustc, which you don't seem to have, disabling Rust bindings])
+        enable_rust=no
+    fi
+    if test ${HAVE_CARGO} = 0; then
+        AC_MSG_WARN([Was about to enable Rust bindings, which need Cargo, which you don't seem to have, disabling Rust bindings])
+        enable_rust=no
+    fi
+
+    if test "x$enable_rust" = "xyes"; then
+
+        rust_cargo_build_dir="target/debug"
+
+        if test "x$enable_debug" = "xno"; then
+            rust_cargo_build_options=" --release"
+            rust_cargo_build_dir="target/release"
+            # TODO: cargo puts the release build in target/release
+            AC_SUBST(rust_cargo_build_options)
+        fi
+
+        AC_SUBST(rust_cargo_build_dir)
+        LIBRUST_MODULES_LIBS="-lrust_modules -L\$(moduledir)/rust-modules/ -L\$(moduledir)/rust-modules/deps "
+        AC_SUBST(LIBRUST_MODULES_LIBS)
+    fi
+fi
 dnl ***************************************************************************
 dnl create common cflags/libs for incubator modules.
 dnl ***************************************************************************
@@ -273,6 +307,8 @@ AC_SUBST(RDKAFKA_LIBS)
 
 AC_SUBST(INCUBATOR_TEST_LDADD)
 AC_SUBST(SYSLOG_NG_LIBDIR)
+AC_SUBST(rustmoduledir)
+AC_SUBST(rustmoduledepsdir)
 
 AC_DEFINE_UNQUOTED(ENABLE_DEBUG, `enable_value $enable_debug`, [Enable debugging])
 
@@ -283,6 +319,7 @@ AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
 AM_CONDITIONAL(ENABLE_DATE, [test "$enable_date" = "yes"])
+AM_CONDITIONAL(ENABLE_RUST, [test "$enable_rust" = "yes"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -304,4 +341,5 @@ echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
 echo "  grok-parser          ${enable_grok}"
 echo "  date-parser          ${enable_date}"
+echo "  Rust bindings        ${enable_rust:=no}"
 echo

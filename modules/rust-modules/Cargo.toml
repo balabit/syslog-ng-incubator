@@ -1,0 +1,19 @@
+[package]
+
+name = "rust_modules"
+version = "0.0.1"
+authors = ["Tibor Benke <ihrwein@gmail.com>"]
+
+[lib]
+
+name = "rust_modules"
+crate-type = ["dylib"]
+
+[dependencies.dummy_filter]
+path = "dummy_filter"
+
+[dependencies.in_list_filter]
+path = "in_list_filter"
+
+[dependencies.syslog_ng_rust]
+path = "syslog_ng_rust"
