@@ -78,6 +78,15 @@ AC_ARG_ENABLE(kafka,
               [ --disable-kafka           Disable Kafka support (default: auto)]
               ,,enable_kafka="auto")
 
+AC_ARG_ENABLE(grok,
+              [ --disable-grok            Disable Grok Parser support (default: auto)]
+              ,,enable_grok="auto")
+
+AC_ARG_WITH(libgrok,
+             AC_HELP_STRING([--with-libgrok=DIR],
+                            [use libgrok library from (prefix) directory DIR])
+                            ,,with_libgrok="null")
+
 AC_ARG_WITH(librdkafka,
              AC_HELP_STRING([--with-librdkafka=DIR],
                             [use librdkafka library from (prefix) directory DIR]),,)
@@ -214,10 +223,16 @@ fi
 dnl ***************************************************************************
 dnl grok headers/libraries
 dnl ***************************************************************************
-
-AC_CHECK_LIB(grok, grok_new, [enable_grok="yes"; GROK_LIBS="-lgrok"], [enable_grok="no"])
-if test  "x$enable_grok" = "xno"; then
-  PKG_CHECK_MODULES(GROK, libgrok, enable_grok="yes", enable_grok="no")
+if test "x$enable_grok" = "xauto" && test "x$with_libgrok" == "xnull"; then
+ AC_CHECK_LIB(grok, grok_new, [enable_grok="yes"; GROK_LIBS="-lgrok"], [enable_grok="no"])
+ if test  "x$enable_grok" = "xno"; then
+   PKG_CHECK_MODULES(GROK, libgrok, enable_grok="yes", enable_grok="no")
+ fi
+fi
+if test "x$with_libgrok" != "xnull"; then
+	GROK_LIBS="-L$with_libgrok"
+	GROK_CFLAGS="-I$with_libgrok"
+	enable_grok="yes"
 fi
 
 dnl ***************************************************************************
