@@ -87,6 +87,9 @@ install-exec-local:
 uninstall-local:
 	rm -rf $(DESTDIR)$(moduledir)/SyslogNg.jar
 
+clean-local:
+	rm -rf modules/java/org
+
 else
 modules/java modules/java/ mod-java:
 endif
