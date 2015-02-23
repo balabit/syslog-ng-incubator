@@ -238,7 +238,7 @@ fi
 dnl ***************************************************************************
 dnl librdkafka headers/libraries
 dnl ***************************************************************************
-if test "x$enable_kafka" != "xno" && test "x$with_kafka" != "xno"; then
+if test "x$enable_kafka" != "xno"; then
        rdkafka="yes"
        if test "x$with_librdkafka" != "xno"; then
                CFLAGS_SAVE="$CFLAGS"
