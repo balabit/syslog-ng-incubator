@@ -78,6 +78,11 @@ AC_ARG_ENABLE(kafka,
               [ --disable-kafka           Disable Kafka support (default: auto)]
               ,,enable_kafka="auto")
 
+AC_ARG_WITH(librdkafka,
+             AC_HELP_STRING([--with-librdkafka=DIR],
+                            [use librdkafka library from (prefix) directory DIR])
+                            ,,with_librdkafka="no")
+
 AC_ARG_ENABLE(grok,
               [ --disable-grok            Disable Grok Parser support (default: auto)]
               ,,enable_grok="auto")
@@ -86,10 +91,6 @@ AC_ARG_WITH(libgrok,
              AC_HELP_STRING([--with-libgrok=DIR],
                             [use libgrok library from (prefix) directory DIR])
                             ,,with_libgrok="null")
-
-AC_ARG_WITH(librdkafka,
-             AC_HELP_STRING([--with-librdkafka=DIR],
-                            [use librdkafka library from (prefix) directory DIR]),,)
 
 AC_ARG_ENABLE(zmq,
    [  --enable-zmq        Enable zmq destination ],
@@ -250,7 +251,7 @@ if test "x$enable_kafka" != "xno"; then
                CFLAGS="$CFLAGS_SAVE"
                LDFLAGS="$LDFLAGS_SAVE"
        else
-               rdkafka="no"	
+               AC_CHECK_HEADER(librdkafka/rdkafka.h, [RDKAFKA_LIBS="-lrdkafka"], [rdkafka=no])
        fi
 
        if test "x$enable_kafka" = "xyes" && test "x$rdkafka" = "xno"; then
