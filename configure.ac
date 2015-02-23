@@ -90,7 +90,7 @@ AC_ARG_ENABLE(grok,
 AC_ARG_WITH(libgrok,
              AC_HELP_STRING([--with-libgrok=DIR],
                             [use libgrok library from (prefix) directory DIR])
-                            ,,with_libgrok="null")
+                            ,,with_libgrok="no")
 
 AC_ARG_ENABLE(zmq,
    [  --enable-zmq        Enable zmq destination ],
@@ -224,16 +224,21 @@ fi
 dnl ***************************************************************************
 dnl grok headers/libraries
 dnl ***************************************************************************
-if test "x$enable_grok" = "xauto" && test "x$with_libgrok" == "xnull"; then
- AC_CHECK_LIB(grok, grok_new, [enable_grok="yes"; GROK_LIBS="-lgrok"], [enable_grok="no"])
- if test  "x$enable_grok" = "xno"; then
-   PKG_CHECK_MODULES(GROK, libgrok, enable_grok="yes", enable_grok="no")
- fi
-fi
-if test "x$with_libgrok" != "xnull"; then
+if test "x$enable_grok" != "xno"; then
+ grok="no"
+ if test "x$with_libgrok" != "xno"; then
 	GROK_LIBS="-L$with_libgrok"
 	GROK_CFLAGS="-I$with_libgrok"
-	enable_grok="yes"
+	grok="yes"
+ else
+	PKG_CHECK_MODULES(GROK, libgrok, grok="yes",
+	  AC_CHECK_LIB(grok, grok_new, [grok="yes"; GROK_LIBS="-lgrok"], [grok="no"]))
+ fi
+ if test "x$enable_grok" = "xyes" && test "x$grok" = "xno"; then
+	AC_MSG_ERROR(libgrok not found)
+ fi
+
+ enable_grok=$grok
 fi
 
 dnl ***************************************************************************
