@@ -97,6 +97,11 @@ Contents
   
    [sng:java]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/java/
 
+ * [Date parser][sng:date]: A parser for arbitrary date formats which
+   may be contained in non-syslog messages.
+  
+   [sng:date]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/date/
+
 Installation
 ------------
 

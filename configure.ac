@@ -98,6 +98,8 @@ AC_ARG_ENABLE(zmq,
 
 AC_ARG_ENABLE(java, [ --enable-java  Enable java destination (default: auto)],, enable_java="auto")
 
+AC_ARG_ENABLE(date, [ --enable-date  Enable date parser (default: yes)],, enable_date="yes")
+
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -329,6 +331,7 @@ AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
 AM_CONDITIONAL(ENABLE_JAVA, [test "$enable_java" = "yes"])
+AM_CONDITIONAL(ENABLE_DATE, [test "$enable_date" = "yes"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -350,5 +353,6 @@ echo "  trigger-source       yes"
 echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
 echo "  grok-parser          ${enable_grok}"
+echo "  date-parser          ${enable_date}"
 echo "  java                 ${enable_java:=no}"
 echo
