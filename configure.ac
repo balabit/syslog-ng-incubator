@@ -78,6 +78,11 @@ AC_ARG_ENABLE(kafka,
               [ --disable-kafka           Disable Kafka support (default: auto)]
               ,,enable_kafka="auto")
 
+AC_ARG_WITH(librdkafka,
+             AC_HELP_STRING([--with-librdkafka=DIR],
+                            [use librdkafka library from (prefix) directory DIR])
+                            ,,with_librdkafka="no")
+
 AC_ARG_ENABLE(grok,
               [ --disable-grok            Disable Grok Parser support (default: auto)]
               ,,enable_grok="auto")
@@ -85,11 +90,7 @@ AC_ARG_ENABLE(grok,
 AC_ARG_WITH(libgrok,
              AC_HELP_STRING([--with-libgrok=DIR],
                             [use libgrok library from (prefix) directory DIR])
-                            ,,with_libgrok="null")
-
-AC_ARG_WITH(librdkafka,
-             AC_HELP_STRING([--with-librdkafka=DIR],
-                            [use librdkafka library from (prefix) directory DIR]),,)
+                            ,,with_libgrok="no")
 
 AC_ARG_ENABLE(zmq,
    [  --enable-zmq        Enable zmq destination ],
@@ -223,22 +224,27 @@ fi
 dnl ***************************************************************************
 dnl grok headers/libraries
 dnl ***************************************************************************
-if test "x$enable_grok" = "xauto" && test "x$with_libgrok" == "xnull"; then
- AC_CHECK_LIB(grok, grok_new, [enable_grok="yes"; GROK_LIBS="-lgrok"], [enable_grok="no"])
- if test  "x$enable_grok" = "xno"; then
-   PKG_CHECK_MODULES(GROK, libgrok, enable_grok="yes", enable_grok="no")
- fi
-fi
-if test "x$with_libgrok" != "xnull"; then
+if test "x$enable_grok" != "xno"; then
+ grok="no"
+ if test "x$with_libgrok" != "xno"; then
 	GROK_LIBS="-L$with_libgrok"
 	GROK_CFLAGS="-I$with_libgrok"
-	enable_grok="yes"
+	grok="yes"
+ else
+	PKG_CHECK_MODULES(GROK, libgrok, grok="yes",
+	  AC_CHECK_LIB(grok, grok_new, [grok="yes"; GROK_LIBS="-lgrok"], [grok="no"]))
+ fi
+ if test "x$enable_grok" = "xyes" && test "x$grok" = "xno"; then
+	AC_MSG_ERROR(libgrok not found)
+ fi
+
+ enable_grok=$grok
 fi
 
 dnl ***************************************************************************
 dnl librdkafka headers/libraries
 dnl ***************************************************************************
-if test "x$enable_kafka" != "xno" && test "x$with_kafka" != "xno"; then
+if test "x$enable_kafka" != "xno"; then
        rdkafka="yes"
        if test "x$with_librdkafka" != "xno"; then
                CFLAGS_SAVE="$CFLAGS"
@@ -250,7 +256,7 @@ if test "x$enable_kafka" != "xno" && test "x$with_kafka" != "xno"; then
                CFLAGS="$CFLAGS_SAVE"
                LDFLAGS="$LDFLAGS_SAVE"
        else
-               rdkafka="no"	
+               AC_CHECK_HEADER(librdkafka/rdkafka.h, [RDKAFKA_LIBS="-lrdkafka"], [rdkafka=no])
        fi
 
        if test "x$enable_kafka" = "xyes" && test "x$rdkafka" = "xno"; then
