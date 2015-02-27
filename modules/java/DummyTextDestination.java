@@ -24,33 +24,47 @@ package org.syslog_ng;
 
 public class DummyTextDestination extends TextLogDestination {
 
-	private String name;
+  private String name;
 
-	public DummyTextDestination(long arg0) {
-		super(arg0);
-	}
+  public DummyTextDestination(long arg0) {
+    super(arg0);
+  }
 
-	public void deinit() {
-		System.out.println("Deinit");
-	}
+  public void deinit() {
+    InternalMessageSender.debug("Deinit");
+  }
 
-	public boolean flush() {
-		System.out.println("Flush");
-		return true;
-	}
+  public void onMessageQueueEmpty() {
+    InternalMessageSender.debug("onMessageQueueEmpty");
+    return;
+  }
 
-	public boolean init() {
-		name = getOption("name");
-		if (name == null) {
-			System.err.println("Name is a required option for this destination");
-			return false;
-		}
-		System.out.println("Init " + name);
-		return true;
-	}
+  public boolean init() {
+    name = getOption("name");
+    if (name == null) {
+      InternalMessageSender.error("Name is a required option for this destination");
+      return false;
+    }
+    InternalMessageSender.debug("Init " + name);
+    return true;
+  }
 
-	public boolean queue(String arg0) {
-		System.out.println("Incoming message: " + arg0);
-		return true;
-	}
+  public boolean open() {
+    InternalMessageSender.debug("open");
+    return true;
+  }
+
+  public boolean isOpened() {
+    InternalMessageSender.debug("isOpened");
+    return true;
+  }
+
+  public void close() {
+    InternalMessageSender.debug("close");
+  }
+
+  public boolean send(String arg0) {
+    InternalMessageSender.debug("Incoming message: " + arg0);
+    return true;
+  }
 }

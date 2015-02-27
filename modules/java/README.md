@@ -3,7 +3,7 @@ java destination
 
 java destination gives an abstract class to implement destinations based on Java
 
-If you want to implement a java destination, you should extend SyslogNgDestination abstract class
+If you want to implement a java destination, you should extend TextLogDestination or StructuredLogDestination abstract class
 which is contained by the SyslogNg.jar which jar file will be in the moduledir after make install
 
 Example implementation of a dummy destination
@@ -11,34 +11,53 @@ Example implementation of a dummy destination
 ```
 import org.syslog_ng.*;
 
-public class TestClass extends TextLogDestination {
+public class DummyTextDestination extends TextLogDestination {
+
+  private String name;
 
   public TestClass(long arg0) {
     super(arg0);
   }
 
-  public boolean init()
-  {
-    System.out.println("START");
-    System.out.println("Initialize test destination");
+  public void deinit() {
+    InternalMessageSender.debug("Deinit");
+  }
+
+  public void onMessageQueueEmpty() {
+    InternalMessageSender.debug("onMessageQueueEmpty");
+    return;
+  }
+
+  public boolean init() {
+    name = getOption("name");
+    if (name == null) {
+      InternalMessageSender.error("Name is a required option for this destination");
+      return false;
+    }
+    InternalMessageSender.debug("Init " + name);
     return true;
   }
 
-  public void deinit()
-  {
-    System.out.println("Deinitialize object");
-  }
-
-  public boolean queue(String message)
-  {
-    System.out.println("This is queue!" + message);
+  public boolean open() {
+    InternalMessageSender.debug("open");
     return true;
   }
 
-  public boolean flush()
-  {
+  public boolean isOpened() {
+    InternalMessageSender.debug("isOpened");
     return true;
   }
+
+  public void close() {
+    InternalMessageSender.debug("close");
+  }
+
+  public boolean send(String arg0) {
+    InternalMessageSender.debug("Incoming message: " + arg0);
+    return true;
+  }
+}
+
 }
 ```
 
@@ -67,7 +86,7 @@ destination d_java{
   java(
     class_name("TestClass")
     class_path("/tmp")
-    option("key", "value")
+    option("name", "value")
   );
 };
 

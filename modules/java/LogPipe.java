@@ -23,28 +23,62 @@
 
 package org.syslog_ng;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
+import org.syslog_ng.InternalMessageSender;
+
 public abstract class LogPipe {
-  private long pipeHandle;
-  private long configHandle;
+	private long pipeHandle;
+	private long configHandle;
 
-  public LogPipe(long pipeHandle) {
-    this.pipeHandle = pipeHandle;
-    configHandle = 0;
-  }
+	public LogPipe(long pipeHandle) {
+		this.pipeHandle = pipeHandle;
+		configHandle = 0;
+	}
 
-  public String getOption(String key) {
-    return getOption(pipeHandle, key);
-  }
+	public long getConfigHandle() {
+		if (configHandle == 0) {
+			configHandle = getConfigHandle(pipeHandle);
+		}
+		return configHandle;
+	}
 
-  public long getConfigHandle() {
-    if (configHandle != 0) {
-      return configHandle;
-    }
-    else {
-      return getConfigHandle(pipeHandle);
-    }
-  }
+	protected abstract boolean init();
+	protected abstract void deinit();
 
-  private native String getOption(long ptr, String key);
-  private native long getConfigHandle(long ptr);
+	protected String getStackTrace(Exception e) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		return sw.toString();
+	}
+
+	protected void sendExceptionMessage(Exception e) {
+		InternalMessageSender.error("Exception occured: " + getStackTrace(e));
+	}
+
+	public boolean initProxy() {
+		try {
+			return init();
+		}
+		catch (Exception e) {
+			sendExceptionMessage(e);
+			return false;
+		}
+	}
+
+	public void deinitProxy() {
+		try {
+			deinit();
+		}
+		catch (Exception e) {
+			sendExceptionMessage(e);
+		}
+	}
+
+	public long getHandle() {
+		return pipeHandle;
+	}
+	private native long getConfigHandle(long ptr);
 }
