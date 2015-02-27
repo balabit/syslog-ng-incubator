@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2014 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2014 Viktor Juhasz <viktor.juhasz@balabit.com>
+ * Copyright (c) 2010-2015 BalaBit IT Ltd, Budapest, Hungary
+ * Copyright (c) 2010-2015 Viktor Juhasz <viktor.juhasz@balabit.com>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,26 +21,19 @@
  *
  */
 
-#include "cfg-parser.h"
-#include "java-grammar.h"
+#include "messages.h"
+#include "InternalMessageSender.h"
 
-int java_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
-
-static CfgLexerKeyword java_keywords[] = {
-  { "java",        KW_JAVA },
-  { "class_path",  KW_CLASS_PATH},
-  { "class_name",  KW_CLASS_NAME},
-  { "option",      KW_OPTION},
-  { "retries",     KW_RETRIES},
-  { NULL }
-};
-
-CfgParser java_parser =
-  {
-    .name = "java",
-    .keywords = java_keywords,
-    .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) java_parse,
-    .cleanup = (void (*)(gpointer)) log_pipe_unref,
-  };
-
-CFG_PARSER_IMPLEMENT_LEXER_BINDING(java_, LogDriver **)
+JNIEXPORT void JNICALL
+Java_org_syslog_1ng_InternalMessageSender_createInternalMessage(JNIEnv *env, jclass cls, jint pri, jstring message)
+{
+  if ((pri != org_syslog_ng_InternalMessageSender_MsgDebug) || debug_flag)
+    {
+      const char *c_str = (*env)->GetStringUTFChars(env, message, 0);
+      if (msg_limit_internal_message())
+        {
+          msg_event_send(msg_event_create(pri, c_str, NULL));
+        }
+      (*env)->ReleaseStringUTFChars(env, message, c_str);
+    }
+}

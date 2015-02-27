@@ -20,27 +20,49 @@
  * COPYING for details.
  *
  */
+package org.syslog_ng;
 
-#include "cfg-parser.h"
-#include "java-grammar.h"
+public class DummyStructuredDestination extends StructuredLogDestination {
 
-int java_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
+  private String name;
 
-static CfgLexerKeyword java_keywords[] = {
-  { "java",        KW_JAVA },
-  { "class_path",  KW_CLASS_PATH},
-  { "class_name",  KW_CLASS_NAME},
-  { "option",      KW_OPTION},
-  { "retries",     KW_RETRIES},
-  { NULL }
-};
+  public DummyStructuredDestination(long arg0) {
+    super(arg0);
+  }
 
-CfgParser java_parser =
-  {
-    .name = "java",
-    .keywords = java_keywords,
-    .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) java_parse,
-    .cleanup = (void (*)(gpointer)) log_pipe_unref,
-  };
+  public void deinit() {
+    System.out.println("Deinit");
+  }
 
-CFG_PARSER_IMPLEMENT_LEXER_BINDING(java_, LogDriver **)
+  public void onMessageQueueEmpty() {
+    System.out.println("onMessageQueueEmpty");
+    return;
+  }
+
+  public boolean init() {
+    name = getOption("name");
+    if (name == null) {
+      System.err.println("Name is a required option for this destination");
+      return false;
+    }
+    System.out.println("Init " + name);
+    return true;
+  }
+
+  public boolean open() {
+    return true;
+  }
+
+  public boolean isOpened() {
+    return true;
+  }
+
+  public void close() {
+    System.out.println("close");
+  }
+
+  public boolean send(LogMessage arg0) {
+    arg0.release();
+    return true;
+  }
+}

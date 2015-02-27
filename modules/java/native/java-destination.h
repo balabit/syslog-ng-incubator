@@ -28,6 +28,7 @@
 #include <iv.h>
 #include <iv_event.h>
 #include "driver.h"
+#include "logthrdestdrv.h"
 #include "logqueue.h"
 #include "mainloop.h"
 #include "mainloop-io-worker.h"
@@ -38,19 +39,13 @@
 
 typedef struct
 {
-  LogDestDriver super;
-  JavaVMSingleton *java_machine;
-  JNIEnv *java_env;
+  LogThrDestDriver super;
   JavaDestinationProxy *proxy;
   GString *class_path;
   gchar *class_name;
-  LogQueue *log_queue;
   LogTemplate *template;
   gchar *template_string;
-  gboolean threaded;
   GString *formatted_message;
-  MainLoopIOWorkerJob io_job;
-  struct iv_event wake_up_event;
   GHashTable *options;
 } JavaDestDriver;
 
@@ -58,6 +53,7 @@ LogDriver *java_dd_new(GlobalConfig *cfg);
 void java_dd_set_class_path(LogDriver *s, const gchar *class_path);
 void java_dd_set_class_name(LogDriver *s, const gchar *class_name);
 void java_dd_set_template_string(LogDriver *s, const gchar *template_string);
+void java_dd_set_retries(LogDriver *s, guint retries);
 void java_dd_set_option(LogDriver *s, const gchar *key, const gchar *value);
 
 #endif

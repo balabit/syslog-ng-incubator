@@ -21,26 +21,40 @@
  *
  */
 
-#include "cfg-parser.h"
-#include "java-grammar.h"
 
-int java_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
+package org.syslog_ng;
 
-static CfgLexerKeyword java_keywords[] = {
-  { "java",        KW_JAVA },
-  { "class_path",  KW_CLASS_PATH},
-  { "class_name",  KW_CLASS_NAME},
-  { "option",      KW_OPTION},
-  { "retries",     KW_RETRIES},
-  { NULL }
+public class InternalMessageSender {
+  private static final int MsgFatal = 2;
+  private static final int MsgError = 3;
+  private static final int MsgWarning = 4;
+  private static final int MsgNotice = 5;
+  private static final int MsgInfo = 6;
+  private static final int MsgDebug = 7;
+
+  public static void fatal(String message) {
+    createInternalMessage(MsgFatal, message);
+  }
+
+  public static void error(String message) {
+    createInternalMessage(MsgError, message);
+  }
+  
+  public static void warning(String message) {
+    createInternalMessage(MsgWarning, message);
+  }
+  
+  public static void notice(String message) {
+    createInternalMessage(MsgNotice, message);
+  }
+
+  public static void info(String message) {
+    createInternalMessage(MsgInfo, message);
+  }
+  
+  public static void debug(String message) {
+    createInternalMessage(MsgDebug, message);
+  }
+  
+  private native static void createInternalMessage(int level, String message);
 };
-
-CfgParser java_parser =
-  {
-    .name = "java",
-    .keywords = java_keywords,
-    .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) java_parse,
-    .cleanup = (void (*)(gpointer)) log_pipe_unref,
-  };
-
-CFG_PARSER_IMPLEMENT_LEXER_BINDING(java_, LogDriver **)
