@@ -30,10 +30,7 @@ Java_org_syslog_1ng_InternalMessageSender_createInternalMessage(JNIEnv *env, jcl
   if ((pri != org_syslog_ng_InternalMessageSender_MsgDebug) || debug_flag)
     {
       const char *c_str = (*env)->GetStringUTFChars(env, message, 0);
-      if (msg_limit_internal_message())
-        {
-          msg_event_send(msg_event_create(pri, c_str, NULL));
-        }
+      msg_event_suppress_recursions_and_send(msg_event_create(pri, c_str, NULL));
       (*env)->ReleaseStringUTFChars(env, message, c_str);
     }
 }
