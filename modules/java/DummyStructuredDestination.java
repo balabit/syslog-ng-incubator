@@ -25,12 +25,18 @@ package org.syslog_ng;
 public class DummyStructuredDestination extends StructuredLogDestination {
 
   private String name;
+  private LogTemplate msgTemplate;
+  private String msgTemplateString;
 
-  public DummyStructuredDestination(long arg0) {
-    super(arg0);
+
+  public DummyStructuredDestination(long handle) {
+    super(handle);
+    msgTemplateString = "${ISODATE} ${MESSAGE}";
   }
 
   public void deinit() {
+    msgTemplate.release();
+    msgTemplate = null;
     System.out.println("Deinit");
   }
 
@@ -40,13 +46,14 @@ public class DummyStructuredDestination extends StructuredLogDestination {
   }
 
   public boolean init() {
+    msgTemplate = new LogTemplate(getConfigHandle());
     name = getOption("name");
     if (name == null) {
       System.err.println("Name is a required option for this destination");
       return false;
     }
     System.out.println("Init " + name);
-    return true;
+    return msgTemplate.compile(msgTemplateString);
   }
 
   public boolean open() {
@@ -61,8 +68,8 @@ public class DummyStructuredDestination extends StructuredLogDestination {
     System.out.println("close");
   }
 
-  public boolean send(LogMessage arg0) {
-    arg0.release();
+  public boolean send(LogMessage msg) {
+    System.out.println(msgTemplate.format(msg));
     return true;
   }
 }
