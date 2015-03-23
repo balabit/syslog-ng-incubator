@@ -242,4 +242,4 @@ This change ensures that Cargo creates an `.so` library from your module and set
  use hello_filter::HelloFilter; 
  ```
 
-You are ready to roll the dice!
+You are ready!
