@@ -63,6 +63,52 @@ If you use `--enable-debug` the Rust bindings will be built in
 debug mode. If that's not specified, the Rust code is compiled in
 release mode (`-O3`).
 
+### Sample config
+
+```
+@version: 3.7
+
+source s_localhost {
+    syslog(
+        ip(
+            127.0.0.1
+        ),
+        port(
+            1233
+        ),
+        transport("udp")
+    );
+};
+
+
+destination d_log_server {
+    tcp(
+        "127.0.0.1",
+        port(
+            1234
+        )
+    );
+};
+
+filter f_rust {
+    rust(
+        type("in_list"),
+        option("field", "HOST"),
+        option("list", "localhost,hostA,hostB"),
+    );
+};
+
+log {
+    source(
+        s_localhost
+    );
+    filter(f_rust);
+    destination {
+       file("/tmp/a.log");  
+    };
+};
+```
+
 ## References
 
 All bindings are defined in the `syslog_ng_rust` crate.
