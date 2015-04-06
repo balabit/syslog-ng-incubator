@@ -20,8 +20,8 @@ impl InternalMessageSender {
             if ffi::debug_flag != 0 {
                 let msg = CString::new(message).unwrap();
                 let prio = severity as i32;
-                let simple = ffi::msg_event_create_simple(prio, msg.as_ptr());
-                ffi::msg_event_suppress_recursions_and_send(simple);
+                let msg_event = ffi::msg_event_create_from_desc(prio, msg.as_ptr());
+                ffi::msg_event_suppress_recursions_and_send(msg_event);
             }
         };
     }
