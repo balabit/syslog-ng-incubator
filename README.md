@@ -43,9 +43,7 @@ Contents
  
    Functions:
     * // : floating point division
-    * or : returns first non-empty string
     * state : gets or sets global state from template function.
-    * padding : pads a string to a specified width with specified chars.
 
    [sng:bf+]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/basicfuncs-plus/
 

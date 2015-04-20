@@ -23,11 +23,10 @@
 
 #include "plugin.h"
 #include "cfg.h"
+#include "template/function.h"
 #include "plugin-types.h"
 
 #include "number-funcs.c"
-#include "cond-funcs.c"
-#include "string-funcs.c"
 
 #if GLIB_CHECK_VERSION(2,32,0)
 #include "state-funcs.c"
@@ -40,8 +39,6 @@
 static Plugin basicfuncs_plus_plugins[] =
 {
   TEMPLATE_FUNCTION_PLUGIN(tf_num_divx, "//"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_or, "or"),
-  TEMPLATE_FUNCTION_PLUGIN(tf_string_padding, "padding"),
 #if GLIB_CHECK_VERSION(2,32,0)
   TEMPLATE_FUNCTION_PLUGIN(tf_state, "state"),
 #endif
