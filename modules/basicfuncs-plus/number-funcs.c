@@ -29,6 +29,7 @@
 #include "cfg.h"
 #include "parse-number.h"
 #include "plugin-types.h"
+#include "template/simple-function.h"
 
 static gboolean
 tf_num_parse(gint argc, GString *argv[],

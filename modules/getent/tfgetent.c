@@ -26,6 +26,7 @@
 #include <plugin-types.h>
 #include <cfg.h>
 #include <parse-number.h>
+#include <template/simple-function.h>
 
 #include <grp.h>
 #include <pwd.h>
@@ -34,6 +35,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stddef.h>
+
 
 typedef gboolean (*lookup_method)(gchar *key, gchar *member_name, GString *result);
 typedef gboolean (*format_member)(gchar *member_name, gpointer member, GString *result);
