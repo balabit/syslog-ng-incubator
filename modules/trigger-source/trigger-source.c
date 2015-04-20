@@ -164,7 +164,8 @@ trigger_source_new (TriggerSourceDriver *owner, LogSourceOptions *options, Globa
 
   log_source_init_instance (&self->super, cfg);
   log_source_set_options (&self->super, options, 0, SCS_TRIGGER,
-                          owner->super.super.id, NULL, FALSE, FALSE);
+                          owner->super.super.id, NULL, FALSE, FALSE,
+                          owner->super.super.super.expr_node);
 
   self->options = &owner->options;
 
