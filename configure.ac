@@ -53,9 +53,6 @@ AC_ARG_ENABLE(luajit,
    [  --enable-luajit          Use luajit instead of standard liblua for Lua support],
    enable_luajit="yes",)
 
-AC_ARG_WITH(python,
-   [  --with-python=VERSION    Build with a specific version of python],,with_python="auto")
-
 AC_ARG_ENABLE(lua,
    [  --disable-lua	       Disable lua based modules (lua-dest, monitoring source)],
    ,enable_lua="auto")
@@ -63,10 +60,6 @@ AC_ARG_ENABLE(lua,
 AC_ARG_ENABLE(perl,	       
    [  --disable-perl	       Disable perl based modules (perl-dest)],
    ,enable_perl="auto")
-
-AC_ARG_ENABLE(python,	       
-   [  --disable-python	       Disable python based modules (python-dest)],
-   ,enable_python="auto")
 
 AC_ARG_ENABLE(logmongource,
    [  --disable-logmongource	      Disable logmongource tool],
@@ -194,33 +187,6 @@ INCUBATOR_CHECK_DEP(perl,[
   fi])
 
 dnl ***************************************************************************
-dnl python checks
-dnl ***************************************************************************
-if test "x$with_python" != "xno" ; then
-  if test "x$with_python" = "xauto"  -o "x$with_python" = "xforce" ; then
-    python_versions="python python3 python-3.4 python-3.3 python-3.2 python-3.0 python2 python-2.7 python-2.6"
-    python_version=""
-    for version in $python_versions; do
-        PKG_CHECK_EXISTS($version, python_version=$version, python_version="")
-        if test "x$python_version" != "x" ; then
-           break
-        fi
-    done
-    if test "x$with_python" = "xforce" -a  "x$python_version" = "x" ; then
-       AC_MSG_ERROR([Python is forced to be required, but no suitable python version found!])
-    fi
-  else
-    python_version=$with_python
-  fi
-  PKG_CHECK_MODULES(PYTHON, $python_version >= 2.6, enable_python="yes", [if test "x$with_python" != "xauto"  -a "x$with_python" != "xforce";then
-       AC_MSG_ERROR([Python is forced to be required with version $python_version, but this version is not found!])
-     else
-       enable_python="no"
-     fi])
-fi
-
-
-dnl ***************************************************************************
 dnl grok headers/libraries
 dnl ***************************************************************************
 if test "x$enable_grok" != "xno"; then
@@ -313,7 +279,6 @@ AC_DEFINE_UNQUOTED(ENABLE_DEBUG, `enable_value $enable_debug`, [Enable debugging
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
-AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
 AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
@@ -333,12 +298,10 @@ echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  perl:                ${enable_perl:-yes}"
-echo "  python:              ${enable_python:-yes} (${python_version})"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
 echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
 echo "  grok-parser          ${enable_grok}"
 echo "  date-parser          ${enable_date}"
-echo "  java                 ${enable_java:=no}"
 echo
