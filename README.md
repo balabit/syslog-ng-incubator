@@ -92,11 +92,6 @@ Contents
 
    [sng:zmq]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/zmq/
 
- * [Java destination][sng:java]: Java destination drivers enables the users to write destinations
-   in Java or in any JVM compatible language.
-  
-   [sng:java]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/java/
-
  * [Date parser][sng:date]: A parser for arbitrary date formats which
    may be contained in non-syslog messages.
   

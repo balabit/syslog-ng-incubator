@@ -35,7 +35,6 @@ LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
 LUA_MIN_VERSION="5.1.4"
 ZMQ_MIN_VERSION="3.1.1"
-JAVA_MIN_VERSION="1.7"
 
 dnl ***************************************************************************
 dnl Initial setup
@@ -95,8 +94,6 @@ AC_ARG_WITH(libgrok,
 AC_ARG_ENABLE(zmq,
    [  --enable-zmq        Enable zmq destination ],
    ,enable_zmq="auto")
-
-AC_ARG_ENABLE(java, [ --enable-java  Enable java destination (default: auto)],, enable_java="auto")
 
 AC_ARG_ENABLE(date, [ --enable-date  Enable date parser (default: yes)],, enable_date="yes")
 
@@ -293,16 +290,6 @@ INCUBATOR_CFLAGS="$SYSLOG_NG_CFLAGS $IVYKIS_CFLAGS $EVENTLOG_CFLAGS $GLIB_CFLAGS
 INCUBATOR_LIBS="$SYSLOG_NG_LIBS $IVYKIS_LIBS $EVENTLOG_LIBS $GLIB_LIBS"
 
 INCUBATOR_TEST_LDADD="$SYSLOG_NG_LIBDIR/syslog-ng/libtest/libsyslog-ng-test.a -rpath $SYSLOG_NG_LIBDIR"
-dnl java headers/libraries
-dnl ***************************************************************************
-
-if test "x$enable_java" = "xauto" || test "x$enable_java" = "xyes"; then
-    if test "x$enable_java" = "xauto"; then
-      AC_CHECK_JAVA_VERSION([$JAVA_MIN_VERSION], [enable_java=yes], [enable_java=no])
-    else
-      AC_CHECK_JAVA_VERSION([$JAVA_MIN_VERSION], [enable_java=yes], [AC_MSG_ERROR([Java not found])])
-    fi
-fi
 
 dnl ***************************************************************************
 dnl misc features to be enabled
@@ -330,7 +317,6 @@ AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
 AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
-AM_CONDITIONAL(ENABLE_JAVA, [test "$enable_java" = "yes"])
 AM_CONDITIONAL(ENABLE_DATE, [test "$enable_date" = "yes"])
 
 AC_CONFIG_FILES([Makefile])
