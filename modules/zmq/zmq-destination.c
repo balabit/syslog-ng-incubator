@@ -139,7 +139,6 @@ static worker_insert_result_t
 zmq_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
 {
   ZMQDestDriver *self = (ZMQDestDriver *)destination;
-  gboolean success = TRUE;
   GString *result = g_string_new("");
 
   if (self->socket == NULL)

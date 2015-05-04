@@ -29,6 +29,8 @@
 #include "poll-fd-events.h"
 #include "logproto/logproto-text-server.h"
 
+void zmq_sd_set_address(LogDriver *source, const gchar *address);
+void zmq_sd_set_port(LogDriver *source, gint port);
 
 typedef struct _ZMQReaderContext
 {
