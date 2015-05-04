@@ -31,7 +31,7 @@ typedef struct _LogTransportZMQ
 } LogTransportZMQ;
 
 static gssize
-log_transport_zmq_read_method(LogTransport *s, gpointer buf, gsize buflen, GSockAddr **sa)
+log_transport_zmq_read_method(LogTransport *s, gpointer buf, gsize buflen, LogTransportAuxData *aux)
 {
   LogTransportZMQ *self = (LogTransportZMQ *) s;
   return zmq_recv(self->socket, buf, buflen, ZMQ_DONTWAIT);
