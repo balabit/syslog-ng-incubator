@@ -23,17 +23,9 @@
 
 #include <zmq.h>
 
-#include "zmq-source.h"
-#include "zmq-parser.h"
+#include "zmq-module.h"
 #include "zmq-transport.h"
 
-#include "plugin.h"
-#include "messages.h"
-#include "misc.h"
-#include "stats/stats.h"
-#include "logqueue.h"
-#include "driver.h"
-#include "plugin-types.h"
 #include "poll-fd-events.h"
 #include "logproto/logproto-text-server.h"
 
