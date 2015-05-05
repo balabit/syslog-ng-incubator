@@ -26,8 +26,7 @@
 
 #include "cfg-parser.h"
 #include "cfg-lexer.h"
-#include "zmq-destination.h"
-#include "zmq-source.h"
+#include "zmq-module.h"
 
 extern CfgParser zmq_parser;
 

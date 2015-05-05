@@ -23,16 +23,7 @@
 
 #include <zmq.h>
 
-#include "zmq-destination.h"
-#include "zmq-parser.h"
-#include "plugin.h"
-#include "messages.h"
-#include "misc.h"
-#include "stats/stats.h"
-#include "logqueue.h"
-#include "driver.h"
-#include "plugin-types.h"
-#include "logthrdestdrv.h"
+#include "zmq-module.h"
 
 #ifndef SCS_ZMQ
 #define SCS_ZMQ 0
@@ -148,7 +139,6 @@ static worker_insert_result_t
 zmq_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
 {
   ZMQDestDriver *self = (ZMQDestDriver *)destination;
-  gboolean success = TRUE;
   GString *result = g_string_new("");
 
   if (self->socket == NULL)
