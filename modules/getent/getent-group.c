@@ -38,9 +38,7 @@ tf_getent_group(gchar *key, gchar *member_name, GString *result)
   glong d;
   gboolean is_num, r;
 
-  bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-  if (bufsize == -1)
-    bufsize = 16384;
+  bufsize = 16384;
 
   buf = g_malloc(bufsize);
 
