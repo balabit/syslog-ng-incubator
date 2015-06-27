@@ -1,9 +1,5 @@
-#![feature(collections)]
-#![feature(core)]
-
 #[macro_use]
 extern crate syslog_ng_rust;
-extern crate collections;
 
 use std::collections::BTreeSet;
 use std::borrow::Borrow;
@@ -28,7 +24,7 @@ impl InListFilter {
 impl syslog_ng_rust::RustFilter for InListFilter {
 
     fn init(&mut self, _: &GlobalConfig) {
-        self.list = BTreeSet::from_iter(self.orig_list.as_slice().split(',').map(|x| x.to_string()));
+        self.list = BTreeSet::from_iter(self.orig_list.split(',').map(|x: &str| x.to_string()));
     }
 
     fn eval(&self, msg: &mut LogMessage) -> bool {
@@ -40,11 +36,11 @@ impl syslog_ng_rust::RustFilter for InListFilter {
     }
 
     fn set_option(&mut self, key: String, value: String) {
-        msg_debug!("InListFilter.set_option({:?}, {:?})", key.as_slice(), value.as_slice());
+        msg_debug!("InListFilter.set_option({:?}, {:?})", &key, &value);
 
-        match key.as_slice() {
+        match key.borrow() {
             "field" => {
-                self.field = LogMessage::get_value_handle(value.as_slice());
+                self.field = LogMessage::get_value_handle(&value);
             },
             "list" => {
                 self.orig_list = value;

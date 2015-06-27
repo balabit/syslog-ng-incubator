@@ -1,6 +1,3 @@
-use std::num::ToPrimitive;
-use std::num::Int;
-
 use ::types::*;
 use ::ffi::from_c_str_to_borrowed_str;
 
@@ -16,25 +13,25 @@ extern "C" {
 
 impl GlobalConfig {
 
-    fn hex_to_dec(hex: u16) -> u16 {
+    fn hex_to_dec(hex: i32) -> i32 {
         let mut dec = 0;
         let mut shifted_hex = hex;
 
-        for i in 0..5 {
-            dec += (shifted_hex % 16) * 10.pow(i);
+        for i in 0..10 {
+            dec += (shifted_hex % 16) * 10i32.pow(i);
             shifted_hex >>= 4;
         }
 
         dec
     }
 
-    fn convert_version(version: i32) -> (u16,u16) {
-       let minor = GlobalConfig::hex_to_dec((version & 0xFF).to_u16().unwrap());
-       let major = GlobalConfig::hex_to_dec(((version >> 8) & 0xFF).to_u16().unwrap());
+    fn convert_version(version: i32) -> (i32,i32) {
+       let minor = GlobalConfig::hex_to_dec(version);
+       let major = GlobalConfig::hex_to_dec(version >> 8);
        (major, minor)
     }
 
-    pub fn get_user_version(&self) -> (u16,u16) {
+    pub fn get_user_version(&self) -> (i32,i32) {
        let version = unsafe {
            cfg_get_user_version(self)
        };
@@ -42,7 +39,7 @@ impl GlobalConfig {
        GlobalConfig::convert_version(version)
     }
 
-    pub fn get_parsed_version(&self) -> (u16,u16) {
+    pub fn get_parsed_version(&self) -> (i32,i32) {
        let version = unsafe {
            cfg_get_parsed_version(self)
        };

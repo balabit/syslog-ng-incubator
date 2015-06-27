@@ -1,5 +1,4 @@
 #![crate_type = "dylib"]
-#![feature(core)]
 
 extern crate libc;
 
