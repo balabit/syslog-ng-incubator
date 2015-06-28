@@ -1,9 +1,9 @@
 if ENABLE_RUST
 
-export rustmoduledir
-export rustmoduledepsdir
 export top_srcdir
 export top_builddir
+export rust_modules_libdir
+export rust_modules_depslibdir
 
 module_LTLIBRARIES      += modules/rust/librust.la
 modules_rust_librust_la_SOURCES = \
@@ -15,15 +15,13 @@ modules_rust_librust_la_SOURCES = \
   modules/rust/rust-filter.h
 
 modules_rust_librust_la_CPPFLAGS  =     \
-  $(AM_CPPFLAGS)            \
   $(INCUBATOR_CFLAGS)			\
+  $(SYSLOG_NG_RUST_MODULES_CFLAGS)			\
   -I$(top_srcdir)/modules/rust        \
-  -I$(top_builddir)/modules/rust	 \
-  -I$(top_srcdir)/modules/rust-modules/include
-modules_rust_librust_la_LIBADD  = $(MODULE_DEPS_LIBS) $(LIBRUST_MODULES_LIBS)
-modules_rust_librust_la_LDFLAGS = $(MODULE_LDFLAGS) -R $(rustmoduledir):$(rustmoduledepsdir)
-modules_rust_librust_la_DEPENDENCIES= $(MODULE_DEPS_LIBS)  librust_modules.so
+  -I$(top_builddir)/modules/rust
 
+modules_rust_librust_la_LIBADD = $(SYSLOG_NG_RUST_MODULES_LIBS) $(INCUBATOR_LIBS)
+modules_rust_librust_la_LDFLAGS = -avoid-version -module -no-undefined -R ${rust_modules_libdir}:${rust_modules_depslibdir}
 
 else
 modules/rust modules/rust/ mod-rust: modules/rust/librust.la

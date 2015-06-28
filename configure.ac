@@ -14,8 +14,6 @@ dnl ***************************************************************************
 dnl definitions
 
 moduledir='${exec_prefix}/lib/syslog-ng'
-rustmoduledir='${exec_prefix}/lib/syslog-ng/rust-modules'
-rustmoduledepsdir='${exec_prefix}/lib/syslog-ng/rust-modules/deps'
 
 enable_value()
 {
@@ -37,6 +35,7 @@ LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
 LUA_MIN_VERSION="5.1.4"
 ZMQ_MIN_VERSION="3.1.1"
+LSRM_MIN_VERSION="0.1.0"
 
 dnl ***************************************************************************
 dnl Initial setup
@@ -254,7 +253,7 @@ INCUBATOR_CHECK_DEP(zmq,[PKG_CHECK_MODULES(ZMQ_CLIENT, libzmq >= $ZMQ_MIN_VERSIO
 
 if test "x$enable_rust" = "xyes" -o "x$enable_rust" = "xauto"; then
     AC_CHECK_PROG(HAVE_RUSTC, rustc, 1, 0)
-    AC_CHECK_PROG(HAVE_CARGO, rustc, 1, 0)
+    AC_CHECK_PROG(HAVE_CARGO, cargo, 1, 0)
     if test ${HAVE_RUSTC} = 0; then
         AC_MSG_WARN([Was about to enable Rust bindings, which need rustc, which you don't seem to have, disabling Rust bindings])
         enable_rust=no
@@ -265,19 +264,11 @@ if test "x$enable_rust" = "xyes" -o "x$enable_rust" = "xauto"; then
     fi
 
     if test "x$enable_rust" = "xyes"; then
-
-        rust_cargo_build_dir="target/debug"
-
-        if test "x$enable_debug" = "xno"; then
-            rust_cargo_build_options=" --release"
-            rust_cargo_build_dir="target/release"
-            # TODO: cargo puts the release build in target/release
-            AC_SUBST(rust_cargo_build_options)
-        fi
-
-        AC_SUBST(rust_cargo_build_dir)
-        LIBRUST_MODULES_LIBS="-lrust_modules -L\$(moduledir)/rust-modules/ -L\$(moduledir)/rust-modules/deps "
-        AC_SUBST(LIBRUST_MODULES_LIBS)
+        PKG_CHECK_MODULES(SYSLOG_NG_RUST_MODULES, libsyslog_ng_rust_modules >= $LSRM_MIN_VERSION)
+        rust_modules_libdir=[`pkg-config --variable=libdir libsyslog_ng_rust_modules`]
+        rust_modules_depslibdir=[`pkg-config --variable=depslibdir libsyslog_ng_rust_modules`]
+        AC_SUBST(rust_modules_libdir)
+        AC_SUBST(rust_modules_depslibdir)
     fi
 fi
 dnl ***************************************************************************
@@ -307,8 +298,6 @@ AC_SUBST(RDKAFKA_LIBS)
 
 AC_SUBST(INCUBATOR_TEST_LDADD)
 AC_SUBST(SYSLOG_NG_LIBDIR)
-AC_SUBST(rustmoduledir)
-AC_SUBST(rustmoduledepsdir)
 
 AC_DEFINE_UNQUOTED(ENABLE_DEBUG, `enable_value $enable_debug`, [Enable debugging])
 
