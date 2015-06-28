@@ -266,9 +266,7 @@ if test "x$enable_rust" = "xyes" -o "x$enable_rust" = "xauto"; then
     if test "x$enable_rust" = "xyes"; then
         PKG_CHECK_MODULES(SYSLOG_NG_RUST_MODULES, libsyslog_ng_rust_modules >= $LSRM_MIN_VERSION)
         rust_modules_libdir=[`pkg-config --variable=libdir libsyslog_ng_rust_modules`]
-        rust_modules_depslibdir=[`pkg-config --variable=depslibdir libsyslog_ng_rust_modules`]
         AC_SUBST(rust_modules_libdir)
-        AC_SUBST(rust_modules_depslibdir)
     fi
 fi
 dnl ***************************************************************************

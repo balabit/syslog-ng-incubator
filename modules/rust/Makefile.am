@@ -3,7 +3,6 @@ if ENABLE_RUST
 export top_srcdir
 export top_builddir
 export rust_modules_libdir
-export rust_modules_depslibdir
 
 module_LTLIBRARIES      += modules/rust/librust.la
 modules_rust_librust_la_SOURCES = \
@@ -21,7 +20,7 @@ modules_rust_librust_la_CPPFLAGS  =     \
   -I$(top_builddir)/modules/rust
 
 modules_rust_librust_la_LIBADD = $(SYSLOG_NG_RUST_MODULES_LIBS) $(INCUBATOR_LIBS)
-modules_rust_librust_la_LDFLAGS = -avoid-version -module -no-undefined -R ${rust_modules_libdir}:${rust_modules_depslibdir}
+modules_rust_librust_la_LDFLAGS = -avoid-version -module -no-undefined -R ${rust_modules_libdir}
 
 else
 modules/rust modules/rust/ mod-rust: modules/rust/librust.la
