@@ -1,6 +1,0 @@
-cc:
-    image: schickling/rust:latest
-    volumes:
-        - .:/source
-    environment:
-        - USER=tibi
