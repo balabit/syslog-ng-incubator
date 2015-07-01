@@ -1,6 +1,6 @@
 #include "logmsg.h"
 #include "misc.h"
-#include "rust-filter.h"
+#include "filter.h"
 #include "rust-filter-proxy.h"
 
 #include <stdlib.h>

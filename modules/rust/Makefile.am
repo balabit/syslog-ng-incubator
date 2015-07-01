@@ -10,8 +10,8 @@ modules_rust_librust_la_SOURCES = \
   modules/rust/rust-parser.c        \
   modules/rust/rust-parser.h        \
   modules/rust/rust-plugin.c        \
-  modules/rust/rust-filter.c               \
-  modules/rust/rust-filter.h
+  modules/rust/filter.c               \
+  modules/rust/filter.h
 
 modules_rust_librust_la_CPPFLAGS  =     \
   $(INCUBATOR_CFLAGS)			\

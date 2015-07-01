@@ -29,7 +29,7 @@
 %code {
 
 #include "cfg-parser.h"
-#include "rust-filter.h"
+#include "filter.h"
 #include "rust-grammar.h"
 #include "syslog-names.h"
 #include "messages.h"
