@@ -9,7 +9,7 @@
 
 typedef struct _FilterRust {
   FilterExprNode super;
-  struct RustFilter* rust_object;
+  struct RustFilterProxy* rust_object;
 } FilterRust;
 
 static gboolean
