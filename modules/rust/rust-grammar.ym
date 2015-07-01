@@ -57,8 +57,10 @@
 %token KW_TYPE
 
 %type <ptr> rust
-%type <ptr> rust_filter 
-%type <ptr> rust_filter_params 
+%type <ptr> rust_filter
+%type <ptr> rust_filter_params
+%type <ptr> rust_parser
+%type <ptr> rust_parser_params
 %%
 
 start
@@ -73,18 +75,22 @@ start
 
 rust
   : LL_CONTEXT_FILTER rust_filter { $$ = $2; }
+  | LL_CONTEXT_PARSER rust_parser { $$ = $2; }
   ;
 
 rust_filter
   : KW_RUST '(' rust_filter_params ')' { $$ = *instance; }
   ;
 
+rust_parser
+  : KW_RUST '(' rust_parser_params ')' { $$ = *instance; }
+  ;
 
-rust_filter_params 
+rust_filter_params
   : KW_TYPE '(' string ')'
     {
       *instance = rust_filter_new($3);
-        
+
       if (!*instance)
        {
          msg_error("Cannot find the specified rust filter, aborting",
@@ -107,6 +113,38 @@ rust_filter_option
   : KW_OPTION '(' string string ')'
     {
       rust_filter_set_option(*instance, $3, $4);
+      free($3);
+      free($4);
+    }
+    ;
+
+rust_parser_params
+  : KW_TYPE '(' string ')'
+    {
+      *instance = rust_parser_new($3, configuration);
+
+      if (!*instance)
+       {
+         msg_error("Cannot find the specified Rust parser, aborting",
+                   evt_tag_str("name", $3),
+                   NULL);
+         YYERROR;
+       }
+
+      free($3);
+    }
+    rust_parser_options
+  ;
+
+rust_parser_options
+  : rust_parser_option rust_parser_options
+  |
+  ;
+
+rust_parser_option
+  : KW_OPTION '(' string string ')'
+    {
+      rust_parser_set_option(*instance, $3, $4);
       free($3);
       free($4);
     }

@@ -11,7 +11,9 @@ modules_rust_librust_la_SOURCES = \
   modules/rust/rust-parser.h        \
   modules/rust/rust-plugin.c        \
   modules/rust/filter.c               \
-  modules/rust/filter.h
+  modules/rust/filter.h				\
+  modules/rust/parser.c				\
+  modules/rust/parser.h
 
 modules_rust_librust_la_CPPFLAGS  =     \
   $(INCUBATOR_CFLAGS)			\

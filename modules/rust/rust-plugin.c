@@ -33,6 +33,11 @@ static Plugin rust_plugins[] =
     .name = "rust",
     .parser = &rust_parser,
   },
+  {
+    .type = LL_CONTEXT_PARSER,
+    .name = "rust",
+    .parser = &rust_parser,
+  },
 };
 
 gboolean
