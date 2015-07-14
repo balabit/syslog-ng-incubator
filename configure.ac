@@ -199,7 +199,7 @@ INCUBATOR_CHECK_DEP(perl,[
 dnl ***************************************************************************
 dnl python checks
 dnl ***************************************************************************
-if test "x$with_python" != "xno" ; then
+if test "x$with_python" != "xno" -a "x$enable_python" != "xno" ; then
   if test "x$with_python" = "xauto"  -o "x$with_python" = "xforce" ; then
     python_versions="python python3 python-3.4 python-3.3 python-3.2 python-3.0 python2 python-2.7 python-2.6"
     python_version=""
