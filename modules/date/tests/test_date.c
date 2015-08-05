@@ -24,6 +24,7 @@ testcase(gchar *msg, goffset offset, gchar *timezone, gchar *format, gchar *expe
 
   parse_options.flags = 0;
   logmsg = log_msg_new_empty();
+  logmsg->timestamps[LM_TS_RECVD].tv_sec = 1438793384; /* Wed Aug  5 2015 */
   log_msg_set_value(logmsg, log_msg_get_value_handle("MESSAGE"), msg, -1);
   nvtable = nv_table_ref(logmsg->payload);
   success = log_parser_process(parser, &logmsg, NULL, log_msg_get_value(logmsg, LM_V_MESSAGE, NULL), -1);
@@ -84,6 +85,13 @@ int main()
   testcase("Tue, 27 Jan 2015 11:48:46", 0, NULL, "%a, %d %b %Y %T", "2015-01-27T11:48:46+00:00");
   testcase("Tue, 27 Jan 2015 11:48:46", 0, "America/Phoenix", "%a, %d %b %Y %T", "2015-01-27T11:48:46-07:00");
   testcase("Tue, 27 Jan 2015 11:48:46", 0, "+05:00", "%a, %d %b %Y %T", "2015-01-27T11:48:46+05:00");
+
+  /* Try without the year. */
+  testcase("01/Jul:00:40:07 +0500", 0, NULL, "%d/%b:%T %z", "2015-07-01T00:40:07+05:00");
+  testcase("01/Aug:00:40:07 +0500", 0, NULL, "%d/%b:%T %z", "2015-08-01T00:40:07+05:00");
+  testcase("01/Sep:00:40:07 +0500", 0, NULL, "%d/%b:%T %z", "2015-09-01T00:40:07+05:00");
+  testcase("01/Oct:00:40:07 +0500", 0, NULL, "%d/%b:%T %z", "2014-10-01T00:40:07+05:00");
+  testcase("01/Nov:00:40:07 +0500", 0, NULL, "%d/%b:%T %z", "2014-11-01T00:40:07+05:00");
 
   app_shutdown();
   return 0;
