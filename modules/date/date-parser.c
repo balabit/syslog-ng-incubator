@@ -99,6 +99,23 @@ date_parser_process (LogParser *s,
 
   if (remaining == NULL) return FALSE;
 
+  /* The date may be missing. Try to use the current date as we can't
+   * do anything better... Don't try to be too smart with new year
+   * eve. */
+  if (tm.tm_year == 0)
+    {
+      /* Grab the year from the received timestamp */
+      struct tm nowtm;
+      LogStamp received = msg->timestamps[LM_TS_RECVD];
+      cached_gmtime(&received.tv_sec, &nowtm);
+      tm.tm_year = nowtm.tm_year;
+
+      /* Adjust the year if needed. Therefore, we don't need to care
+       * too much about timezones. */
+      if (tm.tm_mon > nowtm.tm_mon + 1)
+        tm.tm_year--;
+    }
+
   /* mktime handles timezones horribly. It considers the time to be
      local and also alter the parsed timezone. Try to fix all that. */
   msg->timestamps[LM_TS_STAMP].tv_usec = 0;
