@@ -5,9 +5,7 @@ include modules/rss/Makefile.am
 include modules/lua/Makefile.am
 include modules/getent/Makefile.am
 include modules/perl/Makefile.am
-include modules/python/Makefile.am
 include modules/kafka/Makefile.am
 include modules/zmq/Makefile.am
 include modules/grok/Makefile.am
-include modules/java/Makefile.am
 include modules/date/Makefile.am

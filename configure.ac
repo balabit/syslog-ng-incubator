@@ -35,7 +35,6 @@ LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
 LUA_MIN_VERSION="5.1.4"
 ZMQ_MIN_VERSION="3.1.1"
-JAVA_MIN_VERSION="1.7"
 
 dnl ***************************************************************************
 dnl Initial setup
@@ -54,9 +53,6 @@ AC_ARG_ENABLE(luajit,
    [  --enable-luajit          Use luajit instead of standard liblua for Lua support],
    enable_luajit="yes",)
 
-AC_ARG_WITH(python,
-   [  --with-python=VERSION    Build with a specific version of python],,with_python="auto")
-
 AC_ARG_ENABLE(lua,
    [  --disable-lua	       Disable lua based modules (lua-dest, monitoring source)],
    ,enable_lua="auto")
@@ -64,10 +60,6 @@ AC_ARG_ENABLE(lua,
 AC_ARG_ENABLE(perl,	       
    [  --disable-perl	       Disable perl based modules (perl-dest)],
    ,enable_perl="auto")
-
-AC_ARG_ENABLE(python,	       
-   [  --disable-python	       Disable python based modules (python-dest)],
-   ,enable_python="auto")
 
 AC_ARG_ENABLE(logmongource,
    [  --disable-logmongource	      Disable logmongource tool],
@@ -95,8 +87,6 @@ AC_ARG_WITH(libgrok,
 AC_ARG_ENABLE(zmq,
    [  --enable-zmq        Enable zmq destination ],
    ,enable_zmq="auto")
-
-AC_ARG_ENABLE(java, [ --enable-java  Enable java destination (default: auto)],, enable_java="auto")
 
 AC_ARG_ENABLE(date, [ --enable-date  Enable date parser (default: yes)],, enable_date="yes")
 
@@ -197,33 +187,6 @@ INCUBATOR_CHECK_DEP(perl,[
   fi])
 
 dnl ***************************************************************************
-dnl python checks
-dnl ***************************************************************************
-if test "x$with_python" != "xno" -a "x$enable_python" != "xno" ; then
-  if test "x$with_python" = "xauto"  -o "x$with_python" = "xforce" ; then
-    python_versions="python python3 python-3.4 python-3.3 python-3.2 python-3.0 python2 python-2.7 python-2.6"
-    python_version=""
-    for version in $python_versions; do
-        PKG_CHECK_EXISTS($version, python_version=$version, python_version="")
-        if test "x$python_version" != "x" ; then
-           break
-        fi
-    done
-    if test "x$with_python" = "xforce" -a  "x$python_version" = "x" ; then
-       AC_MSG_ERROR([Python is forced to be required, but no suitable python version found!])
-    fi
-  else
-    python_version=$with_python
-  fi
-  PKG_CHECK_MODULES(PYTHON, $python_version >= 2.6, enable_python="yes", [if test "x$with_python" != "xauto"  -a "x$with_python" != "xforce";then
-       AC_MSG_ERROR([Python is forced to be required with version $python_version, but this version is not found!])
-     else
-       enable_python="no"
-     fi])
-fi
-
-
-dnl ***************************************************************************
 dnl grok headers/libraries
 dnl ***************************************************************************
 if test "x$enable_grok" != "xno"; then
@@ -293,16 +256,6 @@ INCUBATOR_CFLAGS="$SYSLOG_NG_CFLAGS $IVYKIS_CFLAGS $EVENTLOG_CFLAGS $GLIB_CFLAGS
 INCUBATOR_LIBS="$SYSLOG_NG_LIBS $IVYKIS_LIBS $EVENTLOG_LIBS $GLIB_LIBS"
 
 INCUBATOR_TEST_LDADD="$SYSLOG_NG_LIBDIR/syslog-ng/libtest/libsyslog-ng-test.a -rpath $SYSLOG_NG_LIBDIR"
-dnl java headers/libraries
-dnl ***************************************************************************
-
-if test "x$enable_java" = "xauto" || test "x$enable_java" = "xyes"; then
-    if test "x$enable_java" = "xauto"; then
-      AC_CHECK_JAVA_VERSION([$JAVA_MIN_VERSION], [enable_java=yes], [enable_java=no])
-    else
-      AC_CHECK_JAVA_VERSION([$JAVA_MIN_VERSION], [enable_java=yes], [AC_MSG_ERROR([Java not found])])
-    fi
-fi
 
 dnl ***************************************************************************
 dnl misc features to be enabled
@@ -326,11 +279,9 @@ AC_DEFINE_UNQUOTED(ENABLE_DEBUG, `enable_value $enable_debug`, [Enable debugging
 AM_CONDITIONAL(ENABLE_LOGMONGOURCE, [test "$enable_logmongource" != "no"])
 AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
-AM_CONDITIONAL(ENABLE_PYTHON, [test "$enable_python" != "no"])
 AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
-AM_CONDITIONAL(ENABLE_JAVA, [test "$enable_java" = "yes"])
 AM_CONDITIONAL(ENABLE_DATE, [test "$enable_date" = "yes"])
 
 AC_CONFIG_FILES([Makefile])
@@ -347,12 +298,10 @@ echo "  logmongource:        ${enable_logmongource:-yes}"
 echo "  lua:                 ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  perl:                ${enable_perl:-yes}"
-echo "  python:              ${enable_python:-yes} (${python_version})"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
 echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
 echo "  grok-parser          ${enable_grok}"
 echo "  date-parser          ${enable_date}"
-echo "  java                 ${enable_java:=no}"
 echo
