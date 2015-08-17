@@ -4,7 +4,11 @@ install:
   - sudo apt-get install -qq curl
   - wget http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key
   - sudo apt-key add Release.key
+  - rm -rf Release.key
+  - wget http://download.opensuse.org/repositories/home:/viktorjuhasz/xUbuntu_12.04/Release.key
+  - sudo apt-key add Release.key
   - sudo sh -c 'echo "deb http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04 ./" >> /etc/apt/sources.list'
+  - sudo sh -c 'echo "deb http://download.opensuse.org/repositories/home:/viktorjuhasz/xUbuntu_12.04/ ./" >> /etc/apt/sources.list'
   - sudo apt-get update -qq
   - sudo apt-get install -qq aptitude
   - sudo aptitude install -q -y pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-dev libperl-dev python-dev python3-dev libgrok-dev libtokyocabinet-dev libzmq3-dev
