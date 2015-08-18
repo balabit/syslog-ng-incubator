@@ -3,7 +3,7 @@ dnl
 
 AC_PREREQ([2.68])
 
-AC_INIT([syslog-ng-incubator], [0.4.1], [viktor.juhasz@balabit.com])
+AC_INIT([syslog-ng-incubator], [0.5.0], [viktor.juhasz@balabit.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects dist-xz no-dist-gzip])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -28,7 +28,7 @@ dnl ***************************************************************************
 dnl dependencies
 
 GLIB_MIN_VERSION="2.14"
-SYSLOG_NG_MIN_VERSION="3.6.0"
+SYSLOG_NG_MIN_VERSION="3.7.0"
 EVENTLOG_MIN_VERSION="0.2.10"
 IVYKIS_MIN_VERSION="0.30.0"
 LMC_MIN_VERSION="0.1.2"

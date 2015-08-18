@@ -1,3 +1,30 @@
+# 0.5.0 - <2015-08-18 Tue>
+
+## Feature: syslog-ng 3.7 support
+
+This release adds support for syslog-ng 3.7, but older versions are not supported anymore.
+
+## Feature: date parser
+
+A parser for arbitrary date formats which may be contained in non-syslog messages
+
+## Feature: Kafka improvements
+
+ * check for partition availability before selecting one
+ * synchronously insert events into kafka (configurable)
+
+## Bugfix: Various kafka/grok configure fixes
+
+In some cases enable/disable kafka and grok support were confused
+
+## Bugfix: getent group size
+
+Fixes extraction on large groups
+
+We would like to thank the following people for their contribution:
+
+Andras Mitzki, Fabien Wernli, Gergely Nagy, Laszlo Meszaros, Levente Kurusa, Peter Czanik, Viktor Juhasz, Vincent Bernat
+
 # 0.4.1 - <2014-12-16 Tue>
 
 ## Bugfix: Make it possible to disable java destination
