@@ -114,7 +114,7 @@ optional) installed too.
 Docker container
 ----------------
 
-An automatically built docker container is available at https://registry.hub.docker.com/u/talien/syslog-ng-incubator/
+An automatically built docker container is available at https://hub.docker.com/r/juhaszviktor/syslog-ng-incubator/
 from the latest development snapshot.
 
 License
