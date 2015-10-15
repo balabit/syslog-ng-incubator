@@ -51,6 +51,7 @@ zmq_sd_set_port(LogDriver *source, gint port)
 {
     ZMQSourceDriver *self = (ZMQSourceDriver *)source;
     self->port = port;
+    msg_info("Port set successfully!", evt_tag_int("Port: ", self->port), NULL);
 }
 
 static void
@@ -91,9 +92,9 @@ create_zmq_context(ZMQSourceDriver* self)
 
   gchar* address = get_address(self);
 
-  if (zmq_bind(self->socket, address) != 0)
+  if (zmq_connect(self->socket, address) != 0)
   {
-    msg_error("Failed to bind!", evt_tag_str("Bind address", address), evt_tag_errno("Error", errno),NULL);
+    msg_error("Failed to connect!", evt_tag_str("Connect address", address), evt_tag_errno("Error", errno),NULL);
     g_free(address);
     return FALSE;
   }
@@ -230,8 +231,9 @@ zmq_sd_new(GlobalConfig *cfg)
   self->super.super.super.notify = zmq_sd_notify;
   self->super.super.super.free_fn = zmq_sd_free;
 
-  zmq_sd_set_address((LogDriver *) self, "*");
+  zmq_sd_set_address((LogDriver *) self, "localhost");
   zmq_sd_set_port((LogDriver *) self, 5558);
+
   log_reader_options_defaults(&self->reader_options);
   return &self->super.super;
 }
