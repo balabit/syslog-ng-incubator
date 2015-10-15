@@ -29,6 +29,7 @@
 #include "driver.h"
 #include "logreader.h"
 #include "logthrdestdrv.h"
+#include "misc.h"
 
 typedef struct _ZMQSourceDriver
 {
