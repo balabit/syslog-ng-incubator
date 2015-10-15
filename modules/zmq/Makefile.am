@@ -30,6 +30,8 @@ modules_zmq_libzmq_la_LDFLAGS = \
 modules_zmq_libzmq_la_DEPENDENCIES  = \
         $(MODULE_DEPS_LIBS)
 
+include modules/zmq/tests/Makefile.am
+
 modules/zmq modules/zmq/ mod-zmq: modules/zmq/libzmq.la
 
 else
