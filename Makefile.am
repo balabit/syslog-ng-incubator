@@ -2,6 +2,8 @@ ACLOCAL_AMFLAGS		= -I m4
 AM_YFLAGS		= -Wno-other -d
 
 scldir			= ${datadir}/include/scl
+pkgconfigdir        = $(libdir)/pkgconfig
+pkgconfig_DATA      = syslog-ng-rust-deps.pc
 
 check_PROGRAMS		=
 TESTS			= ${check_PROGRAMS}
