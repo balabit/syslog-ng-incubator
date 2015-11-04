@@ -12,7 +12,8 @@ modules_rust_libsyslog_ng_rust_deps_a_SOURCES = \
   modules/rust/parser.h
 
 modules_rust_libsyslog_ng_rust_deps_a_CPPFLAGS = \
-  $(INCUBATOR_CFLAGS)	-fPIC		\
+  $(INCUBATOR_CFLAGS)	-fPIC	\
+  -fvisibility=hidden	\
   -I$(top_srcdir)/modules/rust        \
   -I$(top_builddir)/modules/rust
 
