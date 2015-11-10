@@ -55,7 +55,7 @@ zmq_sd_set_port(LogDriver *source, gint port)
 }
 
 static void
-create_reader(LogPipe *s)
+zmq_sd_create_reader(LogPipe *s)
 {
   ZMQSourceDriver* self = (ZMQSourceDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
@@ -73,13 +73,13 @@ create_reader(LogPipe *s)
 }
 
 gchar *
-get_address(ZMQSourceDriver* self)
+zmq_sd_get_address(ZMQSourceDriver* self)
 {
   return g_strdup_printf("tcp://%s:%d", self->address, self->port);
 }
 
 gboolean
-create_zmq_context(ZMQSourceDriver* self)
+zmq_sd_create_context(ZMQSourceDriver* self)
 {
   errno = 0;
   self->context = zmq_ctx_new();
@@ -91,7 +91,7 @@ create_zmq_context(ZMQSourceDriver* self)
     return FALSE;
   }
 
-  gchar* address = get_address(self);
+  gchar* address = zmq_sd_get_address(self);
 
   if (zmq_connect(self->socket, address) != 0)
   {
@@ -105,7 +105,7 @@ create_zmq_context(ZMQSourceDriver* self)
 }
 
 gchar*
-get_persist_name(ZMQSourceDriver* self)
+zmq_sd_get_persist_name(ZMQSourceDriver* self)
 {
     return g_strdup_printf("zmq_source:%s:%d", self->address, self->port);
 }
@@ -122,7 +122,7 @@ zmq_sd_init(LogPipe *s)
     return FALSE;
   }
 
-  gchar* persist_name = get_persist_name(self);
+  gchar* persist_name = zmq_sd_get_persist_name(self);
 
   ZMQReaderContext* reader_context = cfg_persist_config_fetch(cfg, persist_name);
 
@@ -138,9 +138,9 @@ zmq_sd_init(LogPipe *s)
   }
   else
   {
-    if (!create_zmq_context(self))
+    if (!zmq_sd_create_context(self))
       return FALSE;
-    create_reader(s);
+    zmq_sd_create_reader(s);
   }
 
   log_reader_set_options(self->reader,
@@ -165,7 +165,7 @@ zmq_sd_init(LogPipe *s)
 }
 
 static void
-zmq_socket_deinit(ZMQReaderContext* reader_context)
+zmq_sd_socket_deinit(ZMQReaderContext* reader_context)
 {
   log_pipe_unref((LogPipe *) reader_context->reader);
   zmq_ctx_term(reader_context->context);
@@ -188,9 +188,9 @@ zmq_sd_deinit(LogPipe *s)
   self->context = NULL;
   self->reader = NULL;
 
-  gchar* persist_name = get_persist_name(self);
+  gchar* persist_name = zmq_sd_get_persist_name(self);
 
-  cfg_persist_config_add(cfg, persist_name, reader_context, (GDestroyNotify) zmq_socket_deinit, FALSE);
+  cfg_persist_config_add(cfg, persist_name, reader_context, (GDestroyNotify) zmq_sd_socket_deinit, FALSE);
 
   g_free(persist_name);
 
