@@ -29,7 +29,7 @@
 #include "poll-fd-events.h"
 #include "logproto/logproto-text-server.h"
 
-void zmq_sd_set_address(LogDriver *source, const gchar *address);
+void zmq_sd_set_host(LogDriver *source, const gchar *host);
 void zmq_sd_set_port(LogDriver *source, gint port);
 
 typedef struct _ZMQReaderContext
@@ -39,11 +39,11 @@ typedef struct _ZMQReaderContext
 } ZMQReaderContext;
 
 void
-zmq_sd_set_address(LogDriver *source, const gchar *address)
+zmq_sd_set_host(LogDriver *source, const gchar *host)
 {
     ZMQSourceDriver *self = (ZMQSourceDriver *)source;
-    g_free(self->address);
-    self->address = g_strdup(address);
+    g_free(self->host);
+    self->host = g_strdup(host);
 }
 
 void
@@ -75,11 +75,11 @@ zmq_sd_create_reader(LogPipe *s)
 gchar *
 zmq_sd_get_address(ZMQSourceDriver* self)
 {
-  return g_strdup_printf("tcp://%s:%d", self->address, self->port);
+  return g_strdup_printf("tcp://%s:%d", self->host, self->port);
 }
 
 gboolean
-zmq_sd_create_context(ZMQSourceDriver* self)
+zmq_sd_connect(ZMQSourceDriver* self)
 {
   errno = 0;
   self->context = zmq_ctx_new();
@@ -95,7 +95,7 @@ zmq_sd_create_context(ZMQSourceDriver* self)
 
   if (zmq_connect(self->socket, address) != 0)
   {
-    msg_error("Failed to connect!", evt_tag_str("Connect address", address), evt_tag_errno("Error", errno),NULL);
+    msg_error("Failed to connect!", evt_tag_str("Connection address", address), evt_tag_errno("Error", errno),NULL);
     g_free(address);
     return FALSE;
   }
@@ -107,7 +107,7 @@ zmq_sd_create_context(ZMQSourceDriver* self)
 gchar*
 zmq_sd_get_persist_name(ZMQSourceDriver* self)
 {
-    return g_strdup_printf("zmq_source:%s:%d", self->address, self->port);
+    return g_strdup_printf("zmq_source:%s:%d", self->host, self->port);
 }
 
 static gboolean
@@ -138,7 +138,7 @@ zmq_sd_init(LogPipe *s)
   }
   else
   {
-    if (!zmq_sd_create_context(self))
+    if (!zmq_sd_connect(self))
       return FALSE;
     zmq_sd_create_reader(s);
   }
@@ -232,7 +232,7 @@ zmq_sd_new(GlobalConfig *cfg)
   self->super.super.super.notify = zmq_sd_notify;
   self->super.super.super.free_fn = zmq_sd_free;
 
-  zmq_sd_set_address((LogDriver *) self, "localhost");
+  zmq_sd_set_host((LogDriver *) self, "localhost");
   zmq_sd_set_port((LogDriver *) self, 5558);
 
   log_reader_options_defaults(&self->reader_options);

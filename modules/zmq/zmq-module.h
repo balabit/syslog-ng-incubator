@@ -40,7 +40,7 @@ typedef struct _ZMQSourceDriver
   void* context;
   void* socket;
 
-  gchar *address;
+  gchar *host;
   gint port;
 
 } ZMQSourceDriver;
@@ -66,10 +66,10 @@ typedef struct _ZMQDestDriver
 LogDriver *zmq_sd_new(GlobalConfig *cfg);
 LogDriver *zmq_dd_new(GlobalConfig *cfg);
 
-void      zmq_sd_set_address(LogDriver *source, const gchar *address);
+void      zmq_sd_set_host(LogDriver *source, const gchar *host);
 void      zmq_sd_set_port(LogDriver *source, gint port);
 gchar*    zmq_sd_get_address(ZMQSourceDriver* self);
-gboolean  zmq_sd_create_zmq_context(ZMQSourceDriver* self);
+gboolean  zmq_sd_connect(ZMQSourceDriver* self);
 gchar*    zmq_sd_get_persist_name(ZMQSourceDriver* self);
 LogDriver *zmq_sd_new(GlobalConfig *cfg);
 
