@@ -76,13 +76,6 @@ zmq_dest_option
             CHECK_ERROR($3 > 0 && $3 < 65535, @3, "Port is out of range!\n");
             zmq_dd_set_port(last_driver, $3);
           }
-        | KW_SOCKET_TYPE '(' string ')'
-          {
-            CHECK_ERROR(zmq_dd_set_socket_type(last_driver, $3), @3,
-                        "Unknown zmq socket type: %s", $3);
-            free($3);
-          }
-
         | KW_TEMPLATE '(' string ')'
           {
             zmq_dd_set_template(last_driver, $3);

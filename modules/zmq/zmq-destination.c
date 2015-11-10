@@ -29,43 +29,29 @@
 #define SCS_ZMQ 0
 #endif
 
-void zmq_dd_set_port(LogDriver *destination, gint port);
-gboolean zmq_dd_set_socket_type(LogDriver *destination, gchar *socket_type);
-void zmq_dd_set_template(LogDriver *destination, gchar *template);
+void zmq_dd_set_address(LogDriver *d, const gchar *address);
+void zmq_dd_set_port(LogDriver *d, gint port);
+void zmq_dd_set_template(LogDriver *d, gchar *template);
 
-/*
- * Configuration
- */
 void
-zmq_dd_set_port(LogDriver *destination, gint port)
-{
-  ZMQDestDriver *self = (ZMQDestDriver *)destination;
-  self->port = g_strdup_printf("%d", port);
-}
-
-gboolean
-zmq_dd_set_socket_type(LogDriver *destination, gchar *socket_type)
-{
-  ZMQDestDriver *self = (ZMQDestDriver *)destination;
-
-  // ZMQ_PUB, ZMQ_REQ, ZMQ_PUSH
-  if (strcmp(socket_type, "publish") == 0)
-    self->socket_type = ZMQ_PUB;
-  else if (strcmp(socket_type, "request") == 0)
-    self->socket_type = ZMQ_REQ;
-  else if (strcmp(socket_type, "push") == 0)
-    self->socket_type = ZMQ_PUSH;
-  else
-    return FALSE;
-
-  return TRUE;
+zmq_dd_set_address(LogDriver *d, const gchar *address){
+    ZMQDestDriver *self = (ZMQDestDriver *)d;
+    g_free(self->address);
+    self->address = g_strdup(address);
 }
 
 void
-zmq_dd_set_template(LogDriver *destination, gchar *template)
+zmq_dd_set_port(LogDriver *d, gint port)
 {
-  ZMQDestDriver *self = (ZMQDestDriver *)destination;
-  GlobalConfig* cfg = log_pipe_get_config(&destination->super);
+  ZMQDestDriver *self = (ZMQDestDriver *)d;
+  self->port = port;
+}
+
+void
+zmq_dd_set_template(LogDriver *d, gchar *template)
+{
+  ZMQDestDriver *self = (ZMQDestDriver *)d;
+  GlobalConfig* cfg = log_pipe_get_config(&d->super);
   self->template = log_template_new(cfg, NULL);
   log_template_compile(self->template, template, NULL);
 }
@@ -76,10 +62,6 @@ zmq_dd_get_template_options(LogDriver *d)
   ZMQDestDriver *self = (ZMQDestDriver *)d;
   return &self->template_options;
 }
-
-/*
- * Utilities
- */
 
 static gchar *
 zmq_dd_format_stats_instance(LogThrDestDriver *d)
@@ -99,51 +81,53 @@ zmq_dd_format_persist_name(LogThrDestDriver *d)
   return persist_name;
 }
 
-static gboolean
-zmq_dd_connect(ZMQDestDriver *self, gboolean reconnect)
+gchar *
+zmq_dd_get_address(ZMQDestDriver* self)
 {
-  gboolean bind_result = TRUE;
-  self->context = zmq_ctx_new();
-  self->socket = zmq_socket(self->context, self->socket_type);
+  return g_strdup_printf("tcp://%s:%d", self->address, self->port);
+}
 
-  gchar *connection_string = g_strconcat("tcp://*:", self->port, NULL);
+gboolean
+zmq_dd_connect(ZMQDestDriver *self)
+{
+  gboolean result = TRUE;
+  self->context = zmq_ctx_new();
+  self->socket = zmq_socket(self->context, ZMQ_PUSH);
+
+  gchar *connection_string = zmq_dd_get_address(self);
 
   if (zmq_bind(self->socket, connection_string) == 0)
   {
-    msg_verbose("Succesfully bind!", evt_tag_str("Port", self->port), NULL);
-    bind_result = TRUE;
+    msg_verbose("Succesfully bind!", evt_tag_int("Port", self->port), NULL);
+    result = TRUE;
   }
   else
   {
-    msg_verbose("Failed to bind!", evt_tag_str("Port", self->port), NULL);
-    bind_result = FALSE;
+    msg_verbose("Failed to bind!", evt_tag_int("Port", self->port), NULL);
+    result = FALSE;
   }
 
   g_free(connection_string);
-  return bind_result;
+  return result;
 }
 
 static void
-zmq_dd_disconnect(LogThrDestDriver *destination)
+zmq_dd_disconnect(LogThrDestDriver *d)
 {
-  ZMQDestDriver *self = (ZMQDestDriver *)destination;
+  ZMQDestDriver *self = (ZMQDestDriver *)d;
   zmq_close(self->socket);
   zmq_ctx_destroy(self->context);
 }
 
-/*
- * Worker thread
- */
-
 static worker_insert_result_t
-zmq_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
+zmq_worker_insert(LogThrDestDriver *d, LogMessage *msg)
 {
-  ZMQDestDriver *self = (ZMQDestDriver *)destination;
+  ZMQDestDriver *self = (ZMQDestDriver *)d;
   GString *result = g_string_new("");
 
   if (self->socket == NULL)
   {
-    if (!zmq_dd_connect(self, FALSE))
+    if (!zmq_dd_connect(self))
     {
       return WORKER_INSERT_RESULT_ERROR;
     }
@@ -159,53 +143,46 @@ zmq_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
   }
   else
   {
-    return WORKER_INSERT_RESULT_SUCCESS;;
+    g_string_free(result, TRUE);
+    return WORKER_INSERT_RESULT_SUCCESS;
   }
 }
 
 static void
-zmq_worker_thread_init(LogThrDestDriver *destination)
+zmq_worker_thread_init(LogThrDestDriver *d)
 {
-  ZMQDestDriver *self = (ZMQDestDriver *)destination;
+  ZMQDestDriver *self = (ZMQDestDriver *)d;
 
   msg_debug("Worker thread started",
             evt_tag_str("driver", self->super.super.super.id),
             NULL);
 
-  zmq_dd_connect(self, FALSE);
+  zmq_dd_connect(self);
 }
 
-/*
- * Main thread
- */
-
 gboolean
-zmq_dd_init(LogPipe *destination)
+zmq_dd_init(LogPipe *d)
 {
-  ZMQDestDriver *self = (ZMQDestDriver *)destination;
-  GlobalConfig *cfg = log_pipe_get_config(destination);
+  ZMQDestDriver *self = (ZMQDestDriver *)d;
+  GlobalConfig *cfg = log_pipe_get_config(d);
 
   log_template_options_init(&self->template_options, cfg);
 
-  log_dest_driver_init_method(destination);
+  log_dest_driver_init_method(d);
 
   msg_verbose("Initializing ZeroMQ destination",
               evt_tag_str("driver", self->super.super.super.id),
               NULL);
 
-  log_threaded_dest_driver_start(destination);
+  log_threaded_dest_driver_start(d);
   return TRUE;
 }
 
 static void
-zmq_dd_free(LogPipe *destination)
+zmq_dd_free(LogPipe *d)
 {
-  log_threaded_dest_driver_free(destination);
+  log_threaded_dest_driver_free(d);
 }
-
-/*
- * Plugin glue.
- */
 
 LogDriver *
 zmq_dd_new(GlobalConfig *cfg)
@@ -225,7 +202,6 @@ zmq_dd_new(GlobalConfig *cfg)
   self->super.stats_source = SCS_ZMQ;
 
   zmq_dd_set_port((LogDriver *) self, 5556);
-  zmq_dd_set_socket_type((LogDriver *) self, "push");
   zmq_dd_set_template((LogDriver *) self, "${MESSAGE}");
 
   init_sequence_number(&self->seq_num);
