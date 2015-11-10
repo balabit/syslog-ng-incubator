@@ -72,15 +72,16 @@ create_reader(LogPipe *s)
   log_reader_reopen(self->reader, proto, poll_events);
 }
 
-static gchar *
+gchar *
 get_address(ZMQSourceDriver* self)
 {
   return g_strdup_printf("tcp://%s:%d", self->address, self->port);
 }
 
-static inline gboolean
+gboolean
 create_zmq_context(ZMQSourceDriver* self)
 {
+  errno = 0;
   self->context = zmq_ctx_new();
   self->socket = zmq_socket(self->context, ZMQ_PULL);
 
@@ -103,7 +104,7 @@ create_zmq_context(ZMQSourceDriver* self)
   return TRUE;
 }
 
-static inline gchar*
+gchar*
 get_persist_name(ZMQSourceDriver* self)
 {
     return g_strdup_printf("zmq_source:%s:%d", self->address, self->port);
@@ -167,7 +168,7 @@ static void
 zmq_socket_deinit(ZMQReaderContext* reader_context)
 {
   log_pipe_unref((LogPipe *) reader_context->reader);
-  zmq_ctx_destroy(reader_context->context);
+  zmq_ctx_term(reader_context->context);
   g_free(reader_context);
 }
 

@@ -67,6 +67,9 @@ LogDriver *zmq_dd_new(GlobalConfig *cfg);
 
 void zmq_sd_set_address(LogDriver *source, const gchar *address);
 void zmq_sd_set_port(LogDriver *source, gint port);
+gchar* get_address(ZMQSourceDriver* self);
+gboolean create_zmq_context(ZMQSourceDriver* self);
+gchar* get_persist_name(ZMQSourceDriver* self);
 LogDriver *zmq_sd_new(GlobalConfig *cfg);
 
 void zmq_dd_set_port(LogDriver *destination, gint port);
