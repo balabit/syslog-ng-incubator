@@ -55,7 +55,7 @@ perl_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 const ModuleInfo module_info =
 {
   .canonical_name = "perl",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "The perl module provides Perl scripted destination support for syslog-ng.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = &perl_plugin,

@@ -46,7 +46,7 @@ grok_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 const ModuleInfo module_info =
 {
   .canonical_name = "grok",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "Experimental grok parser.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = &grok_plugin,
