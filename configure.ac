@@ -250,6 +250,9 @@ dnl ***************************************************************************
 
 INCUBATOR_CHECK_DEP(zmq,[PKG_CHECK_MODULES(ZMQ_CLIENT, libzmq >= $ZMQ_MIN_VERSION, zmq_found="yes", zmq_found="no")])
 
+if test "x$enable_native" = "xyes" -o "x$enable_native" = "xauto"; then
+    AC_CONFIG_FILES([syslog-ng-native-connector.pc])
+fi
 dnl ***************************************************************************
 dnl create common cflags/libs for incubator modules.
 dnl ***************************************************************************
