@@ -538,7 +538,7 @@ kafka_module_init(GlobalConfig *cfg, CfgArgs *args)
 const ModuleInfo module_info =
 {
   .canonical_name = "kafka",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "The afkafka module provides Kafka destination support for syslog-ng.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = &kafka_plugin,

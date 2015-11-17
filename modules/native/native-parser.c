@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2015 BalaBit
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,34 +20,31 @@
  *
  */
 
-#include "grok-parser.h"
-#include "grok-parser-parser.h"
+#include "cfg-parser.h"
+#include "logpipe.h"
+#include "parser.h"
+#include "native-grammar.h"
 
-#include "plugin.h"
-#include "plugin-types.h"
+extern int native_debug;
 
-extern CfgParser grok_parser;
+__attribute__((__visibility__("hidden"))) int native_parse(CfgLexer *lexer, LogParser **instance, gpointer arg);
 
-static Plugin grok_plugin =
+static CfgLexerKeyword native_keywords[] = {
+  { "option",   KW_OPTION },
+  { NULL }
+};
+ 
+__attribute__((__visibility__("hidden"))) CfgParser native_parser =
 {
-  .type = LL_CONTEXT_PARSER,
-  .name = "grok",
-  .parser = &grok_parser,
+#if ENABLE_DEBUG
+  .debug_flag = &native_debug,
+#endif
+  .context = LL_IDENTIFIER,
+  .name = "native-module",
+  .keywords = native_keywords,
+  .parse = (gint (*)(CfgLexer *, gpointer *, gpointer)) native_parse,
+  .cleanup = (void (*)(gpointer)) log_pipe_unref,
 };
 
-gboolean
-grok_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
-{
-  plugin_register(cfg, &grok_plugin, 1);
-  return TRUE;
-}
+CFG_PARSER_IMPLEMENT_LEXER_BINDING(native_, LogParser **)
 
-const ModuleInfo module_info =
-{
-  .canonical_name = "grok",
-  .version = SYSLOG_NG_VERSION,
-  .description = "Experimental grok parser.",
-  .core_revision = VERSION_CURRENT_VER_ONLY,
-  .plugins = &grok_plugin,
-  .plugins_len = 1,
-};

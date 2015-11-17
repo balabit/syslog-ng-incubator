@@ -182,7 +182,7 @@ getent_plugin_module_init(GlobalConfig *cfg, CfgArgs *args)
 const ModuleInfo module_info =
 {
   .canonical_name = "getent-plugin",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "The getent module provides getent template functions for syslog-ng.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = getent_plugins,

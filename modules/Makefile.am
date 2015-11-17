@@ -9,3 +9,4 @@ include modules/kafka/Makefile.am
 include modules/zmq/Makefile.am
 include modules/grok/Makefile.am
 include modules/date/Makefile.am
+include modules/native/Makefile.am

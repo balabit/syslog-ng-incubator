@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2013 BalaBit IT Ltd, Budapest, Hungary
- * Copyright (c) 2013 Gergely Nagy <algernon@balabit.hu>
+ * Copyright (c) 2015 BalaBit
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 as published
@@ -21,34 +20,14 @@
  *
  */
 
-#include "grok-parser.h"
-#include "grok-parser-parser.h"
+#ifndef FILTER_NATIVE_PARSER_H_INCLUDED
+#define FILTER_NATIVE_PARSER_H_INCLUDED
 
-#include "plugin.h"
-#include "plugin-types.h"
+#include "cfg-parser.h"
+#include "cfg-lexer.h"
+#include "parser/parser-expr.h"
 
-extern CfgParser grok_parser;
+CFG_PARSER_DECLARE_LEXER_BINDING(native_, LogParser **)
 
-static Plugin grok_plugin =
-{
-  .type = LL_CONTEXT_PARSER,
-  .name = "grok",
-  .parser = &grok_parser,
-};
+#endif
 
-gboolean
-grok_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
-{
-  plugin_register(cfg, &grok_plugin, 1);
-  return TRUE;
-}
-
-const ModuleInfo module_info =
-{
-  .canonical_name = "grok",
-  .version = SYSLOG_NG_VERSION,
-  .description = "Experimental grok parser.",
-  .core_revision = VERSION_CURRENT_VER_ONLY,
-  .plugins = &grok_plugin,
-  .plugins_len = 1,
-};

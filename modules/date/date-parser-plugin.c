@@ -46,7 +46,7 @@ date_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 const ModuleInfo module_info =
 {
   .canonical_name = "date",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "Experimental date parser.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = &date_plugin,

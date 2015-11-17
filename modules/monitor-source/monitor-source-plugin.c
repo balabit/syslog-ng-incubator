@@ -47,7 +47,7 @@ monitor_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 const ModuleInfo module_info =
 {
   .canonical_name = "monitor",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "The monitor module provides stuff.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = &monitor_plugin,

@@ -90,6 +90,10 @@ AC_ARG_ENABLE(zmq,
 
 AC_ARG_ENABLE(date, [ --enable-date  Enable date parser (default: yes)],, enable_date="yes")
 
+AC_ARG_ENABLE(native,
+              [  --enable-native        Enable native bindings (default: auto)]
+              ,,enable_native="auto")
+
 dnl ***************************************************************************
 dnl Checks for programs.
 AC_PROG_YACC
@@ -246,6 +250,9 @@ dnl ***************************************************************************
 
 INCUBATOR_CHECK_DEP(zmq,[PKG_CHECK_MODULES(ZMQ_CLIENT, libzmq >= $ZMQ_MIN_VERSION, zmq_found="yes", zmq_found="no")])
 
+if test "x$enable_native" = "xyes" -o "x$enable_native" = "xauto"; then
+    AC_CONFIG_FILES([syslog-ng-native-connector.pc])
+fi
 dnl ***************************************************************************
 dnl create common cflags/libs for incubator modules.
 dnl ***************************************************************************
@@ -283,6 +290,7 @@ AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
 AM_CONDITIONAL(ENABLE_DATE, [test "$enable_date" = "yes"])
+AM_CONDITIONAL(ENABLE_NATIVE, [test "$enable_native" = "yes"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -304,4 +312,5 @@ echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
 echo "  grok-parser          ${enable_grok}"
 echo "  date-parser          ${enable_date}"
+echo "  native bindings      ${enable_native:=no}"
 echo
