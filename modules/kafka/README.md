@@ -21,7 +21,7 @@ destination d_kafka {
     };
     destination {
       kafka(properties(metadata.broker.list("localhost:9092")
-                       queue.buffering.max.ms("1"))
+                       queue.buffering.max.ms("1000"))
             topic("syslog-ng")
             payload("$(format-json --key .eventv1.* --rekey .eventv1.* --shift 9)"));
     };
