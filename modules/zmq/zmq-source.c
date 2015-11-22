@@ -139,7 +139,11 @@ zmq_sd_init(LogPipe *s)
   else
   {
     if (!zmq_sd_connect(self))
+    {
+      zmq_ctx_term(self->context);
+      zmq_close(self->socket);
       return FALSE;
+    }
     zmq_sd_create_reader(s);
   }
 
@@ -157,7 +161,8 @@ zmq_sd_init(LogPipe *s)
     msg_error("Error initializing log_reader", NULL);
     log_pipe_unref((LogPipe *) self->reader);
     self->reader = NULL;
-
+    zmq_ctx_term(self->context);
+    zmq_close(self->socket);
     return FALSE;
   }
 
@@ -181,6 +186,7 @@ zmq_sd_deinit(LogPipe *s)
   ZMQReaderContext* reader_context = g_new0(ZMQReaderContext, 1);
   reader_context->context = self->context;
   reader_context->reader = self->reader;
+
   if (self->reader)
   {
     log_pipe_deinit((LogPipe *) self->reader);
