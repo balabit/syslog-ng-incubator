@@ -34,7 +34,14 @@ static gssize
 log_transport_zmq_read_method(LogTransport *s, gpointer buf, gsize buflen, LogTransportAuxData *aux)
 {
   LogTransportZMQ *self = (LogTransportZMQ *) s;
-  return zmq_recv(self->socket, buf, buflen, ZMQ_DONTWAIT);
+  gint rc = zmq_recv(self->socket, buf, buflen, ZMQ_DONTWAIT);
+
+  if (rc == -1) {
+    return rc;
+  }
+
+  errno = 0;
+  return rc;
 }
 
 static gssize
