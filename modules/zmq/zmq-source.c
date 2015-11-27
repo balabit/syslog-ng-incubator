@@ -21,6 +21,7 @@
  *
  */
 
+
 #include <zmq.h>
 
 #include "zmq-module.h"
@@ -225,6 +226,14 @@ zmq_sd_free(LogPipe *s)
   log_src_driver_free(s);
 }
 
+static void
+zmq_sd_queue(LogPipe *s, LogMessage *msg, const LogPathOptions *path_options, gpointer user_data)
+{
+  LogPathOptions *path_opt = path_options;
+  path_opt->ack_needed = FALSE;
+  log_src_driver_queue_method(s, msg, path_opt, user_data);
+}
+
 LogDriver *
 zmq_sd_new(GlobalConfig *cfg)
 {
@@ -233,6 +242,7 @@ zmq_sd_new(GlobalConfig *cfg)
   log_src_driver_init_instance(&self->super, cfg);
 
   self->super.super.super.init = zmq_sd_init;
+  self->super.super.super.queue = zmq_sd_queue;
   self->super.super.super.deinit = zmq_sd_deinit;
   self->super.super.super.notify = zmq_sd_notify;
   self->super.super.super.free_fn = zmq_sd_free;
