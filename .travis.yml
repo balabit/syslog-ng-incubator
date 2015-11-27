@@ -1,7 +1,7 @@
 language: c
 install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq curl
+  - sudo apt-get install -qq curl git wget
   - wget http://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/xUbuntu_12.04/Release.key
   - sudo apt-key add Release.key
   - rm -rf Release.key
@@ -11,11 +11,13 @@ install:
   - sudo sh -c 'echo "deb http://download.opensuse.org/repositories/home:/viktorjuhasz/xUbuntu_12.04/ ./" >> /etc/apt/sources.list'
   - sudo apt-get update -qq
   - sudo apt-get install -qq aptitude
-  - sudo aptitude install -q -y pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-dev libperl-dev python-dev python3-dev libgrok-dev libtokyocabinet-dev libzmq3-dev librdkafka-dev
-  - git clone https://github.com/lmesz/syslog-ng
+  - sudo aptitude install -q -y autoconf libtool build-essential pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-core syslog-ng-dev libperl-dev python-dev python3-dev libgrok-dev libtokyocabinet-dev libzmq3-dev librdkafka-dev
+  - git clone https://github.com/lmesz/syslog-ng && cd syslog-ng && git checkout remove-fix-relative-path-of-syslog-ng-in-func-test
 before_script:
   - autoreconf -i
 script:
+  - ./configure
+  - make && make func-test
   - travis/build
 compiler:
   - gcc
