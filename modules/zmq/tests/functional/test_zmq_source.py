@@ -1,2 +1,7 @@
+#!/usr/bin/env python
 
-#from control import *
+import os
+import sys
+
+sys.path.append(os.environ['func_test_dir'])
+from control import *

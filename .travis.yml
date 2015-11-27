@@ -12,6 +12,7 @@ install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq aptitude
   - sudo aptitude install -q -y pkg-config flex bison liblua5.2-dev libmongo-client-dev syslog-ng-dev libperl-dev python-dev python3-dev libgrok-dev libtokyocabinet-dev libzmq3-dev librdkafka-dev
+  - git clone https://github.com/lmesz/syslog-ng
 before_script:
   - autoreconf -i
 script:
