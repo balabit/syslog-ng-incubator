@@ -115,7 +115,7 @@ void
 zmq_dd_disconnect(LogThrDestDriver *d)
 {
   ZMQDestDriver *self = (ZMQDestDriver *)d;
-  zmq_ctx_term(self->context);
+  zmq_ctx_destroy(self->context);
 }
 
 gboolean
