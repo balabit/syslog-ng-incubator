@@ -2,8 +2,7 @@ export top_srcdir
 export top_builddir
 
 EXTRA_DIST	+= \
-		tests/functional/runtests.sh \
-		tests/functional/func_test.py
+		modules/zmq/tests/functional/runtests.sh
 
 func-test:
 	@$(top_srcdir)/modules/zmq/tests/functional/runtests.sh
