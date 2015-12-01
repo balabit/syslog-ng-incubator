@@ -6,5 +6,3 @@ EXTRA_DIST	+= \
 
 func-test:
 	@$(top_srcdir)/modules/zmq/tests/functional/runtests.sh
-
-.PHONY: func-test
