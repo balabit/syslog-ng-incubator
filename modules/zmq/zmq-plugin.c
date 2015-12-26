@@ -59,8 +59,8 @@ const ModuleInfo module_info =
 {
   .canonical_name = "zmq",
   .version = VERSION,
-  .description = "The zmq module provides ZeroMQ destination support for syslog-ng.",
-  .core_revision = "Dummy Revision",
+  .description = "The zmq module provides ZeroMQ source and destination support for syslog-ng.",
+  .core_revision = "",
   .plugins = zmq_plugins,
   .plugins_len = G_N_ELEMENTS(zmq_plugins),
 };
