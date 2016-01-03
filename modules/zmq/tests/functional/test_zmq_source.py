@@ -9,7 +9,7 @@ from control import *
 from func_test import *
 
 conf = """
-@version: 3.7
+@version: 3.8
 
 source zmq {
     zmqq();
