@@ -24,6 +24,7 @@
 #include <zmq.h>
 
 #include "zmq-module.h"
+#include "misc.h"
 
 #ifndef SCS_ZMQ
 #define SCS_ZMQ 0
