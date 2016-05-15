@@ -35,6 +35,7 @@ LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
 LUA_MIN_VERSION="5.1.4"
 ZMQ_MIN_VERSION="3.1.1"
+LIBWEBSOCKETS_MIN_VERSION="1.2.2"
 
 dnl ***************************************************************************
 dnl Initial setup
@@ -89,6 +90,10 @@ AC_ARG_ENABLE(zmq,
    ,enable_zmq="auto")
 
 AC_ARG_ENABLE(date, [ --enable-date  Enable date parser (default: yes)],, enable_date="yes")
+
+AC_ARG_ENABLE(websocket,
+   [  --enable-websocket        Enable websocket source and destination ],
+   ,enable_websocket="auto")
 
 dnl ***************************************************************************
 dnl Checks for programs.
@@ -247,6 +252,12 @@ dnl ***************************************************************************
 INCUBATOR_CHECK_DEP(zmq,[PKG_CHECK_MODULES(ZMQ_CLIENT, libzmq >= $ZMQ_MIN_VERSION, zmq_found="yes", zmq_found="no")])
 
 dnl ***************************************************************************
+dnl websocket headers/libraries
+dnl ***************************************************************************
+
+INCUBATOR_CHECK_DEP(websocket, [PKG_CHECK_MODULES(LIBWEBSOCKETS, libwebsockets >= $LIBWEBSOCKETS_MIN_VERSION, websockets_found="yes", websockets_found="no")])
+
+dnl ***************************************************************************
 dnl create common cflags/libs for incubator modules.
 dnl ***************************************************************************
 
@@ -281,6 +292,7 @@ AM_CONDITIONAL(ENABLE_LUA, [test "$enable_lua" != "no"])
 AM_CONDITIONAL(ENABLE_PERL, [test "$enable_perl" != "no"])
 AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
+AM_CONDITIONAL(ENABLE_WEBSOCKET, [test "$enable_websocket" != "no"])
 AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
 AM_CONDITIONAL(ENABLE_DATE, [test "$enable_date" = "yes"])
 
@@ -302,6 +314,7 @@ echo "  rss                  yes"
 echo "  trigger-source       yes"
 echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
+echo "  websocket            ${enable_websocket:=no}"
 echo "  grok-parser          ${enable_grok}"
 echo "  date-parser          ${enable_date}"
 echo
