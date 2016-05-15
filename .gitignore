@@ -29,3 +29,15 @@
 
 /b/
 /build/
+
+modules/*/*.o
+modules/*/*.lo
+modules/*/*.la
+modules/*/*-grammar.c
+modules/*/*-grammar.h
+modules/*/*-grammar.y
+modules/*/.deps/
+modules/*/.dirstamp
+modules/*/.libs/
+tools/*/.deps/
+tools/*/.dirstamp
