@@ -33,7 +33,6 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
   struct per_session_data *psd = (struct per_session_data *) user;
   int n, m;
 
-  printf("Reason: %d\n", reason);
 	switch( reason )
 	{
     case LWS_CALLBACK_ESTABLISHED:
@@ -66,7 +65,7 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
 			break;
 
     case LWS_CALLBACK_RECEIVE:
-
+      lwsl_notice("Message recieved from the client: %s\n", in);
       if (ringbuffer[ringbuffer_head].payload)
         free(ringbuffer[ringbuffer_head].payload);
 
@@ -80,7 +79,7 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
       break;
 
 		default:
-      printf("Reason %d not handled!!!\n", reason);
+      lwsl_notice("Reason %d not handled.\n", reason);
 			break;
 	}
 

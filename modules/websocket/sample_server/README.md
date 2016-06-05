@@ -8,9 +8,18 @@ messages.  The server can act like a chat room.
 
 First run code below to start the test server
 ```
-make test
+make test-server
 ```
+
+And open another terminal and run test client 
+```
+make test-client
+```
+
 
 Open your browser and open the link http://localhost:8000/ and click the "Connect"
 button to begin receive log.  Typing some messages in the first editable
 textarea and click the "send" button, you will send message to other clients.
+
+
+Then you can find that the test-client is interacting with the browser client.
