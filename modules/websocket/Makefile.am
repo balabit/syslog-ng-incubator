@@ -3,7 +3,8 @@ if ENABLE_WEBSOCKET
 module_LTLIBRARIES += modules/websocket/libwebsocket.la
 modules_websocket_libwebsocket_la_CFLAGS = \
     $(SYSLOG_NG_CFLAGS) \
-    -I$(top_srcdir)/modules/websocket    \
+	$(LIBWEBSOCKETS_CFLAGS) \
+    -I$(top_srcdir)/modules/websocket \
     -I$(top_builddir)/modules/websocket
 
 modules_websocket_libwebsocket_la_SOURCES = \
@@ -12,10 +13,12 @@ modules_websocket_libwebsocket_la_SOURCES = \
     modules/websocket/websocket-destination.c \
     modules/websocket/websocket-destination.h \
     modules/websocket/websocket-parser.c \
-    modules/websocket/websocket-parser.h
+    modules/websocket/websocket-parser.h \
+    modules/websocket/client.c \
+    modules/websocket/client.h
 
 modules_websocket_libwebsocket_la_LIBADD      = \
-    $(INCUBATOR_LIBS)
+    $(INCUBATOR_LIBS) $(LIBWEBSOCKETS_LIBS)
 
 modules_websocket_libwebsocket_la_LDFLAGS = \
     -avoid-version -module -no-undefined

@@ -47,6 +47,8 @@
 %token KW_WEBSOCKET
 %token KW_ADDRESS
 %token KW_PORT
+%token KW_PROTOCOL
+%token KW_PATH
 %%
 
 start
@@ -72,6 +74,16 @@ websocket_dest_option
         | KW_ADDRESS '(' string ')'
           {
             websocket_dd_set_address(last_driver, $3);
+            free($3);
+          }
+        | KW_PROTOCOL '(' string ')'
+          {
+            websocket_dd_set_protocol(last_driver, $3);
+            free($3);
+          }
+        | KW_PATH '(' string ')'
+          {
+            websocket_dd_set_path(last_driver, $3);
             free($3);
           }
         | dest_driver_option

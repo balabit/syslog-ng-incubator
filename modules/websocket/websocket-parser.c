@@ -31,6 +31,8 @@ static CfgLexerKeyword websocket_keywords[] = {
   { "websocket",            KW_WEBSOCKET },
   { "address",        KW_ADDRESS },
   { "port",           KW_PORT },
+  { "protocol",           KW_PROTOCOL },
+  { "path",        KW_PATH },
   { NULL }
 };
 

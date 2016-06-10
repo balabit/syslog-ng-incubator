@@ -27,6 +27,7 @@ static struct lws* wsi;
 
 static int destroy_flag = 0;
 static int connection_flag = 0;
+pthread_t service_pid;
 
 
 // the message ring buffer
@@ -184,9 +185,7 @@ websocket_client_create(char* protocol, char* address, int port, char* path)
   if ((ret_code = set_wsi()) != 0)
     return ret_code;
 
-	pthread_t pid;
-	pthread_create(&pid, NULL, pthread_routine, NULL);
-	pthread_detach(pid);
+	pthread_create(&service_pid, NULL, pthread_routine, NULL);
 	return 0;
 }
 
@@ -212,5 +211,6 @@ websocket_client_disconnect()
   while (ringbuffer_head != ringbuffer_tail && !destroy_flag)
     usleep(20 * 1000);
   destroy_flag = 1;
+  pthread_join(service_pid, NULL);
 	lws_context_destroy(ccinfo.context);
 }

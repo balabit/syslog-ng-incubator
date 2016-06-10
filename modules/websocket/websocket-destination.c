@@ -22,6 +22,7 @@
  */
 
 #include "websocket-destination.h"
+#include "client.h"
 
 
 gboolean
@@ -39,6 +40,7 @@ websocket_dd_init(LogPipe *destination)
 }
 
 LogDriver *websocket_dd_new(GlobalConfig *cfg);
+
 void websocket_dd_set_port(LogDriver *destination, gint port) {
   WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
   self->port = port;
@@ -51,6 +53,20 @@ websocket_dd_set_address(LogDriver *destination, gchar *address) {
   self->address = g_strdup(address);
 }
 
+void
+websocket_dd_set_protocol(LogDriver *destination, gchar *protocol) {
+  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
+  g_free(self->protocol);
+  self->protocol = g_strdup(protocol);
+}
+
+void
+websocket_dd_set_path(LogDriver *destination, gchar *path) {
+  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
+  g_free(self->path);
+  self->path = g_strdup(path);
+}
+
 LogTemplateOptions *
 destination_dd_get_template_options(LogDriver *d)
 {
@@ -61,8 +77,14 @@ destination_dd_get_template_options(LogDriver *d)
 static void
 websocket_dd_free(LogPipe *destination)
 {
+  WebsocketDestDriver *self = (WebsocketDestDriver *) destination;
+  g_free(self->template);
+  g_free(self->address);
+  g_free(self->path);
+  g_free(self->protocol);
   log_threaded_dest_driver_free(destination);
 }
+
 
 static void
 websocket_worker_thread_init(LogThrDestDriver *destination)
@@ -73,21 +95,25 @@ websocket_worker_thread_init(LogThrDestDriver *destination)
             evt_tag_str("driver", self->super.super.super.id),
             NULL);
 
-  // TODO websocket_dd_connect(self, FALSE);
+  websocket_client_create(self->protocol, self->address, self->port, self->path);
 }
+
+
 
 static void
 websocket_dd_disconnect(LogThrDestDriver *destination)
 {
   WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
-  // TODO disconnect websocket
+  websocket_client_disconnect();
 }
 
 static worker_insert_result_t
 websocket_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
 {
   WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
-  msg_debug("Received", NULL);
+  GString *result = g_string_new("");
+  log_template_format(self->template, msg, &self->template_options, LTZ_LOCAL, self->super.seq_num, NULL, result);
+  websocket_client_send_msg(result->str);
   return WORKER_INSERT_RESULT_SUCCESS;;
 }
 
@@ -97,7 +123,8 @@ websocket_dd_format_stats_instance(LogThrDestDriver *d)
   static gchar persist_name[1024];
   WebsocketDestDriver *self = (WebsocketDestDriver *)d;
 
-  g_snprintf(persist_name, sizeof(persist_name), "websocket:%s:%d", self->address, self->port);
+  g_snprintf(persist_name, sizeof(persist_name), "websocket:%s:%d:%s:%s",
+    self->address, self->port, self->protocol, self->path);
   return persist_name;
 }
 
@@ -107,13 +134,15 @@ websocket_dd_format_persist_name(LogThrDestDriver *d)
   static gchar persist_name[1024];
   WebsocketDestDriver *self = (WebsocketDestDriver *)d;
 
-  g_snprintf(persist_name, sizeof(persist_name), "websocket:%s:%d", self->address, self->port);
+  g_snprintf(persist_name, sizeof(persist_name), "websocket:%s:%d:%s:%s",
+    self->address, self->port, self->protocol, self->path);
   return persist_name;
 }
 
 void
 websocket_dd_set_template(LogDriver *destination, gchar *template)
 {
+  // TODO  enable template setting in .ym file
   WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
   GlobalConfig* cfg = log_pipe_get_config(&destination->super);
   self->template = log_template_new(cfg, NULL);
@@ -144,8 +173,10 @@ websocket_dd_new(GlobalConfig *cfg)
   self->super.format.persist_name = websocket_dd_format_persist_name;
   self->super.stats_source = SCS_WEBSOCKET;
 
+  websocket_dd_set_protocol((LogDriver *) self, "");
   websocket_dd_set_port((LogDriver *) self, 7681);
   websocket_dd_set_address((LogDriver *) self, "127.0.0.1");
+  websocket_dd_set_path((LogDriver *) self, "/");
   websocket_dd_set_template((LogDriver *) self, "${MESSAGE}");
 
   return (LogDriver *)self;
