@@ -58,7 +58,7 @@ AC_ARG_ENABLE(lua,
    [  --disable-lua	       Disable lua based modules (lua-dest, monitoring source)],
    ,enable_lua="auto")
 
-AC_ARG_ENABLE(perl,	       
+AC_ARG_ENABLE(perl,
    [  --disable-perl	       Disable perl based modules (perl-dest)],
    ,enable_perl="auto")
 
@@ -255,7 +255,7 @@ dnl ***************************************************************************
 dnl websocket headers/libraries
 dnl ***************************************************************************
 
-INCUBATOR_CHECK_DEP(websocket, [PKG_CHECK_MODULES(LIBWEBSOCKETS, libwebsockets >= $LIBWEBSOCKETS_MIN_VERSION, websockets_found="yes", websockets_found="no")])
+INCUBATOR_CHECK_DEP(websocket, [PKG_CHECK_MODULES(LIBWEBSOCKETS, libwebsockets >= $LIBWEBSOCKETS_MIN_VERSION, websocket_found="yes", websocket_found="no")])
 
 dnl ***************************************************************************
 dnl create common cflags/libs for incubator modules.
