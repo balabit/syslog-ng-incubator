@@ -12,5 +12,8 @@ clean:
 test-server: server
 	./server
 
+debug-server: server
+	gdb ./server
+
 test-client: client
 	./client

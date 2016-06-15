@@ -33,6 +33,11 @@ static CfgLexerKeyword websocket_keywords[] = {
   { "port",           KW_PORT },
   { "protocol",           KW_PROTOCOL },
   { "path",        KW_PATH },
+  { "ssl",        KW_SSL },
+  { "cert",        KW_CERT },
+  { "key",        KW_KEY },
+  { "cacert",        KW_CACERT },
+  { "allow_self_signed",        KW_ALLOW_SELF_SIGNED },
   { "template",        KW_TEMPLATE },
   { NULL }
 };

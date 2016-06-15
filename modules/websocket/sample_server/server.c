@@ -9,22 +9,22 @@ static int ringbuffer_head;
 
 static int callback_http( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len )
 {
-	switch( reason )
-	{
-		case LWS_CALLBACK_HTTP:
-			lws_serve_http_file( wsi, "index.html", "text/html", NULL, 0 );
-			break;
-		default:
-			break;
-	}
+  switch( reason )
+  {
+    case LWS_CALLBACK_HTTP:
+      lws_serve_http_file( wsi, "index.html", "text/html", NULL, 0 );
+      break;
+    default:
+      break;
+  }
 
-	return 0;
+  return 0;
 }
 
 struct payload
 {
-	unsigned char data[LWS_SEND_BUFFER_PRE_PADDING + EXAMPLE_RX_BUFFER_BYTES + LWS_SEND_BUFFER_POST_PADDING];
-	size_t len;
+  unsigned char data[LWS_SEND_BUFFER_PRE_PADDING + EXAMPLE_RX_BUFFER_BYTES + LWS_SEND_BUFFER_POST_PADDING];
+  size_t len;
 } received_payload;
 
 static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len )
@@ -33,8 +33,8 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
   struct per_session_data *psd = (struct per_session_data *) user;
   int n, m;
 
-	switch( reason )
-	{
+  switch( reason )
+  {
     case LWS_CALLBACK_ESTABLISHED:
       lwsl_info("%s: LWS_CALLBACK_ESTABLISHED\n", __func__);
       psd->ringbuffer_tail = ringbuffer_head;
@@ -48,7 +48,7 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
           free(ringbuffer[n].payload);
       break;
 
-		case LWS_CALLBACK_SERVER_WRITEABLE:
+    case LWS_CALLBACK_SERVER_WRITEABLE:
       while (psd->ringbuffer_tail != ringbuffer_head) {
         m = ringbuffer[psd->ringbuffer_tail].len;
         n = lws_write(wsi, (unsigned char *)
@@ -62,7 +62,7 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
           lwsl_err("Write %d vs %d\n", n, m);
         psd->ringbuffer_tail = (psd->ringbuffer_tail + 1) % MAX_MESSAGE_QUEUE;
       }
-			break;
+      break;
 
     case LWS_CALLBACK_RECEIVE:
       lwsl_notice("Message recieved from the client: %s\n", in);
@@ -78,50 +78,59 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
                     lws_get_protocol(wsi));
       break;
 
-		default:
+    default:
       lwsl_notice("Reason %d not handled.\n", reason);
-			break;
-	}
+      break;
+  }
 
-	return 0;
+  return 0;
 }
 
 
 static struct lws_protocols protocols[] =
 {
-	/* The first protocol must always be the HTTP handler */
-	{
-		"http-only",   /* name */
-		callback_http, /* callback */
-		0,             /* No per session data. */
-		0,             /* max frame size / rx buffer */
-	},
-	{
-		"example-protocol",
-		callback_example,
-		sizeof(struct per_session_data),
-		EXAMPLE_RX_BUFFER_BYTES,
-	},
-	{ NULL, NULL, 0, 0 } /* terminator */
+  /* The first protocol must always be the HTTP handler */
+  {
+    "http-only",   /* name */
+    callback_http, /* callback */
+    0,             /* No per session data. */
+    0,             /* max frame size / rx buffer */
+  },
+  {
+    "example-protocol",
+    callback_example,
+    sizeof(struct per_session_data),
+    EXAMPLE_RX_BUFFER_BYTES,
+  },
+  { NULL, NULL, 0, 0 } /* terminator */
 };
 
 
 int main( int argc, char *argv[] )
 {
-	struct lws_context_creation_info info;
-	memset( &info, 0, sizeof(info) );
+  struct lws_context_creation_info info;
+  memset( &info, 0, sizeof(info) );
 
-	info.port = 8000;
-	info.protocols = protocols;
-	info.gid = -1;
-	info.uid = -1;
+  info.port = 8000;
+  info.protocols = protocols;
+  info.gid = -1;
+  info.uid = -1;
+  info.ssl_cert_filepath = NULL;
+  info.ssl_private_key_filepath = NULL;
+  info.ssl_ca_filepath = NULL;
 
-	struct lws_context *context = lws_create_context( &info );
+  /* if you want to the server serve as ssl, uncomment this line
+  info.ssl_cert_filepath = "/root/tmp/keys/server.crt";
+  info.ssl_private_key_filepath = "/root/tmp/keys/server.key";
+  info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;
+  */
 
-	while( 1 ) {
-		lws_service( context, 100 );
+  struct lws_context *context = lws_create_context( &info );
+
+  while( 1 ) {
+    lws_service( context, 100 );
   }
-	lws_context_destroy( context );
+  lws_context_destroy( context );
 
-	return 0;
+  return 0;
 }

@@ -49,6 +49,11 @@
 %token KW_PORT
 %token KW_PROTOCOL
 %token KW_PATH
+%token KW_SSL
+%token KW_CERT
+%token KW_KEY
+%token KW_CACERT
+%token KW_ALLOW_SELF_SIGNED
 %token KW_TEMPLATE
 %%
 
@@ -87,6 +92,10 @@ websocket_dest_option
             websocket_dd_set_path(last_driver, $3);
             free($3);
           }
+        | KW_SSL '(' websocket_ssl_options ')'
+          {
+            websocket_dd_set_enable_ssl(last_driver, TRUE);
+          }
         | KW_TEMPLATE '(' string ')'
           {
             websocket_dd_set_template(last_driver, $3);
@@ -94,6 +103,33 @@ websocket_dest_option
           }
         | dest_driver_option
         | { last_template_options = websocket_dd_get_template_options(last_driver); } template_option
+        ;
+
+websocket_ssl_options
+        : websocket_ssl_option websocket_ssl_options
+        |
+        ;
+
+websocket_ssl_option
+        : KW_CERT '(' string ')'
+          {
+            websocket_dd_set_cert(last_driver, $3);
+            free($3);
+          }
+        | KW_KEY '(' string ')'
+          {
+            websocket_dd_set_key(last_driver, $3);
+            free($3);
+          }
+        | KW_CACERT '(' string ')'
+          {
+            websocket_dd_set_cacert(last_driver, $3);
+            free($3);
+          }
+        | KW_ALLOW_SELF_SIGNED
+          {
+            websocket_dd_set_allow_self_signed(last_driver, TRUE);
+          }
         ;
 
 /* INCLUDE_RULES */

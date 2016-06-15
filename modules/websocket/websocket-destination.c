@@ -23,6 +23,7 @@
 
 #include "websocket-destination.h"
 #include "client.h"
+#include <stdio.h>
 
 
 gboolean
@@ -36,6 +37,10 @@ websocket_dd_init(LogPipe *destination)
 
   log_template_options_init(&self->template_options, cfg);
 
+  if (self->enable_ssl)
+    self->client_use_ssl_flag = self->allow_self_signed ? 2 : 1;
+  else
+    self->client_use_ssl_flag = 0;
   return log_threaded_dest_driver_start(destination);
 }
 
@@ -67,6 +72,43 @@ websocket_dd_set_path(LogDriver *destination, gchar *path) {
   self->path = g_strdup(path);
 }
 
+void websocket_dd_set_enable_ssl(LogDriver *destination, int flag) {
+  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
+  self->enable_ssl = flag;
+}
+
+void websocket_dd_set_cert(LogDriver *destination, gchar *path) {
+  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
+  g_free(self->cert);
+  self->cert = path == NULL ? NULL : g_strdup(path);
+}
+
+void websocket_dd_set_key(LogDriver *destination, gchar *path) {
+  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
+  g_free(self->key);
+  self->key = path == NULL ? NULL : g_strdup(path);
+}
+
+void websocket_dd_set_cacert(LogDriver *destination, gchar *path) {
+  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
+  g_free(self->cacert);
+  self->cacert = path == NULL ? NULL : g_strdup(path);
+}
+
+void websocket_dd_set_allow_self_signed(LogDriver *destination, int flag) {
+  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
+  self->allow_self_signed = flag;
+}
+
+void
+websocket_dd_set_template(LogDriver *destination, gchar *template)
+{
+  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
+  GlobalConfig* cfg = log_pipe_get_config(&destination->super);
+  self->template = log_template_new(cfg, NULL);
+  log_template_compile(self->template, template, NULL);
+}
+
 LogTemplateOptions *
 destination_dd_get_template_options(LogDriver *d)
 {
@@ -82,6 +124,9 @@ websocket_dd_free(LogPipe *destination)
   g_free(self->address);
   g_free(self->path);
   g_free(self->protocol);
+  g_free(self->cert);
+  g_free(self->key);
+  g_free(self->cacert);
   log_threaded_dest_driver_free(destination);
 }
 
@@ -95,9 +140,9 @@ websocket_worker_thread_init(LogThrDestDriver *destination)
             evt_tag_str("driver", self->super.super.super.id),
             NULL);
 
-  websocket_client_create(self->protocol, self->address, self->port, self->path);
+  websocket_client_create(self->protocol, self->address, self->port,
+    self->path, self->client_use_ssl_flag, self->cert, self->key, self->cacert);
 }
-
 
 
 static void
@@ -139,15 +184,6 @@ websocket_dd_format_persist_name(LogThrDestDriver *d)
   return persist_name;
 }
 
-void
-websocket_dd_set_template(LogDriver *destination, gchar *template)
-{
-  WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
-  GlobalConfig* cfg = log_pipe_get_config(&destination->super);
-  self->template = log_template_new(cfg, NULL);
-  log_template_compile(self->template, template, NULL);
-}
-
 LogTemplateOptions *
 websocket_dd_get_template_options(LogDriver *d)
 {
@@ -176,7 +212,12 @@ websocket_dd_new(GlobalConfig *cfg)
   websocket_dd_set_port((LogDriver *) self, 7681);
   websocket_dd_set_address((LogDriver *) self, "127.0.0.1");
   websocket_dd_set_path((LogDriver *) self, "/");
+  websocket_dd_set_enable_ssl((LogDriver *) self, FALSE);
+  websocket_dd_set_cert((LogDriver *) self, NULL);
+  websocket_dd_set_key((LogDriver *) self, NULL);
+  websocket_dd_set_cacert((LogDriver *) self, NULL);
   websocket_dd_set_template((LogDriver *) self, "${MESSAGE}");
+  websocket_dd_set_allow_self_signed((LogDriver *) self, FALSE);
 
   return (LogDriver *)self;
 }

@@ -35,6 +35,12 @@ typedef struct
   gchar *address;
   gchar *protocol;
   gchar *path;
+  gchar *cert;
+  gchar *key;
+  gchar *cacert;
+  int enable_ssl;
+  int allow_self_signed;
+  int client_use_ssl_flag;
   LogTemplateOptions template_options;
   LogTemplate *template;
 } WebsocketDestDriver;
@@ -44,5 +50,10 @@ void websocket_dd_set_port(LogDriver *driver, gint port);
 void websocket_dd_set_address(LogDriver *dirver, gchar *address);
 void websocket_dd_set_protocol(LogDriver *dirver, gchar *protocol);
 void websocket_dd_set_path(LogDriver *dirver, gchar *path);
+void websocket_dd_set_cert(LogDriver *dirver, gchar *path);
+void websocket_dd_set_key(LogDriver *dirver, gchar *path);
+void websocket_dd_set_cacert(LogDriver *dirver, gchar *path);
+void websocket_dd_set_enable_ssl(LogDriver *dirver, int flag);
+void websocket_dd_set_allow_self_signed(LogDriver *dirver, int flag);
 LogTemplateOptions * websocket_dd_get_template_options(LogDriver *d);
 #endif
