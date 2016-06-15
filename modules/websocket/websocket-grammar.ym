@@ -49,6 +49,7 @@
 %token KW_PORT
 %token KW_PROTOCOL
 %token KW_PATH
+%token KW_TEMPLATE
 %%
 
 start
@@ -84,6 +85,11 @@ websocket_dest_option
         | KW_PATH '(' string ')'
           {
             websocket_dd_set_path(last_driver, $3);
+            free($3);
+          }
+        | KW_TEMPLATE '(' string ')'
+          {
+            websocket_dd_set_template(last_driver, $3);
             free($3);
           }
         | dest_driver_option

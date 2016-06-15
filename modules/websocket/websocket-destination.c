@@ -142,7 +142,6 @@ websocket_dd_format_persist_name(LogThrDestDriver *d)
 void
 websocket_dd_set_template(LogDriver *destination, gchar *template)
 {
-  // TODO  enable template setting in .ym file
   WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
   GlobalConfig* cfg = log_pipe_get_config(&destination->super);
   self->template = log_template_new(cfg, NULL);
