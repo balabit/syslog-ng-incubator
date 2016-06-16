@@ -1,10 +1,19 @@
 
 
 # Websocket source and destination
+
+## Introduction
  The Websocket destination can send log messages to an WebSocket Server directly. In addition, this destination can also act as a WebSocket server, so the WebSocket client (such as a javascript client in a browser) could subscribe directly to it to get log messages. These will make sending log message privately or publicly much easier.
 A WebSocket source is also included.  It can receive log messages directly from WebSocket clients.
 
 
+## Installation
+If you want to compile syslog-ng-incubator with the websocket source and destination, you must have libwebsockets installed in your system.
+
+Please go to libwebsockets [official website](https://libwebsockets.org/) to download v2.0-stable and install it.
+
+
+## Configuration
 Here is an example of an destination example which act as a client
 ```
 @version: 3.7
@@ -27,6 +36,8 @@ destination ws_client_des {
         )
     );
 };
+
+log { source(s_system); destination(ws_client_des); };
 ```
 
 
@@ -48,7 +59,7 @@ This section will explain the options
 ## The client and server example
 I write a api wrapper for libwebsockets, so using libwebsockets will be much easier.
 
-Simple example can be found in `client_example.c` and `server_example.c`.
+Simple example can be found in `client_example.c` and `server_example.c`(TODO: this program is not provided so far.).
 
 The server example also include a http server by which users can send and view
 messages.  The server can act like a chat room.
@@ -68,3 +79,4 @@ button to begin receive log.  Typing some messages in the first editable
 textarea and click the "send" button, you will send message to other clients.
 
 Then you can find that the test-client is interacting with the browser client.
+

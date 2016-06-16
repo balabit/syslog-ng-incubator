@@ -35,7 +35,7 @@ LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
 LUA_MIN_VERSION="5.1.4"
 ZMQ_MIN_VERSION="3.1.1"
-LIBWEBSOCKETS_MIN_VERSION="1.2.2"
+LIBWEBSOCKETS_MIN_VERSION="2.0"
 
 dnl ***************************************************************************
 dnl Initial setup
