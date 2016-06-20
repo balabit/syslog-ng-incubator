@@ -105,6 +105,7 @@ websocket_dd_set_template(LogDriver *destination, gchar *template)
 {
   WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
   GlobalConfig* cfg = log_pipe_get_config(&destination->super);
+  g_free(self->template);
   self->template = log_template_new(cfg, NULL);
   log_template_compile(self->template, template, NULL);
 }
@@ -159,6 +160,7 @@ websocket_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
   GString *result = g_string_new("");
   log_template_format(self->template, msg, &self->template_options, LTZ_LOCAL, self->super.seq_num, NULL, result);
   websocket_client_send_msg(result->str);
+  g_string_free(result, TRUE);
   return WORKER_INSERT_RESULT_SUCCESS;;
 }
 

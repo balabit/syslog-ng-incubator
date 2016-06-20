@@ -199,6 +199,10 @@ websocket_client_send_msg(char* msg)
   //* waiting for connection with server done.*/
   while(!connection_flag && !destroy_flag)
     usleep(1000*20);
+  if (!connection_flag && destroy_flag) {
+    lwsl_notice("There are no connections. You can't send messages\n");
+    return;  // If we are not connected. We cant send the message
+  }
   int len = strlen(msg);
   ringbuffer[ringbuffer_head] = malloc(len + 1);
   memcpy(ringbuffer[ringbuffer_head], msg, len);
