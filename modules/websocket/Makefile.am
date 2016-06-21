@@ -14,8 +14,10 @@ modules_websocket_libwebsocket_la_SOURCES = \
     modules/websocket/websocket-destination.h \
     modules/websocket/websocket-parser.c \
     modules/websocket/websocket-parser.h \
-    modules/websocket/client.c \
-    modules/websocket/client.h
+    modules/websocket/ws_api/client.c \
+    modules/websocket/ws_api/client.h \
+    modules/websocket/ws_api/server.c \
+    modules/websocket/ws_api/server.h
 
 modules_websocket_libwebsocket_la_LIBADD      = \
     $(INCUBATOR_LIBS) $(LIBWEBSOCKETS_LIBS)

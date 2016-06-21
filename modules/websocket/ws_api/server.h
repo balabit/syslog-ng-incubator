@@ -8,7 +8,6 @@
 /**
  * websocket_server_create - create a server listening on specific port
  *
- * TODO: rewrite the document for the server api
  * @protocol websocket protocol name
  * @port     websocket server listening port
  * @use_ssl  If None-zero value is set, ssl will be used.

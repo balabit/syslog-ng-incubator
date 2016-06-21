@@ -13,6 +13,10 @@ If you want to compile syslog-ng-incubator with the websocket source and destina
 Please go to libwebsockets [official website](https://libwebsockets.org/) to download v2.0-stable and install it.
 
 
+## Test helper scripts
+There is some scripts which can help you test the module easier. Please refer to [README](test/README.md)
+
+
 ## Configuration
 Here is an example of an destination example which act as a client
 ```
@@ -59,7 +63,7 @@ This section will explain the options
 ## The client and server example
 I write a api wrapper for libwebsockets, so using libwebsockets will be much easier.
 
-Simple example can be found in `client_example.c` and `server_example.c`(TODO: this program is not provided so far.).
+Simple example can be found in `ws_api/client_example.c` and `ws_api/server_example.c`
 
 The server example also include a http server by which users can send and view
 messages.  The server can act like a chat room.
@@ -79,4 +83,3 @@ button to begin receive log.  Typing some messages in the first editable
 textarea and click the "send" button, you will send message to other clients.
 
 Then you can find that the test-client is interacting with the browser client.
-

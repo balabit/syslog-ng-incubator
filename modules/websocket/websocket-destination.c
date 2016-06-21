@@ -22,7 +22,7 @@
  */
 
 #include "websocket-destination.h"
-#include "client.h"
+#include "ws_api/client.h"
 #include <stdio.h>
 
 
