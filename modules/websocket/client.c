@@ -27,7 +27,7 @@ static struct lws* wsi;
 
 static int destroy_flag = 0;
 static int connection_flag = 0;
-pthread_t service_pid;
+static pthread_t service_pid;
 
 
 // the message ring buffer
@@ -200,7 +200,7 @@ websocket_client_send_msg(char* msg)
   while(!connection_flag && !destroy_flag)
     usleep(1000*20);
   if (!connection_flag && destroy_flag) {
-    lwsl_notice("There are no connections. You can't send messages\n");
+    lwsl_notice("The connection is closed. You can't send messages\n");
     return;  // If we are not connected. We cant send the message
   }
   int len = strlen(msg);
