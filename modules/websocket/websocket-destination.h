@@ -32,6 +32,7 @@ typedef struct
 {
   LogThrDestDriver super;
   int port;
+  gchar *mode;
   gchar *address;
   gchar *protocol;
   gchar *path;
@@ -46,6 +47,7 @@ typedef struct
 } WebsocketDestDriver;
 
 LogDriver *websocket_dd_new(GlobalConfig *cfg);
+void websocket_dd_set_mode(LogDriver *dirver, gchar *mode);
 void websocket_dd_set_port(LogDriver *driver, gint port);
 void websocket_dd_set_address(LogDriver *dirver, gchar *address);
 void websocket_dd_set_protocol(LogDriver *dirver, gchar *protocol);

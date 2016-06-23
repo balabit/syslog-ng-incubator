@@ -20,6 +20,8 @@
  * @key      (optional) the private key for the cert
  * @cacert   (optional) A CA cert and CRL can be used to validate the cert send
  *           by the server
+ *
+ * Return None-zero if errors occurred.
  */
 int
 websocket_client_create(char* protocol, char* address, int port, char* path, int use_ssl, char* cert, char* key, char* cacert);
@@ -34,8 +36,9 @@ websocket_client_disconnect();
  * websocket_client_send_msg - send message from the client to the server
  *
  * @msg - the message to send
+ *
+ * Return None-zero if errors occurred.
  */
-void
+int
 websocket_client_send_msg(char* msg);
-
 #endif

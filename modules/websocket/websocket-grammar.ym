@@ -45,6 +45,7 @@
 /* INCLUDE_DECLS */
 
 %token KW_WEBSOCKET
+%token KW_MODE
 %token KW_ADDRESS
 %token KW_PORT
 %token KW_PROTOCOL
@@ -72,7 +73,12 @@ websocket_dest_options
         ;
 
 websocket_dest_option
-        : KW_PORT '(' LL_NUMBER ')'
+        : KW_MODE '(' string ')'
+          {
+            websocket_dd_set_mode(last_driver, $3);
+            free($3);
+          }
+        | KW_PORT '(' LL_NUMBER ')'
           {
             CHECK_ERROR($3 > 0 && $3 < 65535, @3, "Port is out of range!\n");
             websocket_dd_set_port(last_driver, $3);

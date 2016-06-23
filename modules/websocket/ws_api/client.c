@@ -174,10 +174,7 @@ pthread_routine(void *pdata_in) {
   return NULL;
 }
 
-/**
- * create websocket client connection.
- * None-zero is returned if errors occurred.
- */
+
 int
 websocket_client_create(char* protocol, char* address, int port, char* path, int use_ssl, char* cert, char* key, char* cacert)
 {
@@ -193,7 +190,7 @@ websocket_client_create(char* protocol, char* address, int port, char* path, int
 }
 
 
-void
+int
 websocket_client_send_msg(char* msg)
 {
   //* waiting for connection with server done.*/
@@ -201,7 +198,7 @@ websocket_client_send_msg(char* msg)
     usleep(1000*20);
   if (!connection_flag && destroy_flag) {
     lwsl_notice("The connection is closed. You can't send messages\n");
-    return;  // If we are not connected. We cant send the message
+    return 1;  // If we are not connected. We cant send the message
   }
   int len = strlen(msg);
   ringbuffer[ringbuffer_head] = malloc(len + 1);
@@ -209,6 +206,7 @@ websocket_client_send_msg(char* msg)
   ringbuffer[ringbuffer_head][len] = '\0';
   ringbuffer_head = (ringbuffer_head + 1) % CLIENT_MAX_MESSAGE_QUEUE;
   lws_callback_on_writable(wsi);
+  return 0;
 }
 
 

@@ -14,6 +14,8 @@
  * @cert     (optional) The certificate of server
  * @key      (optional) the private key for the cert
  * @cacert   (optional) A CA cert.
+ *
+ * Return None-zero if errors occurred.
  */
 int
 websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert);
@@ -28,7 +30,9 @@ websocket_server_shutdown();
  * websocket_server_broadcast_msg - broadcast message to all client
  *
  * @msg - the message to send
+ *
+ * Return None-zero if errors occurred.
  */
-void
+int
 websocket_server_broadcast_msg(char* msg);
 #endif

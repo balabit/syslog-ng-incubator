@@ -27,7 +27,7 @@ source      s_system { system(); internal();};
 
 destination ws_client_des {
     websocket(
-        # mode("client")
+        mode("client")
         protocol("example-protocol")
         address("127.0.0.1")
         path("/")
@@ -48,6 +48,7 @@ log { source(s_system); destination(ws_client_des); };
 ## Options explanation
 This section will explain the options
 
+`mode`:              The mode of the destination. Only server mode and client mode are supported
 `protocol`:          websocket protocol
 `address`:           websocket server listening address
 `port`:              websocket server listening port
@@ -60,26 +61,7 @@ This section will explain the options
 
 
 
-## The client and server example
+## The websocket apis and examples
 I write a api wrapper for libwebsockets, so using libwebsockets will be much easier.
 
-Simple example can be found in `ws_api/client_example.c` and `ws_api/server_example.c`
-
-The server example also include a http server by which users can send and view
-messages.  The server can act like a chat room.
-
-First run code below to start the test server
-```
-make test-server
-```
-
-And open another terminal and run test client
-```
-make test-client
-```
-
-Open your browser and open the link http://localhost:8000/ and click the "Connect"
-button to begin receive log.  Typing some messages in the first editable
-textarea and click the "send" button, you will send message to other clients.
-
-Then you can find that the test-client is interacting with the browser client.
+More detailed description can be found in the [README](ws_api/README.md).

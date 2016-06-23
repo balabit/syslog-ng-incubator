@@ -154,13 +154,13 @@ websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char*
 }
 
 
-void
+int
 websocket_server_broadcast_msg(char* msg) {
   while(!listening && !destroy_flag)
     usleep(1000*20);
   if (!listening && destroy_flag) {
     lwsl_notice("The server has been shutdown. You can't broadcast messages\n");
-    return;  // If we are not connected. We cant send the message
+    return 1;  // If we are not connected. We cant send the message
   }
   lwsl_notice("broadcasting message: %s.\n", msg);
   int len=strlen(msg);
@@ -173,6 +173,7 @@ websocket_server_broadcast_msg(char* msg) {
          LWS_PRE, msg, len);
   ringbuffer_head = (ringbuffer_head + 1) % MAX_MESSAGE_QUEUE;
   lws_callback_on_writable_all_protocol(context, &protocols[1]);
+  return 0;
 }
 
 

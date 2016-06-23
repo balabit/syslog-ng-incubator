@@ -29,6 +29,7 @@ int websocket_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 
 static CfgLexerKeyword websocket_keywords[] = {
   { "websocket",            KW_WEBSOCKET },
+  { "mode",        KW_MODE },
   { "address",        KW_ADDRESS },
   { "port",           KW_PORT },
   { "protocol",           KW_PROTOCOL },
