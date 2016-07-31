@@ -202,7 +202,7 @@ websocket_dd_format_stats_instance(LogThrDestDriver *d)
   static gchar persist_name[1024];
   WebsocketDestDriver *self = (WebsocketDestDriver *)d;
 
-  g_snprintf(persist_name, sizeof(persist_name), "websocket:%s:%s:%d:%s:%s",
+  g_snprintf(persist_name, sizeof(persist_name), "websocket_dest:%s:%s:%d:%s:%s",
     self->mode, self->address, self->port, self->protocol, self->path);
   return persist_name;
 }
@@ -213,7 +213,7 @@ websocket_dd_format_persist_name(LogThrDestDriver *d)
   static gchar persist_name[1024];
   WebsocketDestDriver *self = (WebsocketDestDriver *)d;
 
-  g_snprintf(persist_name, sizeof(persist_name), "websocket:%s:%s:%d:%s:%s",
+  g_snprintf(persist_name, sizeof(persist_name), "websocket_dest:%s:%s:%d:%s:%s",
     self->mode, self->address, self->port, self->protocol, self->path);
   return persist_name;
 }

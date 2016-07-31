@@ -21,44 +21,11 @@
  *
  */
 
-#include "websocket-parser.h"
-#include "plugin.h"
-#include "messages.h"
-#include "misc.h"
-#include "stats/stats.h"
-#include "logqueue.h"
-#include "driver.h"
-#include "plugin-types.h"
+#ifndef WEBSOCKET_TRANSPORT_H_INCLUDED
+#define WEBSOCKET_TRANSPORT_H_INCLUDED
 
-extern CfgParser websocket_dd_parser;
+#include "transport/logtransport.h"
 
-static Plugin websocket_plugins[] =
-{
-  {
-    .type = LL_CONTEXT_SOURCE,
-    .name = "websocket",
-    .parser = &websocket_parser,
-  },
-  {
-    .type = LL_CONTEXT_DESTINATION,
-    .name = "websocket",
-    .parser = &websocket_parser,
-  },
-};
+LogTransport *log_transport_websocket_new();
 
-gboolean
-websocket_module_init(GlobalConfig *cfg, CfgArgs *args)
-{
-  plugin_register(cfg, websocket_plugins, G_N_ELEMENTS(websocket_plugins));
-  return TRUE;
-}
-
-const ModuleInfo module_info =
-{
-  .canonical_name = "websocket",
-  .version = VERSION,
-  .description = "The websocket module provides Websocket source and destination support for syslog-ng.",
-  .core_revision = "Dummy Revision",
-  .plugins = websocket_plugins,
-  .plugins_len = G_N_ELEMENTS(websocket_plugins),
-};
+#endif

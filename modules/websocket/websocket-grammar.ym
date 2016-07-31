@@ -64,8 +64,15 @@ start
             last_driver = *instance = websocket_dd_new(configuration);
           }
           '(' websocket_dest_options ')'        { YYACCEPT; }
-        |
+        | LL_CONTEXT_SOURCE KW_WEBSOCKET
+          {
+            last_driver = *instance = websocket_sd_new(configuration);
+          }
+          '(' websocket_src_options ')'		{ YYACCEPT; }
         ;
+
+
+/* DEST optinos */
 
 websocket_dest_options
         : websocket_dest_option websocket_dest_options
@@ -98,7 +105,7 @@ websocket_dest_option
             websocket_dd_set_path(last_driver, $3);
             free($3);
           }
-        | KW_SSL '(' websocket_ssl_options ')'
+        | KW_SSL '(' websocket_dd_ssl_options ')'
           {
             websocket_dd_set_enable_ssl(last_driver, TRUE);
           }
@@ -111,12 +118,12 @@ websocket_dest_option
         | { last_template_options = websocket_dd_get_template_options(last_driver); } template_option
         ;
 
-websocket_ssl_options
-        : websocket_ssl_option websocket_ssl_options
+websocket_dd_ssl_options
+        : websocket_dd_ssl_option websocket_dd_ssl_options
         |
         ;
 
-websocket_ssl_option
+websocket_dd_ssl_option
         : KW_CERT '(' string ')'
           {
             websocket_dd_set_cert(last_driver, $3);
@@ -135,6 +142,64 @@ websocket_ssl_option
         | KW_ALLOW_SELF_SIGNED
           {
             websocket_dd_set_allow_self_signed(last_driver, TRUE);
+          }
+        ;
+
+
+/* SRC options */
+
+websocket_src_options
+        : websocket_src_option websocket_src_options
+        |
+        ;
+
+websocket_src_option
+        : KW_PORT '(' LL_NUMBER ')'
+          {
+            CHECK_ERROR($3 > 0 && $3 < 65535, @3, "Port is out of range!\n");
+            websocket_sd_set_port(last_driver, $3);
+          }
+        | KW_ADDRESS '(' string ')'
+          {
+            websocket_sd_set_address(last_driver, $3);
+            free($3);
+          }
+        | KW_PROTOCOL '(' string ')'
+          {
+            websocket_sd_set_protocol(last_driver, $3);
+            free($3);
+          }
+        | KW_PATH '(' string ')'
+          {
+            websocket_sd_set_path(last_driver, $3);
+            free($3);
+          }
+        | KW_SSL '(' websocket_sd_ssl_options ')'
+          {
+            websocket_sd_set_enable_ssl(last_driver, TRUE);
+          }
+        ;
+
+websocket_sd_ssl_options
+        : websocket_sd_ssl_option websocket_sd_ssl_options
+        |
+        ;
+
+websocket_sd_ssl_option
+        : KW_CERT '(' string ')'
+          {
+            websocket_sd_set_cert(last_driver, $3);
+            free($3);
+          }
+        | KW_KEY '(' string ')'
+          {
+            websocket_sd_set_key(last_driver, $3);
+            free($3);
+          }
+        | KW_CACERT '(' string ')'
+          {
+            websocket_sd_set_cacert(last_driver, $3);
+            free($3);
           }
         ;
 
