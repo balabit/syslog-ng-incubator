@@ -186,7 +186,7 @@ websocket_sd_free(LogPipe *source)
   g_free(self->key);
   g_free(self->cacert);
 
-  log_reader_free(self->reader); // TODO: make sure it is right
+  // g_free(self->reader);
   log_reader_options_destroy(&self->reader_options);
   log_src_driver_free(source);
 }
