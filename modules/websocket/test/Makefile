@@ -11,3 +11,6 @@ test-client-dest:
 
 test-server-dest:
 	syslog-ng -Fdve -f ./test_server_dest.conf
+
+test-source:
+	syslog-ng -Fdve -f ./test_source.conf

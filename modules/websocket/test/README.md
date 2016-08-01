@@ -6,11 +6,13 @@ This folder contains some configure and Makefile to demonstrate how to use the w
 I presume you followed the [README](../README.md) installation section and have installed libwebsocket, syslog-ng and syslog-ng-incubator with libwebsocket correctly.
 
 
-# Test connection from websocket destination as a client to a websocket server
+# Test websocket destination
+
+## Test connection from websocket destination as a client to a websocket server
 
 Make sure you are in the test directory and your 8000 port is available.
 
-Open terminal A to run the command blew to start a websocket server
+Open terminal A to run the command blow to start a websocket server
 ```
 make test-server
 ```
@@ -28,11 +30,11 @@ logger YOUR_LOG_MESSAGE
 
 You will see messages are sent from the websocket client destination and received in the websocket server.
 
-# Test connection to websocket destination as a server from a websocket client
+## Test connection to websocket destination as a server from a websocket client
 
 Make sure you are in the test directory and your 8000 port is available.
 
-Open terminal A to run the command blew to start a websocket server destination
+Open terminal A to run the command blow to start a websocket server destination
 ```
 make test-server-dest
 ```
@@ -74,3 +76,24 @@ ssl(
 At last you should set the right option to use ssl in `ws_api/server_example.c` or `ws_api/client_example.c`
 
 Then you can test with the same way last section mentioned.
+
+
+
+# Test websocket source
+
+The websocket source works as an websocket server, it will send all the messages it receives to the destinations.
+
+Make sure you are in the test directory and your 8000 port is available.
+
+Open terminal A to run the command blow to start the websocket source
+```
+make test-source
+```
+
+It will open a http server on the port 8000. Open your browser and open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) . You will get and websocket client written by javascript.
+Make sure the text area in the bottom of the page is filled with the right url. If you use the secure connection, it should be [wss://127.0.0.1:8000/](wss://192.168.1.111:8000/).
+Otherwise it should be [wss://127.0.0.1:8000/](wss://192.168.1.111:8000/).
+
+Try to write some message in another text area and press the send button to send message to the source destination.
+
+At last, you will find your input in the file `/tmp/all.log` because we set it as the file destination.
