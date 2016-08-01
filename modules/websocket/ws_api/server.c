@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "server.h"
 
 
@@ -22,6 +23,8 @@ static int destroy_flag = 0;
 static int listening=0;
 static struct lws_context *context = NULL;
 static pthread_t service_pid;
+static int FD[2]; // use pipeline to provide a file descriptor
+static int use_fd;
 
 static int callback_http( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len )
 {
@@ -85,10 +88,13 @@ static int ws_server_callback( struct lws *wsi, enum lws_callback_reasons reason
 
     case LWS_CALLBACK_RECEIVE:
       lwsl_notice("Message recieved from the client: %s\n", in);
+      if (use_fd) { //Writing the message to the pipline
+         write(FD[1], in, len + 1);
+      }
       break;
 
     default:
-      lwsl_notice("Reason %d not handled.\n", reason);
+      lwsl_debug("Reason %d not handled.\n", reason);
       break;
   }
 
@@ -116,6 +122,7 @@ static struct lws_protocols protocols[] =
 
 static void *
 pthread_routine(void *pdata_in) {
+
   while(!destroy_flag)
   {
     lws_service( context, 50 );
@@ -126,7 +133,7 @@ pthread_routine(void *pdata_in) {
 
 
 int
-websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert) {
+websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert, int* fd) {
   struct lws_context_creation_info info;
   memset( &info, 0, sizeof(info) );
 
@@ -147,6 +154,12 @@ websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char*
   }
 
   context = lws_create_context( &info );
+
+  use_fd = (fd != NULL);
+  if (use_fd) {
+    pipe(FD);
+    *fd = FD[0]; // return the file descriptor for reading
+  }
 
   pthread_create(&service_pid, NULL, pthread_routine, NULL);
 

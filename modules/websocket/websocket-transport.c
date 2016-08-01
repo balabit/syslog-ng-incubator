@@ -28,30 +28,26 @@
 static gssize
 log_transport_websocket_read_method(LogTransport *s, gpointer buf, gsize buflen, LogTransportAuxData *aux)
 {
-  printf("calling: log_transport_websocket_read_method   buflen=%d\n", buflen);
-  return read(STDIN_FILENO, buf, buflen);
+  return read(s->fd, buf, buflen);
 }
 
 static gssize
 log_transport_websocket_write_method(LogTransport *s, const gpointer buf, gsize buflen)
 {
-  printf("calling: log_transport_websocket_write_method buflen=%d\n", buflen);
   return 0;
 }
 
 static void
 log_transport_websocket_free_method(LogTransport *s)
 {
-  // TODO: Maybe we should free websocket here
+  // nothing extra to free
   return;
 }
 
 LogTransport *
-log_transport_websocket_new()
+log_transport_websocket_new(int fd)
 {
   LogTransport *self = g_new0(LogTransport, 1);
-  int fd = STDIN_FILENO;  //TODO: we just use stdout first to test
-  size_t fd_size = sizeof(fd);
 
   log_transport_init_instance(self, fd);
 

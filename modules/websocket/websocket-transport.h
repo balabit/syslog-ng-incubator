@@ -26,6 +26,6 @@
 
 #include "transport/logtransport.h"
 
-LogTransport *log_transport_websocket_new();
+LogTransport *log_transport_websocket_new(int fd);
 
 #endif

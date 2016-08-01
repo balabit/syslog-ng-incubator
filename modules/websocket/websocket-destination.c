@@ -162,7 +162,7 @@ websocket_worker_thread_init(LogThrDestDriver *destination)
       self->cacert);
   else if (strcmp(self->mode, "server") == 0)
     websocket_server_create(self->protocol, self->port,
-      self->client_use_ssl_flag, self->cert, self->key, self->cacert);
+      self->client_use_ssl_flag, self->cert, self->key, self->cacert, NULL);
 }
 
 

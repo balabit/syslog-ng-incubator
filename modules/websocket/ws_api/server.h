@@ -14,11 +14,13 @@
  * @cert     (optional) The certificate of server
  * @key      (optional) the private key for the cert
  * @cacert   (optional) A CA cert.
+ * @fd       (optional) If fd is given and not NULL, all data server received
+ *                      will be sent to the fd.
  *
  * Return None-zero if errors occurred.
  */
 int
-websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert);
+websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert, int* fd);
 
 /**
  * websocket_server_shutdown - shut down websocket server

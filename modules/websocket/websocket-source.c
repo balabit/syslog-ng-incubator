@@ -79,23 +79,18 @@ void websocket_sd_set_cacert(LogDriver *source, gchar *path) {
   self->cacert = path == NULL ? NULL : g_strdup(path);
 }
 
-static inline gboolean
-start_websocket_server(WebsocketSrcDriver* self)
-{
-  // TODO: start the server
-  // self->client_use_ssl_flag = self->enable_ssl;
-  // websocket_server_create(self->protocol, self->port,
-  //   self->client_use_ssl_flag, self->cert, self->key, self->cacert);
-  return TRUE;
-}
 
-static void
+static inline gboolean
 create_reader(LogPipe *s)
 {
+  int ret;
+  int fd;
   WebsocketSrcDriver* self = (WebsocketSrcDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
 
-  LogTransport* transport = log_transport_websocket_new(); // TODO: define the constructor
+  if (websocket_server_create(self->protocol, self->port, self->enable_ssl, self->cert, self->key, self->cacert, &fd))
+    return FALSE;
+  LogTransport* transport = log_transport_websocket_new(fd);
   PollEvents* poll_events = poll_fd_events_new(transport->fd);
   LogProtoServerOptions* proto_options = &self->reader_options.proto_options.super;
   LogProtoServer* proto = log_proto_text_server_new(transport, proto_options);
@@ -105,6 +100,7 @@ create_reader(LogPipe *s)
   self->reader_options.parse_options.flags |= LP_NOPARSE;
 
   log_reader_reopen(self->reader, proto, poll_events);
+  return TRUE;
 }
 
 static gboolean
@@ -121,9 +117,8 @@ websocket_sd_init(LogPipe *s)
 
   log_reader_options_init(&self->reader_options, cfg, "websocket");
 
-  if (!start_websocket_server(self))
+  if (!create_reader(s))
     return FALSE;
-  create_reader(s);
 
   log_reader_set_options(self->reader,
                              s,
@@ -147,9 +142,6 @@ websocket_sd_init(LogPipe *s)
 static void
 websocket_socket_deinit(LogReader* reader)
 {
-  log_pipe_unref((LogPipe *) reader);
-  websocket_server_shutdown();
-  g_free(reader);
 }
 
 
@@ -157,14 +149,14 @@ static gboolean
 websocket_sd_deinit(LogPipe *s)
 {
   WebsocketSrcDriver *self = (WebsocketSrcDriver *) s;
-  GlobalConfig *cfg = log_pipe_get_config(&self->super.super.super);
 
-  // TODO: close the websocket connection
   if (self->reader)
   {
-    // TODO: should we call log_reader_deinit to do this job??
     log_pipe_deinit((LogPipe *) self->reader);
   }
+
+  log_pipe_unref((LogPipe *) self->reader);
+  websocket_server_shutdown();
 
   return log_src_driver_deinit_method(s);
 }

@@ -3,7 +3,7 @@
 #include "server.h"
 
 int main() {
-  websocket_server_create("example-protocol", 8000, 0, NULL, NULL, NULL);
+  websocket_server_create("example-protocol", 8000, 0, NULL, NULL, NULL, NULL);
   int i;
   for (i = 0; i < 10; ++i) {
     usleep(2 * 1000 * 1000);
