@@ -2,8 +2,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <string.h>
-#include <pthread.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/msg.h>
+#include <sys/wait.h>
+#include <string.h>
 #include "server.h"
 
 
@@ -22,9 +25,10 @@ static int ringbuffer_head;
 static int destroy_flag = 0;
 static int listening=0;
 static struct lws_context *context = NULL;
-static pthread_t service_pid;
+static int service_pid;
 static int FD[2]; // use pipeline to provide a file descriptor
 static int use_fd;
+static int msgqid;
 
 static int callback_http( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len )
 {
@@ -120,62 +124,27 @@ static struct lws_protocols protocols[] =
   { NULL, NULL, 0, 0 } /* terminator */
 };
 
-static void *
-pthread_routine(void *pdata_in) {
-
-  while(!destroy_flag)
-  {
-    lws_service( context, 50 );
-  }
-  lwsl_notice("[pthread_routine] Service has ended.\n");
-  return NULL;
+static int get_server_message_type(int port) {
+  return 1;
+  return (1 << 16) + port;
 }
 
 
-int
-websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert, int* fd) {
-  struct lws_context_creation_info info;
-  memset( &info, 0, sizeof(info) );
-
-  protocols[1].name = protocol;
-  info.port = port;
-  info.protocols = protocols;
-  info.gid = -1;
-  info.uid = -1;
-  info.ssl_cert_filepath = NULL;
-  info.ssl_private_key_filepath = NULL;
-  info.ssl_ca_filepath = NULL;
-
-  if (use_ssl) {
-    info.ssl_cert_filepath = cert;
-    info.ssl_private_key_filepath = key;
-    info.ssl_ca_filepath = cacert;
-    info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;
-  }
-
-  context = lws_create_context( &info );
-
-  use_fd = (fd != NULL);
-  if (use_fd) {
-    pipe(FD);
-    *fd = FD[0]; // return the file descriptor for reading
-  }
-
-  pthread_create(&service_pid, NULL, pthread_routine, NULL);
-
-  return 0;
+void set_destroy_flag(int sign_no)
+{
+  if(sign_no == SIGINT)
+    destroy_flag = 1;
 }
 
-
-int
-websocket_server_broadcast_msg(char* msg) {
+static int
+enqueue_broadcast_msg(char* msg) {
   while(!listening && !destroy_flag)
     usleep(1000*20);
   if (!listening && destroy_flag) {
     lwsl_notice("The server has been shutdown. You can't broadcast messages\n");
     return 1;  // If we are not connected. We cant send the message
   }
-  lwsl_notice("broadcasting message: %s.\n", msg);
+  lwsl_notice("[received] broadcasting message: %s.\n", msg);
   int len=strlen(msg);
   if (ringbuffer[ringbuffer_head].payload)
     free(ringbuffer[ringbuffer_head].payload);
@@ -190,9 +159,84 @@ websocket_server_broadcast_msg(char* msg) {
 }
 
 
+static void
+run_server(struct lws_context_creation_info info) {
+  struct msg_buf buf;
+  while(!destroy_flag)
+  {
+    lws_service( context, 50 );
+    while (msgrcv(msgqid,&buf,sizeof(buf.data), get_server_message_type(info.port), IPC_NOWAIT) != -1)
+      enqueue_broadcast_msg(buf.data);
+  }
+  lws_context_destroy( context );
+  lwsl_notice("[notice] Service has ended.\n");
+  close(FD[1]);
+  _exit(0);  // exit the process, otherwise it will go on running parent program.
+}
+
+
+int
+websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert, int* fd, int * msgid) {
+  struct lws_context_creation_info info;
+
+  msgqid = *msgid = msgget(IPC_PRIVATE, IPC_CREAT|IPC_EXCL);
+  if (msgqid == -1) {
+    lwsl_err("msgget error!!!!");
+  }
+
+  use_fd = (fd != NULL);
+  if (use_fd) {
+    pipe(FD);
+    *fd = FD[0]; // return the file descriptor for reading
+  }
+
+  if ((service_pid = fork()) == 0) {
+    memset( &info, 0, sizeof(info) );
+    protocols[1].name = protocol;
+    info.port = port;
+    info.protocols = protocols;
+    info.gid = -1;
+    info.uid = -1;
+    info.ssl_cert_filepath = NULL;
+    info.ssl_private_key_filepath = NULL;
+    info.ssl_ca_filepath = NULL;
+
+    if (use_ssl) {
+      info.ssl_cert_filepath = cert;
+      info.ssl_private_key_filepath = key;
+      info.ssl_ca_filepath = cacert;
+      info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;
+    }
+    context = lws_create_context( &info );
+
+    signal(SIGINT, set_destroy_flag);  // receive the signal to shutdown the server
+    run_server(info);
+  }
+  if (use_fd) {
+    if (service_pid == 0)
+      close(FD[0]);
+    else
+      close(FD[1]);
+  }
+  return 0;
+}
+
+int
+websocket_server_broadcast_msg(char* msg, int msgqid, int port) {
+  struct msg_buf buf;
+  strncpy(buf.data, msg, QUEUE_DATA_LEN);
+  buf.mtype = get_server_message_type(port);
+  if (msgsnd(msgqid,&buf,sizeof(buf.data),IPC_NOWAIT) == -1) {
+    lwsl_err("broadcasting message error.\n");
+    return -1;
+  }
+  return 0;
+}
+
+
 void
 websocket_server_shutdown() {
-  destroy_flag = 1;
-  pthread_join(service_pid, NULL);
-  lws_context_destroy( context );
+  lwsl_notice("shutting down the server\n");
+  kill(service_pid, SIGINT);
+  waitpid(service_pid,NULL,0);
 }
