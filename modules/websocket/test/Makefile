@@ -14,3 +14,6 @@ test-server-dest:
 
 test-source:
 	syslog-ng -Fdve -f ./test_source.conf
+
+test-source-dest-together:
+	syslog-ng -Fdve -f ./test_source_and_dest_together.conf

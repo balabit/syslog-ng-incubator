@@ -43,6 +43,8 @@ typedef struct _WebsocketSrcDriver
   gchar *cacert;
   int enable_ssl;
   int client_use_ssl_flag;
+  int msgqid;
+  int service_pid;
 } WebsocketSrcDriver;
 
 LogDriver *websocket_sd_new(GlobalConfig *cfg);

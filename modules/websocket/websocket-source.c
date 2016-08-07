@@ -88,7 +88,7 @@ create_reader(LogPipe *s)
   WebsocketSrcDriver* self = (WebsocketSrcDriver *)s;
   GlobalConfig *cfg = log_pipe_get_config(s);
 
-  if (websocket_server_create(self->protocol, self->port, self->enable_ssl, self->cert, self->key, self->cacert, &fd))
+  if (websocket_server_create(self->protocol, self->port, self->enable_ssl, self->cert, self->key, self->cacert, &fd, &self->msgqid, &self->service_pid))
     return FALSE;
   LogTransport* transport = log_transport_websocket_new(fd);
   PollEvents* poll_events = poll_fd_events_new(transport->fd);
@@ -139,11 +139,6 @@ websocket_sd_init(LogPipe *s)
   return TRUE;
 }
 
-static void
-websocket_socket_deinit(LogReader* reader)
-{
-}
-
 
 static gboolean
 websocket_sd_deinit(LogPipe *s)
@@ -156,7 +151,7 @@ websocket_sd_deinit(LogPipe *s)
   }
 
   log_pipe_unref((LogPipe *) self->reader);
-  websocket_server_shutdown();
+  websocket_server_shutdown(self->service_pid);
 
   return log_src_driver_deinit_method(s);
 }

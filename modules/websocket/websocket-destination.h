@@ -42,6 +42,8 @@ typedef struct
   int enable_ssl;
   int allow_self_signed;
   int client_use_ssl_flag;
+  int msgqid;
+  int service_pid;
   LogTemplateOptions template_options;
   LogTemplate *template;
 } WebsocketDestDriver;

@@ -159,10 +159,11 @@ websocket_worker_thread_init(LogThrDestDriver *destination)
   if (strcmp(self->mode, "client") == 0)
     websocket_client_create(self->protocol, self->address, self->port,
       self->path, self->client_use_ssl_flag, self->cert, self->key,
-      self->cacert);
+      self->cacert, &self->msgqid, &self->service_pid);
   else if (strcmp(self->mode, "server") == 0)
     websocket_server_create(self->protocol, self->port,
-      self->client_use_ssl_flag, self->cert, self->key, self->cacert, NULL);
+      self->client_use_ssl_flag, self->cert, self->key, self->cacert, NULL,
+      &self->msgqid, &self->service_pid);
 }
 
 
@@ -171,9 +172,9 @@ websocket_dd_disconnect(LogThrDestDriver *destination)
 {
   WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
   if (strcmp(self->mode, "client") == 0)
-    websocket_client_disconnect();
+    websocket_client_disconnect(self->service_pid);
   else if (strcmp(self->mode, "server") == 0)
-    websocket_server_shutdown();
+    websocket_server_shutdown(self->service_pid);
 }
 
 static worker_insert_result_t
@@ -185,9 +186,9 @@ websocket_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
 
   int res;
   if (strcmp(self->mode, "client") == 0)
-    res = websocket_client_send_msg(result->str);
+    res = websocket_client_send_msg(result->str, self->msgqid, self->port);
   else if (strcmp(self->mode, "server") == 0)
-    res = websocket_server_broadcast_msg(result->str);
+    res = websocket_server_broadcast_msg(result->str, self->msgqid, self->port);
 
   g_string_free(result, TRUE);
   if (res == 0)
