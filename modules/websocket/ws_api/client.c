@@ -3,8 +3,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/msg.h>
+#include <sys/wait.h>
 #include <libwebsockets.h>
-#include <pthread.h>
 
 #include "client.h"
 
@@ -27,13 +29,20 @@ static struct lws* wsi;
 
 static int destroy_flag = 0;
 static int connection_flag = 0;
-static pthread_t service_pid;
 
 
 // the message ring buffer
 static char* ringbuffer[CLIENT_MAX_MESSAGE_QUEUE];
 static int ringbuffer_head=0;
 static int ringbuffer_tail=0;
+
+
+static void set_destroy_flag(int sign_no)
+{
+  if(sign_no == SIGINT)
+    destroy_flag = 1;
+}
+
 
 
 static int websocket_write_back(struct lws *wsi_in, char *str)
@@ -164,34 +173,12 @@ set_wsi()
   return 0;
 }
 
-static void *
-pthread_routine(void *pdata_in) {
-  while(!destroy_flag)
-  {
-    lws_service(ccinfo.context, 50);
-  }
-  lwsl_notice("[pthread_routine] Service has ended.\n");
-  return NULL;
+static long int get_client_message_type(int port) {
+  return (2 << 16) + port;
 }
 
-
-int
-websocket_client_create(char* protocol, char* address, int port, char* path, int use_ssl, char* cert, char* key, char* cacert)
-{
-  int ret_code;
-  if ((ret_code = set_client_connect_info(protocol, address, port, path, use_ssl, cert, key, cacert)) != 0)
-    return ret_code;
-
-  if ((ret_code = set_wsi()) != 0)
-    return ret_code;
-
-  pthread_create(&service_pid, NULL, pthread_routine, NULL);
-  return 0;
-}
-
-
-int
-websocket_client_send_msg(char* msg)
+static int
+enqueue_client_msg(char* msg)
 {
   //* waiting for connection with server done.*/
   while(!connection_flag && !destroy_flag)
@@ -201,7 +188,7 @@ websocket_client_send_msg(char* msg)
     return 1;  // If we are not connected. We cant send the message
   }
   int len = strlen(msg);
-  ringbuffer[ringbuffer_head] = malloc(len + 1);
+  ringbuffer[ringbuffer_head] = (char*) malloc(len + 1);
   memcpy(ringbuffer[ringbuffer_head], msg, len);
   ringbuffer[ringbuffer_head][len] = '\0';
   ringbuffer_head = (ringbuffer_head + 1) % CLIENT_MAX_MESSAGE_QUEUE;
@@ -210,12 +197,68 @@ websocket_client_send_msg(char* msg)
 }
 
 
+static void
+run_server(int msgqid) {
+  struct client_msg_buf buf;
+  while(!destroy_flag)
+  {
+    lws_service(ccinfo.context, 50);
+    while (msgrcv(msgqid, &buf, sizeof(buf.data), get_client_message_type(ccinfo.port), IPC_NOWAIT) != -1) {
+      enqueue_client_msg(buf.data);
+    }
+  }
+  lws_context_destroy(ccinfo.context);
+  lwsl_notice("[notice] Service has ended.\n");
+  _exit(0);  // exit the process, otherwise it will go on running parent program.
+}
+
+
+int
+websocket_client_create(char* protocol, char* address, int port, char* path, int use_ssl, char* cert, char* key, char* cacert, int* msgqid, int* service_pid)
+{
+
+  int ret_code;
+  *msgqid = msgget(IPC_PRIVATE, IPC_CREAT|IPC_EXCL);
+  if (*msgqid == -1) {
+    lwsl_err("msgget error!!!!");
+    return -1;
+  }
+
+  if ((*service_pid = fork()) == 0) {
+    if ((ret_code = set_client_connect_info(protocol, address, port, path, use_ssl, cert, key, cacert)) != 0)
+      return ret_code;
+
+    if ((ret_code = set_wsi()) != 0)
+      return ret_code;
+
+    signal(SIGINT, set_destroy_flag);
+    run_server(*msgqid);
+  }
+  return 0;
+}
+
+
+
+int
+websocket_client_send_msg(char* msg, int msgqid, int port) {
+  struct client_msg_buf buf;
+  strncpy(buf.data, msg, CLIENT_RX_BUFFER_BYTES);
+  buf.mtype = get_client_message_type(port);
+  if (msgsnd(msgqid,&buf,sizeof(buf.data),IPC_NOWAIT) == -1) {
+    lwsl_err("sending message error.\n");
+    return -1;
+  }
+  return 0;
+}
+
+
 void
-websocket_client_disconnect()
+websocket_client_disconnect(int service_pid)
 {
   while (ringbuffer_head != ringbuffer_tail && !destroy_flag)
     usleep(20 * 1000);
-  destroy_flag = 1;
-  pthread_join(service_pid, NULL);
-  lws_context_destroy(ccinfo.context);
+
+  kill(service_pid, SIGINT);
+  lwsl_notice("shutting down the server\n");
+  waitpid(service_pid,NULL,0);
 }

@@ -26,12 +26,13 @@ struct msg_buf
  * @cacert   (optional) A CA cert.
  * @fd       (optional) If fd is given and not NULL, all data server received
  *                      will be sent to the fd.
- * @msgqid - msgqid the message queue id, you are sending messages to this queue latter
+ * @msgqid   msgqid the message queue id, you are sending messages to this queue latter
+ * @service_pid         The pid of the service process will be stored in the service_pid address
  *
  * Return None-zero if errors occurred.
  */
 int
-websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert, int* fd, int* msgqid);
+websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert, int* fd, int* msgqid, int* service_pid);
 
 /**
  * websocket_server_shutdown - shut down websocket server
@@ -40,17 +41,19 @@ websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char*
  * websocket_server_create before
  */
 void
-websocket_server_shutdown();
+websocket_server_shutdown(int service_pid);
 
 /**
  * websocket_server_broadcast_msg - broadcast message to all client
  *
  * @msg       the message to send
  * @msgqid    msgqid the message queue id, you are sending message to this queue
- * @port      which the port you want to broadcast the message
+ * @port      which port you want to broadcast the message, the port is
+ *            needed because we need it to determine the type of the message
+ * @service_pid the pid of the service process
  *
  * Return None-zero if errors occurred.
  */
 int
-websocket_server_broadcast_msg(char* msg, int msgqid, int port);
+websocket_server_broadcast_msg(char* msgj, int msgqid, int port);
 #endif

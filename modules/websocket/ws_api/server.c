@@ -25,7 +25,6 @@ static int ringbuffer_head;
 static int destroy_flag = 0;
 static int listening=0;
 static struct lws_context *context = NULL;
-static int service_pid;
 static int FD[2]; // use pipeline to provide a file descriptor
 static int use_fd;
 static int msgqid;
@@ -124,13 +123,12 @@ static struct lws_protocols protocols[] =
   { NULL, NULL, 0, 0 } /* terminator */
 };
 
-static int get_server_message_type(int port) {
-  return 1;
+static long int get_server_message_type(int port) {
   return (1 << 16) + port;
 }
 
 
-void set_destroy_flag(int sign_no)
+static void set_destroy_flag(int sign_no)
 {
   if(sign_no == SIGINT)
     destroy_flag = 1;
@@ -176,7 +174,7 @@ run_server(struct lws_context_creation_info info) {
 
 
 int
-websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert, int* fd, int * msgid) {
+websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char* key, char* cacert, int* fd, int * msgid, int *service_pid) {
   struct lws_context_creation_info info;
 
   msgqid = *msgid = msgget(IPC_PRIVATE, IPC_CREAT|IPC_EXCL);
@@ -190,7 +188,7 @@ websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char*
     *fd = FD[0]; // return the file descriptor for reading
   }
 
-  if ((service_pid = fork()) == 0) {
+  if ((*service_pid = fork()) == 0) {
     memset( &info, 0, sizeof(info) );
     protocols[1].name = protocol;
     info.port = port;
@@ -213,7 +211,7 @@ websocket_server_create(char* protocol, int port, int use_ssl, char* cert, char*
     run_server(info);
   }
   if (use_fd) {
-    if (service_pid == 0)
+    if (*service_pid == 0)
       close(FD[0]);
     else
       close(FD[1]);
@@ -235,7 +233,7 @@ websocket_server_broadcast_msg(char* msg, int msgqid, int port) {
 
 
 void
-websocket_server_shutdown() {
+websocket_server_shutdown(int service_pid) {
   lwsl_notice("shutting down the server\n");
   kill(service_pid, SIGINT);
   waitpid(service_pid,NULL,0);

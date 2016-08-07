@@ -6,6 +6,12 @@
 #define CLIENT_RX_BUFFER_BYTES 1024
 #define CLIENT_MAX_MESSAGE_QUEUE 1024
 
+struct client_msg_buf
+{
+    long mtype;
+    char data[CLIENT_RX_BUFFER_BYTES];
+};
+
 /**
  * websocket_client_create - create a client connection to communicate with the server
  *
@@ -24,21 +30,24 @@
  * Return None-zero if errors occurred.
  */
 int
-websocket_client_create(char* protocol, char* address, int port, char* path, int use_ssl, char* cert, char* key, char* cacert);
+websocket_client_create(char* protocol, char* address, int port, char* path, int use_ssl, char* cert, char* key, char* cacert, int* msgqid, int* service_pid);
 
 /**
  * websocket_client_disconnect - disconnect from the websocket server
  */
 void
-websocket_client_disconnect();
+websocket_client_disconnect(int service_pid);
 
 /**
  * websocket_client_send_msg - send message from the client to the server
  *
  * @msg - the message to send
+ * @port      which port you want to broadcast the message, the port is
+ *            needed because we need it to determine the type of the message
+ * @service_pid the pid of the service process
  *
  * Return None-zero if errors occurred.
  */
 int
-websocket_client_send_msg(char* msg);
+websocket_client_send_msg(char* msg, int msgqid, int port);
 #endif
