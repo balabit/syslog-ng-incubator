@@ -82,16 +82,7 @@ zmq_dd_get_template_options(LogDriver *d)
  */
 
 static gchar *
-zmq_dd_format_stats_instance(LogThrDestDriver *d)
-{
-  static gchar persist_name[1024];
-
-  g_snprintf(persist_name, sizeof(persist_name), "zmq()");
-  return persist_name;
-}
-
-static gchar *
-zmq_dd_format_persist_name(LogThrDestDriver *d)
+zmq_dd_format_name(LogThrDestDriver *d)
 {
   static gchar persist_name[1024];
 
@@ -220,8 +211,8 @@ zmq_dd_new(GlobalConfig *cfg)
   self->super.worker.disconnect = zmq_dd_disconnect;
   self->super.worker.insert = zmq_worker_insert;
 
-  self->super.format.stats_instance = zmq_dd_format_stats_instance;
-  self->super.format.persist_name = zmq_dd_format_persist_name;
+  self->super.format.stats_instance = zmq_dd_format_name;
+  self->super.format.persist_name = zmq_dd_format_name;
   self->super.stats_source = SCS_ZMQ;
 
   zmq_dd_set_port((LogDriver *) self, 5556);

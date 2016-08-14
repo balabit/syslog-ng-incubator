@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef WEBSOCKET_H_INCLUDED
-#define WEBSOCKET_H_INCLUDED
+#ifndef WEBSOCKET_SRC_H_INCLUDED
+#define WEBSOCKET_SRC_H_INCLUDED
 #define SCS_WEBSOCKET 0
 
 #include "driver.h"

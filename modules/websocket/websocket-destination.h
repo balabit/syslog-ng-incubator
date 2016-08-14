@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef WEBSOCKET_H_INCLUDED
-#define WEBSOCKET_H_INCLUDED
+#ifndef WEBSOCKET_DEST_H_INCLUDED
+#define WEBSOCKET_DEST_H_INCLUDED
 
 #include "driver.h"
 #include "logthrdestdrv.h"
@@ -44,6 +44,8 @@ typedef struct
   int client_use_ssl_flag;
   int msgqid;
   int service_pid;
+  int (*send_method)(char*, int, int);
+  void (*close_method)(int);
   LogTemplateOptions template_options;
   LogTemplate *template;
 } WebsocketDestDriver;

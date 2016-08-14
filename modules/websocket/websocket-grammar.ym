@@ -24,6 +24,9 @@
 %code requires {
 
 #include "websocket-parser.h"
+#include "websocket-source.h"
+#include "websocket-destination.h"
+#include <string.h>
 
 }
 
@@ -82,6 +85,7 @@ websocket_dest_options
 websocket_dest_option
         : KW_MODE '(' string ')'
           {
+            CHECK_ERROR(strcmp("server", $3) == 0 || strcmp("client", $3) == 0, @3, "Only \"server\" and \"client\" are supported for mode option!\n");
             websocket_dd_set_mode(last_driver, $3);
             free($3);
           }

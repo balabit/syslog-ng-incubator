@@ -44,10 +44,6 @@ websocket_dd_init(LogPipe *destination)
   else
     self->client_use_ssl_flag = 0;
 
-  if (strcmp(self->mode, "client") && strcmp(self->mode, "server")) {
-    msg_error("Only \"server\" and \"client\" are supported for mode option!", evt_tag_str("mode", self->mode), NULL);
-    return FALSE;
-  }
   return log_threaded_dest_driver_start(destination);
 }
 
@@ -156,14 +152,20 @@ websocket_worker_thread_init(LogThrDestDriver *destination)
             evt_tag_str("driver", self->super.super.super.id),
             NULL);
 
-  if (strcmp(self->mode, "client") == 0)
+  if (strcmp(self->mode, "client") == 0) {
     websocket_client_create(self->protocol, self->address, self->port,
       self->path, self->client_use_ssl_flag, self->cert, self->key,
       self->cacert, &self->msgqid, &self->service_pid);
-  else if (strcmp(self->mode, "server") == 0)
+    self->send_method = websocket_client_send_msg;
+    self->close_method = websocket_client_disconnect;
+  }
+  else if (strcmp(self->mode, "server") == 0) {
     websocket_server_create(self->protocol, self->port,
       self->client_use_ssl_flag, self->cert, self->key, self->cacert, NULL,
       &self->msgqid, &self->service_pid);
+    self->send_method = websocket_server_broadcast_msg;
+    self->close_method = websocket_server_shutdown;
+  }
 }
 
 
@@ -171,10 +173,7 @@ static void
 websocket_dd_disconnect(LogThrDestDriver *destination)
 {
   WebsocketDestDriver *self = (WebsocketDestDriver *)destination;
-  if (strcmp(self->mode, "client") == 0)
-    websocket_client_disconnect(self->service_pid);
-  else if (strcmp(self->mode, "server") == 0)
-    websocket_server_shutdown(self->service_pid);
+  self->close_method(self->service_pid);
 }
 
 static worker_insert_result_t
@@ -184,11 +183,7 @@ websocket_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
   GString *result = g_string_new("");
   log_template_format(self->template, msg, &self->template_options, LTZ_LOCAL, self->super.seq_num, NULL, result);
 
-  int res;
-  if (strcmp(self->mode, "client") == 0)
-    res = websocket_client_send_msg(result->str, self->msgqid, self->port);
-  else if (strcmp(self->mode, "server") == 0)
-    res = websocket_server_broadcast_msg(result->str, self->msgqid, self->port);
+  int res = self->send_method(result->str, self->msgqid, self->port);
 
   g_string_free(result, TRUE);
   if (res == 0)
@@ -198,18 +193,7 @@ websocket_worker_insert(LogThrDestDriver *destination, LogMessage *msg)
 }
 
 static gchar *
-websocket_dd_format_stats_instance(LogThrDestDriver *d)
-{
-  static gchar persist_name[1024];
-  WebsocketDestDriver *self = (WebsocketDestDriver *)d;
-
-  g_snprintf(persist_name, sizeof(persist_name), "websocket_dest:%s:%s:%d:%s:%s",
-    self->mode, self->address, self->port, self->protocol, self->path);
-  return persist_name;
-}
-
-static gchar *
-websocket_dd_format_persist_name(LogThrDestDriver *d)
+websocket_dd_format_name(LogThrDestDriver *d)
 {
   static gchar persist_name[1024];
   WebsocketDestDriver *self = (WebsocketDestDriver *)d;
@@ -239,8 +223,8 @@ websocket_dd_new(GlobalConfig *cfg)
   self->super.worker.disconnect = websocket_dd_disconnect;
   self->super.worker.insert = websocket_worker_insert;
 
-  self->super.format.stats_instance = websocket_dd_format_stats_instance;
-  self->super.format.persist_name = websocket_dd_format_persist_name;
+  self->super.format.stats_instance = websocket_dd_format_name;
+  self->super.format.persist_name = websocket_dd_format_name;
   self->super.stats_source = SCS_WEBSOCKET;
 
   websocket_dd_set_mode((LogDriver *) self, "client");

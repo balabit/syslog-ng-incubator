@@ -55,5 +55,5 @@ websocket_server_shutdown(int service_pid);
  * Return None-zero if errors occurred.
  */
 int
-websocket_server_broadcast_msg(char* msgj, int msgqid, int port);
+websocket_server_broadcast_msg(char* msg, int msgqid, int port);
 #endif
