@@ -25,7 +25,7 @@
 
 #include "lua-msg.h"
 #include "lua-utils.h"
-#include "logmsg.h"
+#include "logmsg/logmsg.h"
 #include "messages.h"
 #include <lauxlib.h>
 #include <lualib.h>

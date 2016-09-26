@@ -24,7 +24,7 @@
 #include <zmq.h>
 
 #include "zmq-module.h"
-#include "misc.h"
+#include "seqnum.h"
 
 #ifndef SCS_ZMQ
 #define SCS_ZMQ 0
@@ -87,16 +87,22 @@ zmq_dd_format_stats_instance(LogThrDestDriver *d)
 {
   static gchar persist_name[1024];
 
-  g_snprintf(persist_name, sizeof(persist_name), "zmq()");
+  if (d->super.super.super.persist_name)
+    g_snprintf(persist_name, sizeof(persist_name), "zmq,%s", d->super.super.super.persist_name);
+  else
+    g_snprintf(persist_name, sizeof(persist_name), "zmq");
   return persist_name;
 }
 
-static gchar *
-zmq_dd_format_persist_name(LogThrDestDriver *d)
+static const gchar *
+zmq_dd_format_persist_name(const LogPipe *d)
 {
   static gchar persist_name[1024];
 
-  g_snprintf(persist_name, sizeof(persist_name), "zmq()");
+  if (d->persist_name)
+    g_snprintf(persist_name, sizeof(persist_name), "zmq.%s", d->persist_name);
+  else
+    g_snprintf(persist_name, sizeof(persist_name), "zmq()");
   return persist_name;
 }
 
@@ -216,13 +222,13 @@ zmq_dd_new(GlobalConfig *cfg)
   log_threaded_dest_driver_init_instance(&self->super, cfg);
   self->super.super.super.super.init = zmq_dd_init;
   self->super.super.super.super.free_fn = zmq_dd_free;
+  self->super.super.super.super.generate_persist_name = zmq_dd_format_persist_name;
 
   self->super.worker.thread_init = zmq_worker_thread_init;
   self->super.worker.disconnect = zmq_dd_disconnect;
   self->super.worker.insert = zmq_worker_insert;
 
   self->super.format.stats_instance = zmq_dd_format_stats_instance;
-  self->super.format.persist_name = zmq_dd_format_persist_name;
   self->super.stats_source = SCS_ZMQ;
 
   zmq_dd_set_port((LogDriver *) self, 5556);

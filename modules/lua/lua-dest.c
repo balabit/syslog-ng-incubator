@@ -118,7 +118,7 @@ lua_cast_and_push_value_to_stack(lua_State *state, const gchar *name, TypeHint t
 };
 
 static gboolean
-lua_dd_add_parameter_to_table(const gchar *name, TypeHint type, const gchar *value, gpointer user_data)
+lua_dd_add_parameter_to_table(const gchar *name, TypeHint type, const gchar *value, gsize value_len, gpointer user_data)
 {
   lua_State *state = (lua_State *) user_data;
 
@@ -492,17 +492,20 @@ lua_dd_add_global_constant_with_type_hint(LogDriver *d, const char *name, const 
 };
 
 static gchar *
-lua_dd_format_string_instance(LogThrDestDriver *d, char* name, size_t name_len)
+lua_dd_format_string_instance(const LogPipe *d, char* persist_name, size_t persist_name_len)
 {
   LuaDestDriver *self = (LuaDestDriver *)d;
 
-  g_snprintf(name, name_len,
-             "python,%s,%s,%s,%s",
-             self->filename,
-             self->init_func_name,
-             self->queue_func_name,
-             self->deinit_func_name);
-  return name;
+  if (d->persist_name)
+    g_snprintf(persist_name, persist_name_len, "lua.%s", d->persist_name);
+  else
+    g_snprintf(persist_name, persist_name_len,
+               "lua(%s,%s,%s,%s)",
+               self->filename,
+               self->init_func_name,
+               self->queue_func_name,
+               self->deinit_func_name);
+  return persist_name;
 };
 
 static gchar *
@@ -510,11 +513,11 @@ lua_dd_format_stats_instance(LogThrDestDriver *d)
 {
   static gchar stats_name[1024];
 
-  return lua_dd_format_string_instance(d, stats_name, sizeof(stats_name));
+  return lua_dd_format_string_instance((LogPipe *) d, stats_name, sizeof(stats_name));
 }
 
-static gchar *
-lua_dd_format_persist_name(LogThrDestDriver *d)
+static const gchar *
+lua_dd_format_persist_name(const LogPipe *d)
 {
   static gchar persist_name[1024];
 
@@ -527,7 +530,7 @@ lua_dd_set_params(LogDriver *d, ValuePairs *vp)
   LuaDestDriver *self = (LuaDestDriver *) d;
 
   if (self->params)
-    value_pairs_free(self->params);
+    value_pairs_unref(self->params);
   self->params = vp;
 }
 
@@ -543,12 +546,12 @@ lua_dd_new(GlobalConfig *cfg)
   self->super.super.super.super.init = lua_dd_init;
   self->super.super.super.super.deinit = lua_dd_deinit;
   self->super.super.super.super.free_fn = lua_dd_free;
+  self->super.super.super.super.generate_persist_name = lua_dd_format_persist_name;
 
   self->super.worker.insert = lua_dd_queue;
   self->super.worker.disconnect = NULL;
 
   self->super.format.stats_instance = lua_dd_format_stats_instance;
-  self->super.format.persist_name = lua_dd_format_persist_name;
   self->super.stats_source = SCS_LUA;
 
   return &self->super.super.super;

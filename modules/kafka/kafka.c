@@ -30,12 +30,12 @@
 #include "kafka-parser.h"
 #include "plugin.h"
 #include "messages.h"
-#include "misc.h"
 #include "stats/stats.h"
 #include "logqueue.h"
 #include "driver.h"
 #include "plugin-types.h"
 #include "logthrdestdrv.h"
+#include "seqnum.h"
 
 /*
  * This module draws from the redis module and provides an Apache Kafka
@@ -276,19 +276,23 @@ kafka_dd_format_stats_instance(LogThrDestDriver *d)
   KafkaDriver *self = (KafkaDriver *)d;
   static gchar persist_name[1024];
 
-  g_snprintf(persist_name, sizeof(persist_name),
-             "kafka,%s", self->topic_name);
+  if (d->super.super.super.persist_name)
+    g_snprintf(persist_name, sizeof(persist_name), "kafka,%s", d->super.super.super.persist_name);
+  else
+    g_snprintf(persist_name, sizeof(persist_name), "kafka,%s", self->topic_name);
   return persist_name;
 }
 
-static gchar *
-kafka_dd_format_persist_name(LogThrDestDriver *d)
+static const gchar *
+kafka_dd_format_persist_name(const LogPipe *d)
 {
-  KafkaDriver *self = (KafkaDriver *)d;
+  const KafkaDriver *self = (const KafkaDriver *)d;
   static gchar persist_name[1024];
 
-  g_snprintf(persist_name, sizeof(persist_name),
-             "kafka(%s)", self->topic_name);
+  if (d->persist_name)
+    g_snprintf(persist_name, sizeof(persist_name), "kafka.%s", d->persist_name);
+  else
+    g_snprintf(persist_name, sizeof(persist_name), "kafka(%s)", self->topic_name);
   return persist_name;
 }
 
@@ -500,13 +504,13 @@ kafka_dd_new(GlobalConfig *cfg)
   log_threaded_dest_driver_init_instance(&self->super, cfg);
   self->super.super.super.super.init = kafka_dd_init;
   self->super.super.super.super.free_fn = kafka_dd_free;
+  self->super.super.super.super.generate_persist_name = kafka_dd_format_persist_name;
 
   self->super.worker.thread_init = kafka_worker_thread_init;
   self->super.worker.thread_deinit = kafka_worker_thread_deinit;
   self->super.worker.insert = kafka_worker_insert;
 
   self->super.format.stats_instance = kafka_dd_format_stats_instance;
-  self->super.format.persist_name = kafka_dd_format_persist_name;
   self->super.stats_source = SCS_KAFKA;
 
   self->flags = KAFKA_FLAG_NONE;
@@ -538,7 +542,7 @@ kafka_module_init(GlobalConfig *cfg, CfgArgs *args)
 const ModuleInfo module_info =
 {
   .canonical_name = "kafka",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "The afkafka module provides Kafka destination support for syslog-ng.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = &kafka_plugin,
