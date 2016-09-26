@@ -27,6 +27,8 @@
 #include "logsource.h"
 #include "mainloop.h"
 
+#include <iv.h>
+
 typedef struct
 {
   gint trigger_freq;
