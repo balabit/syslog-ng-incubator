@@ -93,7 +93,7 @@ dnl Checks for programs.
 AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_CC_C_O
-AC_PROG_CXX
+AC_PROG_CC_C99
 AC_C_INLINE
 
 LT_INIT([shared dlopen])
