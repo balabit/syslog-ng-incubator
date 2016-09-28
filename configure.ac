@@ -194,7 +194,7 @@ if test "x$enable_grok" != "xno"; then
 	GROK_CFLAGS="-I$with_libgrok"
 	grok="yes"
  else
-	PKG_CHECK_MODULES(GROK, libgrok, grok="yes",
+	PKG_CHECK_MODULES(GROK, libgrok libtokyocabinet, grok="yes",
 	  AC_CHECK_LIB(grok, grok_new, [grok="yes"; GROK_LIBS="-lgrok"], [grok="no"]))
  fi
  if test "x$enable_grok" = "xyes" && test "x$grok" = "xno"; then
