@@ -27,7 +27,7 @@
 
 #include "driver.h"
 #include "logwriter.h"
-#include "value-pairs.h"
+#include "value-pairs/value-pairs.h"
 #include "logthrdestdrv.h"
 #include <lua.h>
 

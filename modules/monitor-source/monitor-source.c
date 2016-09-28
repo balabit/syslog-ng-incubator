@@ -31,6 +31,8 @@
 #include "logsource.h"
 #include "mainloop.h"
 
+#include <iv.h>
+
 #define LUA_COMPAT_MODULE
 
 typedef struct

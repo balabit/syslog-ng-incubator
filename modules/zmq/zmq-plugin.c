@@ -26,7 +26,6 @@
 #include "zmq-parser.h"
 #include "plugin.h"
 #include "messages.h"
-#include "misc.h"
 #include "stats/stats.h"
 #include "logqueue.h"
 #include "driver.h"
@@ -58,7 +57,7 @@ zmq_module_init(GlobalConfig *cfg, CfgArgs *args)
 const ModuleInfo module_info =
 {
   .canonical_name = "zmq",
-  .version = VERSION,
+  .version = SYSLOG_NG_VERSION,
   .description = "The zmq module provides ZeroMQ destination support for syslog-ng.",
   .core_revision = "Dummy Revision",
   .plugins = zmq_plugins,

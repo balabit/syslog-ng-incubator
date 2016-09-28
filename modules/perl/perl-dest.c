@@ -24,7 +24,7 @@
 #include "perl-dest.h"
 #include "logthrdestdrv.h"
 #include "stats/stats.h"
-#include "misc.h"
+#include "seqnum.h"
 
 #include <EXTERN.h>
 #include <perl.h>
@@ -93,7 +93,7 @@ perl_dd_set_value_pairs(LogDriver *d, ValuePairs *vp)
   PerlDestDriver *self = (PerlDestDriver *)d;
 
   if (self->vp)
-    value_pairs_free(self->vp);
+    value_pairs_unref(self->vp);
   self->vp = vp;
 }
 
@@ -113,27 +113,33 @@ perl_dd_format_stats_instance(LogThrDestDriver *d)
   PerlDestDriver *self = (PerlDestDriver *)d;
   static gchar persist_name[1024];
 
-  g_snprintf(persist_name, sizeof(persist_name),
-             "perl,%s,%s,%s,%s",
-             self->filename,
-             self->init_func_name,
-             self->queue_func_name,
-             self->deinit_func_name);
+  if (d->super.super.super.persist_name)
+    g_snprintf(persist_name, sizeof(persist_name), "perl,%s", d->super.super.super.persist_name);
+  else
+    g_snprintf(persist_name, sizeof(persist_name),
+               "perl,%s,%s,%s,%s",
+               self->filename,
+               self->init_func_name,
+               self->queue_func_name,
+               self->deinit_func_name);
   return persist_name;
 }
 
-static gchar *
-perl_dd_format_persist_name(LogThrDestDriver *d)
+static const gchar *
+perl_dd_format_persist_name(const LogPipe *d)
 {
-  PerlDestDriver *self = (PerlDestDriver *)d;
+  const PerlDestDriver *self = (const PerlDestDriver *)d;
   static gchar persist_name[1024];
 
-  g_snprintf(persist_name, sizeof(persist_name),
-             "perl(%s,%s,%s,%s)",
-             self->filename,
-             self->init_func_name,
-             self->queue_func_name,
-             self->deinit_func_name);
+  if (d->persist_name)
+    g_snprintf(persist_name, sizeof(persist_name), "perl.%s", d->persist_name);
+  else
+    g_snprintf(persist_name, sizeof(persist_name),
+               "perl(%s,%s,%s,%s)",
+               self->filename,
+               self->init_func_name,
+               self->queue_func_name,
+               self->deinit_func_name);
   return persist_name;
 }
 
@@ -206,7 +212,7 @@ xs_init(pTHX)
 
 static gboolean
 perl_worker_vp_add_one(const gchar *name,
-                       TypeHint type, const gchar *value,
+                       TypeHint type, const gchar *value, gsize value_len,
                        gpointer user_data)
 {
   PerlInterpreter *my_perl = (PerlInterpreter *)((gpointer *)user_data)[0];
@@ -402,7 +408,7 @@ perl_dd_free(LogPipe *d)
   g_free(self->deinit_func_name);
 
   if (self->vp)
-    value_pairs_free(self->vp);
+    value_pairs_unref(self->vp);
 
   log_threaded_dest_driver_free(d);
 }
@@ -416,6 +422,7 @@ perl_dd_new(GlobalConfig *cfg)
 
   self->super.super.super.super.init = perl_worker_init;
   self->super.super.super.super.free_fn = perl_dd_free;
+  self->super.super.super.super.generate_persist_name = perl_dd_format_persist_name;
 
   self->super.worker.thread_init = _perl_thread_init;
   self->super.worker.thread_deinit = _perl_thread_deinit;
@@ -423,7 +430,6 @@ perl_dd_new(GlobalConfig *cfg)
   self->super.worker.insert = perl_worker_eval;
 
   self->super.format.stats_instance = perl_dd_format_stats_instance;
-  self->super.format.persist_name = perl_dd_format_persist_name;
   self->super.stats_source = SCS_PERL;
 
   init_sequence_number(&self->seq_num);
