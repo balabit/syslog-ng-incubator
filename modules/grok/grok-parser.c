@@ -25,6 +25,7 @@
 #include <grok.h>
 #include <grok_pattern.h>
 #include "scratch-buffers.h"
+#include "string-list.h"
 
 #define KEY_BUFFER_LENGTH 1024
 
@@ -55,7 +56,8 @@ typedef struct _GrokParser
   gboolean debug;
 } GrokParser;
 
-GrokInstance *grok_instance_new()
+GrokInstance *
+grok_instance_new(void)
 {
   return g_new0(GrokInstance, 1);
 }
@@ -364,7 +366,7 @@ grok_parser_clone(LogPipe *s)
 {
   GrokParser *self = (GrokParser *)s;
 
-  GrokParser *cloned = grok_parser_new ( log_pipe_get_config(&self->super.super) );
+  GrokParser *cloned = (GrokParser *) grok_parser_new(log_pipe_get_config(&self->super.super));
   cloned->instances = grok_parser_clone_instances(self);
   cloned->custom_patterns = grok_parser_clone_custom_patterns(self);
   
