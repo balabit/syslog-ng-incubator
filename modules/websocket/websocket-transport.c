@@ -31,19 +31,6 @@ log_transport_websocket_read_method(LogTransport *s, gpointer buf, gsize buflen,
   return read(s->fd, buf, buflen);
 }
 
-static gssize
-log_transport_websocket_write_method(LogTransport *s, const gpointer buf, gsize buflen)
-{
-  return 0;
-}
-
-static void
-log_transport_websocket_free_method(LogTransport *s)
-{
-  // nothing extra to free
-  return;
-}
-
 LogTransport *
 log_transport_websocket_new(int fd)
 {
@@ -52,8 +39,6 @@ log_transport_websocket_new(int fd)
   log_transport_init_instance(self, fd);
 
   self->read = log_transport_websocket_read_method;
-  self->write = log_transport_websocket_write_method;
-  self->free_fn = log_transport_websocket_free_method;
 
   return self;
 }
