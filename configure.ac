@@ -35,6 +35,7 @@ LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
 LUA_MIN_VERSION="5.1.4"
 ZMQ_MIN_VERSION="3.1.1"
+LSRM_MIN_VERSION="0.1.0"
 
 dnl ***************************************************************************
 dnl Initial setup
@@ -89,6 +90,10 @@ AC_ARG_ENABLE(zmq,
    ,enable_zmq="auto")
 
 AC_ARG_ENABLE(date, [ --enable-date  Enable date parser (default: yes)],, enable_date="yes")
+
+AC_ARG_ENABLE(rust,
+              [  --enable-rust        Enable Rust bindings (default: auto)]
+              ,,enable_rust="auto")
 
 dnl ***************************************************************************
 dnl Checks for programs.
@@ -246,6 +251,24 @@ dnl ***************************************************************************
 
 INCUBATOR_CHECK_DEP(zmq,[PKG_CHECK_MODULES(ZMQ_CLIENT, libzmq >= $ZMQ_MIN_VERSION, zmq_found="yes", zmq_found="no")])
 
+if test "x$enable_rust" = "xyes" -o "x$enable_rust" = "xauto"; then
+    AC_CHECK_PROG(HAVE_RUSTC, rustc, 1, 0)
+    AC_CHECK_PROG(HAVE_CARGO, cargo, 1, 0)
+    if test ${HAVE_RUSTC} = 0; then
+        AC_MSG_WARN([Was about to enable Rust bindings, which need rustc, which you don't seem to have, disabling Rust bindings])
+        enable_rust=no
+    fi
+    if test ${HAVE_CARGO} = 0; then
+        AC_MSG_WARN([Was about to enable Rust bindings, which need Cargo, which you don't seem to have, disabling Rust bindings])
+        enable_rust=no
+    fi
+
+    if test "x$enable_rust" = "xyes"; then
+        PKG_CHECK_MODULES(SYSLOG_NG_RUST_MODULES, libsyslog_ng_rust_modules >= $LSRM_MIN_VERSION)
+        rust_modules_libdir=[`pkg-config --variable=libdir libsyslog_ng_rust_modules`]
+        AC_SUBST(rust_modules_libdir)
+    fi
+fi
 dnl ***************************************************************************
 dnl create common cflags/libs for incubator modules.
 dnl ***************************************************************************
@@ -283,6 +306,7 @@ AM_CONDITIONAL(ENABLE_KAFKA, [test "x$enable_kafka" = "xyes"])
 AM_CONDITIONAL(ENABLE_ZMQ, [test "$enable_zmq" != "no"])
 AM_CONDITIONAL(ENABLE_GROK, [test "$enable_grok" != "no"])
 AM_CONDITIONAL(ENABLE_DATE, [test "$enable_date" = "yes"])
+AM_CONDITIONAL(ENABLE_RUST, [test "$enable_rust" = "yes"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -304,4 +328,5 @@ echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
 echo "  grok-parser          ${enable_grok}"
 echo "  date-parser          ${enable_date}"
+echo "  Rust bindings        ${enable_rust:=no}"
 echo

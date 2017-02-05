@@ -1,0 +1,156 @@
+/*
+ * Copyright (c) 2002-2014 BalaBit S.a.r.l.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * As an additional exemption you are allowed to compile & link against the
+ * OpenSSL libraries as published by the OpenSSL project. See the file
+ * COPYING for details.
+ *
+ */
+
+%code top {
+#include "rust-parser.h"
+
+}
+
+
+%code {
+
+#include "cfg-parser.h"
+#include "filter.h"
+#include "rust-grammar.h"
+#include "syslog-names.h"
+#include "messages.h"
+#include "plugin.h"
+#include "cfg-grammar.h"
+
+#include <string.h>
+
+}
+
+%name-prefix "rust_"
+
+/* this parameter is needed in order to instruct bison to use a complete
+ * argument list for yylex/yyerror */
+
+%lex-param {CfgLexer *lexer}
+%parse-param {CfgLexer *lexer}
+%parse-param {gpointer *instance}
+%parse-param {gpointer arg}
+
+/* INCLUDE_DECLS */
+
+%token KW_RUST
+%token KW_OPTION
+%token KW_TYPE
+
+%type <ptr> rust
+%type <ptr> rust_filter
+%type <ptr> rust_filter_params
+%type <ptr> rust_parser
+%type <ptr> rust_parser_params
+%%
+
+start
+  : rust
+    {
+      *instance = $1;
+      if (yychar != YYEMPTY)
+        cfg_lexer_unput_token(lexer, &yylval);
+      YYACCEPT;
+    }
+  ;
+
+rust
+  : LL_CONTEXT_FILTER rust_filter { $$ = $2; }
+  | LL_CONTEXT_PARSER rust_parser { $$ = $2; }
+  ;
+
+rust_filter
+  : KW_RUST '(' rust_filter_params ')' { $$ = *instance; }
+  ;
+
+rust_parser
+  : KW_RUST '(' rust_parser_params ')' { $$ = *instance; }
+  ;
+
+rust_filter_params
+  : KW_TYPE '(' string ')'
+    {
+      *instance = rust_filter_new($3);
+
+      if (!*instance)
+       {
+         msg_error("Cannot find the specified rust filter, aborting",
+                   evt_tag_str("name", $3),
+                   NULL);
+         YYERROR;
+       }
+
+      free($3);
+    }
+    rust_filter_options
+  ;
+
+rust_filter_options
+  : rust_filter_option rust_filter_options
+  |
+  ;
+
+rust_filter_option
+  : KW_OPTION '(' string string ')'
+    {
+      rust_filter_set_option(*instance, $3, $4);
+      free($3);
+      free($4);
+    }
+    ;
+
+rust_parser_params
+  : KW_TYPE '(' string ')'
+    {
+      *instance = rust_parser_new($3, configuration);
+
+      if (!*instance)
+       {
+         msg_error("Cannot find the specified Rust parser, aborting",
+                   evt_tag_str("name", $3),
+                   NULL);
+         YYERROR;
+       }
+
+      free($3);
+    }
+    rust_parser_options
+  ;
+
+rust_parser_options
+  : rust_parser_option rust_parser_options
+  |
+  ;
+
+rust_parser_option
+  : KW_OPTION '(' string string ')'
+    {
+      rust_parser_set_option(*instance, $3, $4);
+      free($3);
+      free($4);
+    }
+    ;
+
+/* INCLUDE_RULES */
+
+%%
+
