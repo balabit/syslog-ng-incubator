@@ -25,8 +25,8 @@
 
 #include "perl-parser.h"
 #include "perl-dest.h"
-#include "value-pairs.h"
-#include "vptransform.h"
+#include "value-pairs/value-pairs.h"
+#include "value-pairs/transforms.h"
 
 }
 

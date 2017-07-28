@@ -26,7 +26,7 @@
 
 #include "driver.h"
 #include "logwriter.h"
-#include "value-pairs.h"
+#include "value-pairs/value-pairs.h"
 
 LogDriver *perl_dd_new(GlobalConfig *cfg);
 void perl_dd_set_init_func(LogDriver *d, gchar *init_func_name);

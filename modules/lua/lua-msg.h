@@ -21,7 +21,7 @@
  *
  */
 
-#include "logmsg.h"
+#include "logmsg/logmsg.h"
 #include <lua.h>
 
 #ifndef _LUA_MSG_H
