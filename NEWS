@@ -1,3 +1,31 @@
+# 0.6.0 - <2017-07-28 Fri>
+
+## Remove: date parser
+
+Date parser was removed as it was incorporated into syslog-ng master
+
+## Remove: getent template function
+
+Getent module was merged into syslog-ng, so it was removed from here
+
+## Feature: syslog-ng 3.8 support
+
+This release adds support for syslog-ng 3.8 and also incorporated a lot of
+bugfixes needed to compile the code.
+
+## Bugfix: Renamed kafka destination to kafka_c
+
+To fix conflict with syslog-ng
+
+## Bugfix: Fix queue.buffering.max.ms value in example
+
+Setting a too low value incurs a moderate CPU usage even when no logs
+need to be forwarded. Increase the value to 1s instead.
+
+We would like to thank the following people for their contribution:
+
+Vincent Bernat, Balazs Scheidler, Yilin Li, Laszlo Varady
+
 # 0.5.0 - <2015-08-18 Tue>
 
 ## Feature: syslog-ng 3.7 support
