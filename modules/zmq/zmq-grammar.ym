@@ -47,7 +47,6 @@
 %token KW_ZMQ
 %token KW_ADDRESS
 %token KW_PORT
-%token KW_SOCKET_TYPE
 %token KW_TEMPLATE
 %%
 
@@ -76,13 +75,6 @@ zmq_dest_option
             CHECK_ERROR($3 > 0 && $3 < 65535, @3, "Port is out of range!\n");
             zmq_dd_set_port(last_driver, $3);
           }
-        | KW_SOCKET_TYPE '(' string ')'
-          {
-            CHECK_ERROR(zmq_dd_set_socket_type(last_driver, $3), @3,
-                        "Unknown zmq socket type: %s", $3);
-            free($3);
-          }
-
         | KW_TEMPLATE '(' string ')'
           {
             zmq_dd_set_template(last_driver, $3);
@@ -100,7 +92,7 @@ zmq_src_options
 zmq_src_option
         : KW_ADDRESS '(' string ')'
           {
-            zmq_sd_set_address(last_driver, $3);
+            zmq_sd_set_host(last_driver, $3);
             free($3);
           }
         | KW_PORT '(' LL_NUMBER ')'

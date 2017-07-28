@@ -29,6 +29,7 @@
 #include "driver.h"
 #include "logreader.h"
 #include "logthrdestdrv.h"
+#include "misc.h"
 
 typedef struct _ZMQSourceDriver
 {
@@ -39,7 +40,7 @@ typedef struct _ZMQSourceDriver
   void* context;
   void* socket;
 
-  gchar *address;
+  gchar *host;
   gint port;
 
 } ZMQSourceDriver;
@@ -47,7 +48,8 @@ typedef struct _ZMQSourceDriver
 typedef struct _ZMQDestDriver
 {
   LogThrDestDriver super;
-  gchar *port;
+  gchar *host;
+  gint port;
   int socket_type;
 
   GlobalConfig *cfg;
@@ -64,13 +66,20 @@ typedef struct _ZMQDestDriver
 LogDriver *zmq_sd_new(GlobalConfig *cfg);
 LogDriver *zmq_dd_new(GlobalConfig *cfg);
 
-void zmq_sd_set_address(LogDriver *source, const gchar *address);
-void zmq_sd_set_port(LogDriver *source, gint port);
+void      zmq_sd_set_host(LogDriver *source, const gchar *host);
+void      zmq_sd_set_port(LogDriver *source, gint port);
+gchar*    zmq_sd_get_address(ZMQSourceDriver* self);
+gboolean  zmq_sd_connect(ZMQSourceDriver* self);
+gchar*    zmq_sd_get_persist_name(ZMQSourceDriver* self);
 LogDriver *zmq_sd_new(GlobalConfig *cfg);
 
-void zmq_dd_set_port(LogDriver *destination, gint port);
-gboolean zmq_dd_set_socket_type(LogDriver *destination, gchar *socket_type);
-void zmq_dd_set_template(LogDriver *destination, gchar *template);
+void               zmq_dd_set_host(LogDriver *destination, const gchar *host);
+void               zmq_dd_set_port(LogDriver *destination, gint port);
+void               zmq_dd_set_template(LogDriver *destination, gchar *template);
+gchar*             zmq_dd_get_address(ZMQDestDriver* self);
+gboolean           zmq_dd_connect(ZMQDestDriver *self);
+void               zmq_dd_disconnect(LogThrDestDriver *d);
+gboolean           zmq_dd_try_to_reconnect(ZMQDestDriver *self);
 LogTemplateOptions *zmq_dd_get_template_options(LogDriver *destination);
 
 #endif

@@ -29,9 +29,8 @@ int zmq_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 
 static CfgLexerKeyword zmq_keywords[] = {
   { "zmq",            KW_ZMQ },
-  { "address",        KW_ADDRESS },
+  { "host",           KW_HOST },
   { "port",           KW_PORT },
-  { "socket_type",    KW_SOCKET_TYPE},
   { "template",       KW_TEMPLATE },
   { NULL }
 };
