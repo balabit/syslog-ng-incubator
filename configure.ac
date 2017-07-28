@@ -24,6 +24,9 @@ enable_value()
         fi
 }
 
+CURRDATE=`date +"%a, %d %b %Y %H:%M:%S %z"`
+AC_SUBST(CURRDATE)
+
 dnl ***************************************************************************
 dnl dependencies
 
