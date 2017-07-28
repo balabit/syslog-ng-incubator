@@ -4,6 +4,6 @@ include modules/basicfuncs-plus/Makefile.am
 include modules/rss/Makefile.am
 include modules/lua/Makefile.am
 include modules/perl/Makefile.am
-include modules/kafka/Makefile.am
+include modules/kafka-c/Makefile.am
 include modules/zmq/Makefile.am
 include modules/grok/Makefile.am

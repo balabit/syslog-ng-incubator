@@ -26,11 +26,11 @@
 #include "kafka-grammar.h"
 
 extern int kafka_debug;
-int kafka_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
+int kafka_c_parse(CfgLexer *lexer, LogDriver **instance, gpointer arg);
 
 static CfgLexerKeyword kafka_keywords[] = {
     { "field",          KW_FIELD },
-    { "kafka",          KW_KAFKA },
+    { "kafka_c",        KW_KAFKA_C },
     { "partition",      KW_PARTITION },
     { "payload",        KW_PAYLOAD },
     { "properties",     KW_PROP },
@@ -40,15 +40,15 @@ static CfgLexerKeyword kafka_keywords[] = {
     { NULL }
 };
 
-CfgParser kafka_parser =
+CfgParser kafka_c_parser =
 {
 #if ENABLE_DEBUG
   .debug_flag = &kafka_debug,
 #endif
-  .name = "kafka",
+  .name = "kafka-c",
   .keywords = kafka_keywords,
-  .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) kafka_parse,
+  .parse = (int (*)(CfgLexer *lexer, gpointer *instance, gpointer)) kafka_c_parse,
   .cleanup = (void (*)(gpointer)) log_pipe_unref,
 };
 
-CFG_PARSER_IMPLEMENT_LEXER_BINDING(kafka_, LogDriver **)
+CFG_PARSER_IMPLEMENT_LEXER_BINDING(kafka_c_, LogDriver **)
