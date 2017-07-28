@@ -27,7 +27,7 @@
 #include "cfg-lexer.h"
 #include "kafka.h"
 
-extern CfgParser kafka_parser;
+extern CfgParser kafka_c_parser;
 
 struct kafka_property {
     gchar *key;
@@ -36,6 +36,6 @@ struct kafka_property {
 
 void kafka_property_free(void *);
 
-CFG_PARSER_DECLARE_LEXER_BINDING(kafka_, LogDriver **)
+CFG_PARSER_DECLARE_LEXER_BINDING(kafka_c_, LogDriver **)
 
 #endif

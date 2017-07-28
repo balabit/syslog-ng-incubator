@@ -93,9 +93,9 @@ kafka_log(const rd_kafka_t *rkt, int level,
           const char *fac, const char *msg)
 {
   msg_event_suppress_recursions_and_send(
-    msg_event_create(level, 
-                     "Kafka internal message", 
-                     evt_tag_str("msg", msg), 
+    msg_event_create(level,
+                     "Kafka internal message",
+                     evt_tag_str("msg", msg),
                      NULL ));
 }
 
@@ -449,7 +449,7 @@ kafka_dd_init(LogPipe *s)
               evt_tag_str("driver", self->super.super.super.id),
               NULL);
 
-  if (self->topic == NULL)    
+  if (self->topic == NULL)
     {
       msg_error("Kafka producer is not set up properly, topic name is missing",
 		evt_tag_str("driver", self->super.super.super.id),
@@ -457,13 +457,13 @@ kafka_dd_init(LogPipe *s)
       return FALSE;
     }
 
-  if (self->payload == NULL) 
+  if (self->payload == NULL)
     {
       self->payload = log_template_new(cfg, "default_kafka_template");
       log_template_compile(self->payload, "$MESSAGE", NULL);
     }
 
-  if (self->kafka == NULL)  
+  if (self->kafka == NULL)
     {
       msg_error("Kafka producer is not set up properly, perhaps metadata.broker.list property is missing?",
 		evt_tag_str("driver", self->super.super.super.id),
@@ -522,17 +522,17 @@ kafka_dd_new(GlobalConfig *cfg)
   return (LogDriver *)self;
 }
 
-extern CfgParser kafka_dd_parser;
+extern CfgParser kafka_c_parser;
 
 static Plugin kafka_plugin =
 {
   .type = LL_CONTEXT_DESTINATION,
-  .name = "kafka",
-  .parser = &kafka_parser,
+  .name = "kafka-c",
+  .parser = &kafka_c_parser,
 };
 
 gboolean
-kafka_module_init(GlobalConfig *cfg, CfgArgs *args)
+kafka_c_module_init(GlobalConfig *cfg, CfgArgs *args)
 {
   plugin_register(cfg, &kafka_plugin, 1);
 
@@ -541,9 +541,9 @@ kafka_module_init(GlobalConfig *cfg, CfgArgs *args)
 
 const ModuleInfo module_info =
 {
-  .canonical_name = "kafka",
+  .canonical_name = "kafka-c",
   .version = SYSLOG_NG_VERSION,
-  .description = "The afkafka module provides Kafka destination support for syslog-ng.",
+  .description = "The kafka-c module provides Kafka destination support for syslog-ng.",
   .core_revision = VERSION_CURRENT_VER_ONLY,
   .plugins = &kafka_plugin,
   .plugins_len = 1,

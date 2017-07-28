@@ -20,7 +20,7 @@ destination d_kafka {
       set("generic"    value(".eventv1.type")       condition("${.eventv1.type}" eq ""));
     };
     destination {
-      kafka(properties(metadata.broker.list("localhost:9092")
+      kafka-c(properties(metadata.broker.list("localhost:9092")
                        queue.buffering.max.ms("1000"))
             topic("syslog-ng")
             payload("$(format-json --key .eventv1.* --rekey .eventv1.* --shift 9)"));
