@@ -297,7 +297,6 @@ echo "  monitor-source:      ${enable_lua:-yes} ${lua_mod:+($lua_mod)}"
 echo "  perl:                ${enable_perl:-yes}"
 echo "  rss                  yes"
 echo "  trigger-source       yes"
-echo "  tfgetent             yes"
 echo "  zmq                  ${enable_zmq:=no}"
 echo "  grok-parser          ${enable_grok}"
 echo

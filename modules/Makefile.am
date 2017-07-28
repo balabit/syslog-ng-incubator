@@ -3,7 +3,6 @@ include modules/monitor-source/Makefile.am
 include modules/basicfuncs-plus/Makefile.am
 include modules/rss/Makefile.am
 include modules/lua/Makefile.am
-include modules/getent/Makefile.am
 include modules/perl/Makefile.am
 include modules/kafka/Makefile.am
 include modules/zmq/Makefile.am
