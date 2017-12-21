@@ -142,7 +142,7 @@ lua_dd_queue(LogThrDestDriver *d, LogMessage *msg)
 {
   LuaDestDriver *self = (LuaDestDriver *) d;
   LogPathOptions path_options = LOG_PATH_OPTIONS_INIT;
-  SBGString *str = sb_gstring_acquire();
+  GString *str = scratch_buffers_alloc();
   gboolean success;
   int number_of_parameters = 1;
 
@@ -150,8 +150,8 @@ lua_dd_queue(LogThrDestDriver *d, LogMessage *msg)
 
   if (self->mode == LUA_DEST_MODE_FORMATTED)
     {
-      log_template_format(self->template, msg, NULL, 0, 0, NULL, sb_gstring_string(str));
-      lua_pushlstring(self->state, sb_gstring_string(str)->str, sb_gstring_string(str)->len);
+      log_template_format(self->template, msg, NULL, 0, 0, NULL, str);
+      lua_pushlstring(self->state, str->str, str->len);
     }
 
   if (self->mode == LUA_DEST_MODE_RAW)
@@ -166,8 +166,6 @@ lua_dd_queue(LogThrDestDriver *d, LogMessage *msg)
     }
 
   success = !lua_pcall(self->state, number_of_parameters, 0, 0);
-
-  sb_gstring_release(str);
 
   if (success)
    {

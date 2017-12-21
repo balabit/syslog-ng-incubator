@@ -71,15 +71,14 @@ lua_template_format(lua_State *state)
 {
   LogTemplate *template;
   LogMessage *msg;
-  SBGString *str = sb_gstring_acquire();
+  GString *str = scratch_buffers_alloc();
 
   template = (LogTemplate *) lua_check_and_convert_userdata(state, -2, LUA_TEMPLATE_TYPE);
   msg = (LogMessage *) lua_check_and_convert_userdata(state, -1, LUA_MESSAGE_TYPE);
 
-  log_template_format(template, msg, NULL, 0, 0, NULL, sb_gstring_string(str));
-  lua_pushlstring(state, sb_gstring_string(str)->str, sb_gstring_string(str)->len);
+  log_template_format(template, msg, NULL, 0, 0, NULL, str);
+  lua_pushlstring(state, str->str, str->len);
 
-  sb_gstring_release(str);
   return 1;
 }
 
