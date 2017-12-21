@@ -28,8 +28,7 @@ dnl ***************************************************************************
 dnl dependencies
 
 GLIB_MIN_VERSION="2.14"
-SYSLOG_NG_MIN_VERSION="3.7.0"
-EVENTLOG_MIN_VERSION="0.2.10"
+SYSLOG_NG_MIN_VERSION="3.11.0"
 IVYKIS_MIN_VERSION="0.30.0"
 LMC_MIN_VERSION="0.1.2"
 LRC_MIN_VERSION="1.0.0"
@@ -123,7 +122,6 @@ dnl syslog-ng headers/libraries
 dnl ***************************************************************************
 
 PKG_CHECK_MODULES(SYSLOG_NG, syslog-ng >= $SYSLOG_NG_MIN_VERSION)
-PKG_CHECK_MODULES(EVENTLOG, eventlog >= $EVENTLOG_MIN_VERSION)
 
 syslog_ng_ivykis=[`pkg-config syslog-ng --variable ivykis`]
 
@@ -250,8 +248,8 @@ dnl ***************************************************************************
 
 SYSLOG_NG_LIBDIR="`$PKG_CONFIG --variable=libdir syslog-ng`"
 
-INCUBATOR_CFLAGS="$SYSLOG_NG_CFLAGS $IVYKIS_CFLAGS $EVENTLOG_CFLAGS $GLIB_CFLAGS"
-INCUBATOR_LIBS="$SYSLOG_NG_LIBS $IVYKIS_LIBS $EVENTLOG_LIBS $GLIB_LIBS"
+INCUBATOR_CFLAGS="$SYSLOG_NG_CFLAGS $IVYKIS_CFLAGS $GLIB_CFLAGS"
+INCUBATOR_LIBS="$SYSLOG_NG_LIBS $IVYKIS_LIBS $GLIB_LIBS"
 
 INCUBATOR_TEST_LDADD="$SYSLOG_NG_LIBDIR/syslog-ng/libtest/libsyslog-ng-test.a -rpath $SYSLOG_NG_LIBDIR"
 
