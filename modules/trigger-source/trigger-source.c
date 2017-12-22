@@ -165,7 +165,7 @@ trigger_source_new (TriggerSourceDriver *owner, LogSourceOptions *options, Globa
   TriggerSource *self = g_new0 (TriggerSource, 1);
 
   log_source_init_instance (&self->super, cfg);
-  log_source_set_options (&self->super, options, 0, SCS_TRIGGER,
+  log_source_set_options (&self->super, options,
                           owner->super.super.id, NULL, FALSE, FALSE,
                           owner->super.super.super.expr_node);
 
@@ -199,6 +199,9 @@ trigger_sd_init (LogPipe *s)
     self->options.message = g_strdup ("Trigger source is trigger happy.");
 
   log_source_options_init (&self->source_options, cfg, self->super.super.group);
+  self->source_options.stats_level = STATS_LEVEL0;
+  self->source_options.stats_source = SCS_TRIGGER;
+
   self->source = trigger_source_new (self, &self->source_options, cfg);
 
   log_pipe_append (&self->source->super, s);

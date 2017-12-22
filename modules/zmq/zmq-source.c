@@ -127,6 +127,9 @@ zmq_sd_init(LogPipe *s)
   g_free(persist_name);
 
   log_reader_options_init(&self->reader_options, cfg, "zmq");
+  self->reader_options.super.stats_level = STATS_LEVEL1;
+  self->reader_options.super.stats_source = SCS_ZMQ;
+
 
   if (reader_context)
   {
@@ -144,8 +147,6 @@ zmq_sd_init(LogPipe *s)
   log_reader_set_options(self->reader,
                              s,
                              &self->reader_options,
-                             STATS_LEVEL1,
-                             SCS_ZMQ,
                              self->super.super.id,
                              "zmq");
   log_pipe_append((LogPipe *) self->reader, s);

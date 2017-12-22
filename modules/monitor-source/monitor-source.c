@@ -255,7 +255,7 @@ monitor_source_new (MonitorSourceDriver *owner, LogSourceOptions *options, Globa
   MonitorSource *self = g_new0 (MonitorSource, 1);
 
   log_source_init_instance (&self->super, cfg);
-  log_source_set_options (&self->super, options, 0, SCS_MONITOR,
+  log_source_set_options (&self->super, options,
                           owner->super.super.id, NULL, FALSE, FALSE,
                           owner->super.super.super.expr_node);
 
@@ -295,6 +295,9 @@ monitor_sd_init (LogPipe *s)
     self->options.monitor_func_name = g_strdup("monitor");
 
   log_source_options_init (&self->source_options, cfg, self->super.super.group);
+  self->source_options.stats_level = STATS_LEVEL0;
+  self->source_options.stats_source = SCS_MONITOR;
+
   self->source = monitor_source_new (self, &self->source_options, cfg);
 
   log_pipe_append (&self->source->super, s);
