@@ -45,9 +45,9 @@ static Plugin basicfuncs_plus_plugins[] =
 };
 
 gboolean
-basicfuncs_plus_module_init(GlobalConfig *cfg, CfgArgs *args)
+basicfuncs_plus_module_init(PluginContext *context, CfgArgs *args)
 {
-  plugin_register(cfg, basicfuncs_plus_plugins,
+  plugin_register(context, basicfuncs_plus_plugins,
                   G_N_ELEMENTS(basicfuncs_plus_plugins));
   return TRUE;
 }

@@ -37,9 +37,9 @@ static Plugin lua_plugin =
 };
 
 gboolean
-lua_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
+lua_module_init(PluginContext *context, CfgArgs *args G_GNUC_UNUSED)
 {
-  plugin_register(cfg, &lua_plugin, 1);
+  plugin_register(context, &lua_plugin, 1);
   return TRUE;
 }
 

@@ -334,9 +334,9 @@ static Plugin rss_plugin = {
 };
 
 gboolean
-rss_module_init (GlobalConfig * cfg, CfgArgs * args)
+rss_module_init (PluginContext *context, CfgArgs * args)
 {
-  plugin_register (cfg, &rss_plugin, 1);
+  plugin_register (context, &rss_plugin, 1);
   return TRUE;
 }
 

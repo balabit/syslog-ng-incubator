@@ -40,7 +40,7 @@ static Plugin perl_plugin =
 };
 
 gboolean
-perl_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
+perl_module_init(PluginContext *context, CfgArgs *args G_GNUC_UNUSED)
 {
   int argc = 1;
   char *argv[] = {"syslog-ng"};
@@ -48,7 +48,7 @@ perl_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
 
   PERL_SYS_INIT3(&argc, (char ***)&argv, (char ***)&env);
 
-  plugin_register(cfg, &perl_plugin, 1);
+  plugin_register(context, &perl_plugin, 1);
   return TRUE;
 }
 

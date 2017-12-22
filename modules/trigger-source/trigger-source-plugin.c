@@ -37,9 +37,9 @@ static Plugin trigger_plugin =
 };
 
 gboolean
-trigger_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
+trigger_module_init(PluginContext *context, CfgArgs *args G_GNUC_UNUSED)
 {
-  plugin_register(cfg, &trigger_plugin, 1);
+  plugin_register(context, &trigger_plugin, 1);
   return TRUE;
 }
 

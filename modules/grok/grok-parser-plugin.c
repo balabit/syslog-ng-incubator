@@ -37,9 +37,9 @@ static Plugin grok_plugin =
 };
 
 gboolean
-grok_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
+grok_module_init(PluginContext *context, CfgArgs *args G_GNUC_UNUSED)
 {
-  plugin_register(cfg, &grok_plugin, 1);
+  plugin_register(context, &grok_plugin, 1);
   return TRUE;
 }
 

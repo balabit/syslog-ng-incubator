@@ -532,9 +532,9 @@ static Plugin kafka_plugin =
 };
 
 gboolean
-kafka_c_module_init(GlobalConfig *cfg, CfgArgs *args)
+kafka_c_module_init(PluginContext *context, CfgArgs *args)
 {
-  plugin_register(cfg, &kafka_plugin, 1);
+  plugin_register(context, &kafka_plugin, 1);
 
   return TRUE;
 }

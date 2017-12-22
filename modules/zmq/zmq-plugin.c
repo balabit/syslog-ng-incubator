@@ -48,9 +48,9 @@ static Plugin zmq_plugins[] =
 };
 
 gboolean
-zmq_module_init(GlobalConfig *cfg, CfgArgs *args)
+zmq_module_init(PluginContext *context, CfgArgs *args)
 {
-  plugin_register(cfg, zmq_plugins, G_N_ELEMENTS(zmq_plugins));
+  plugin_register(context, zmq_plugins, G_N_ELEMENTS(zmq_plugins));
   return TRUE;
 }
 

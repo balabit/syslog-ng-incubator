@@ -38,9 +38,9 @@ static Plugin monitor_plugin =
 };
 
 gboolean
-monitor_module_init(GlobalConfig *cfg, CfgArgs *args G_GNUC_UNUSED)
+monitor_module_init(PluginContext *context, CfgArgs *args G_GNUC_UNUSED)
 {
-  plugin_register(cfg, &monitor_plugin, 1);
+  plugin_register(context, &monitor_plugin, 1);
   return TRUE;
 }
 
