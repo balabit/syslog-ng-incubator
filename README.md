@@ -10,7 +10,7 @@ also an example of a third party syslog-ng module.
 
  [sng]: https://github.com/balabit/syslog-ng
 
-**NOTE**: The Incubator requires syslog-ng 3.7.1 or newer.
+**NOTE**: The Incubator requires syslog-ng 3.11.1 or newer.
 Contents
 --------
 
@@ -79,11 +79,6 @@ Contents
 
    [sng:zmq]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/zmq/
 
- * [Date parser][sng:date]: A parser for arbitrary date formats which
-   may be contained in non-syslog messages.
-  
-   [sng:date]: https://github.com/balabit/syslog-ng-incubator/tree/master/modules/date/
-
 Installation
 ------------
 
@@ -105,19 +100,13 @@ optional) installed too.
  [kafka]: https://github.com/edenhill/librdkafka
  
  
-Docker container
-----------------
-
-An automatically built docker container is available at https://hub.docker.com/r/juhaszviktor/syslog-ng-incubator/
-from the latest development snapshot.
-
 License
 -------
 
-Copyright (C) 2011-2014 BalaBit IT Security Ltd., Gergely Nagy
-<algernon@balabit.hu>, Viktor Tusa <tusa@balabit.hu>,
-Viktor Juhasz <viktor.juhasz@balabit.com>, and other
-contributors; released under the terms of the
-[GNU General Public License][gpl], version 2 (or later).
+Copyright (C) 2011-2017 BalaBit IT Security Ltd., Gergely Nagy
+<algernon@balabit.hu>, Viktor Tusa <tusa@balabit.hu>, Viktor Juhasz
+<viktor.juhasz@balabit.com>, Attila Szalay <sasa@ubainba.hu> and other
+contributors; released under the terms of the [GNU General Public
+License][gpl], version 2 (or later).
 
  [gpl]: http://www.gnu.org/licenses/gpl-2.0.html
